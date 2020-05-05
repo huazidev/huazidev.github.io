@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="python,爬虫," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。具体链接在这：https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Python写一个小的爬虫工具">
+<meta property="og:url" content="http://yoursite.com/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。具体链接在这：https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2017-03-27T09:45:27.000Z">
+<meta property="article:modified_time" content="2020-05-05T09:52:47.520Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/03/27/用Python写一个小的爬虫工具/"/>
+
+
+
+
+
+  <title>用Python写一个小的爬虫工具 | 华子dev</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?cae53c717201fa244f84905287337ca4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">华子dev</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">大道至简</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">用Python写一个小的爬虫工具</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-27T17:45:27+08:00">
+                2017-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。<br>具体链接在这：<a href="https://www.pingxx.com/api#银行编号说明" target="_blank" rel="noopener">https://www.pingxx.com/api#银行编号说明</a><br>那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。<a id="more"></a>要确实要了，但还是要自己弄一下，要善于将生活中可以写代码处理的事用代码去解决。<br>确定了要做什么事就好办了，首先想到的就是用Python爬虫去解析网页，然后分析数据处理。</p>
+<h3 id="组成爬虫的关键模块"><a href="#组成爬虫的关键模块" class="headerlink" title="组成爬虫的关键模块"></a>组成爬虫的关键模块</h3><ul>
+<li>URL管理器<br>用于对需要爬取的URL和已经爬取过的URL进行管理，可以用set管理也可以用其他工具处理，这里只是对单个固定网页爬取，就用字符串代替了</li>
+<li>HTML下载器<br>将URL管理器中的对应的url的网页下载下来，存为字符串，然后可以将这个字符串传给网页解析器解析。这里用的是Python自带的urllib模块，在Python2.7 中该模块就是有名的urllib2，Python3.0中将urllib2 统一放到urllib.request下，使用方法略有不同，自行google</li>
+<li>HTML解析器<br>一方面会解析出有价值的数据，另一方面，由于每一个页面都有很多指向其它页面的网页，这些URL被解析出来之后，可以补充进URL管理器，以备之后爬取。这里用的第三方模块BeautifulSoup，需要安装，安装方法如下:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ easy_install beautifulsoup4</span><br></pre></td></tr></table></figure>
+或者<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install beautifulsoup4</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="下载网页"><a href="#下载网页" class="headerlink" title="下载网页"></a>下载网页</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line"></span><br><span class="line">response &#x3D; urllib.request.urlopen(&quot;https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明&quot;)</span><br><span class="line">print(response.read())</span><br></pre></td></tr></table></figure>
+<p>没错就需要两行代码就可以下载一个网页，其实一行也可以</p>
+<h3 id="解析网页"><a href="#解析网页" class="headerlink" title="解析网页"></a>解析网页</h3><p>上面下的网页就是一个html的源码，要解析它，BeautifulSoup支持多种方式的解析，获取自己想要的数据。这里就需要去网站看一看源码，我们可以使用Command+option+J 审查元素，来看一下我们需要数据处的源码的一些可用的地方，以方便爬取，下图使我们定位到的源码</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Paste_Image.png"></p>
+<p>查看之后，分析需要的数据在那个div下的table里，我们需要获取table，然后解析table就可以了，但是div不太好直接拿到，但是有个</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;h2 id&#x3D;&quot;银行编号说明&quot;&gt;银行编号说明&lt;&#x2F;h2&gt;</span><br></pre></td></tr></table></figure>
+<p>比较好拿，于是就先取他，再拿他的父节点的然后再取table<br>代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response &#x3D; urllib.request.urlopen(&quot;https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明&quot;)</span><br><span class="line">soup &#x3D; BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table &#x3D; soup.find(&quot;h2&quot;, id&#x3D;&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br></pre></td></tr></table></figure>
+<p>这样就获取到了table，剩下的就简单了，就是处理table了。先获取所有的tr，再获取每个tr中的td，然后获取需要td中的值进行拼接Json字符串。<br>完整代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response &#x3D; urllib.request.urlopen(&quot;https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明&quot;)</span><br><span class="line">soup &#x3D; BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table &#x3D; soup.find(&quot;h2&quot;, id&#x3D;&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br><span class="line"></span><br><span class="line">bankJson &#x3D; &quot;[&quot;</span><br><span class="line">for row in table.findAll(&#39;tr&#39;):</span><br><span class="line">    if len(row) &gt; 2:</span><br><span class="line">        cells &#x3D; row.findAll(&#39;td&#39;)</span><br><span class="line">        bank_code &#x3D; cells[0].find(text&#x3D;True)</span><br><span class="line">        bank_name &#x3D; cells[1].find(text&#x3D;True)</span><br><span class="line">        bankJson &#x3D; bankJson + &quot;&#123;&quot; + &quot;\&quot;code\&quot;:\&quot;&quot; + bank_code + &quot;\&quot;,&quot; + &quot;\&quot;name\&quot;:\&quot;&quot; + bank_name + &quot;\&quot;&#125;,&quot;</span><br><span class="line"></span><br><span class="line">bankJson &#x3D; bankJson[0:len(bankJson) - 1] + &quot;]&quot;</span><br><span class="line">print(bankJson)</span><br></pre></td></tr></table></figure>
+
+<p>运行代码就获取到打印的结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[&#123;&quot;code&quot;:&quot;0100&quot;,&quot;name&quot;:&quot;中国邮政储蓄银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0102&quot;,&quot;name&quot;:&quot;工商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0103&quot;,&quot;name&quot;:&quot;农业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0104&quot;,&quot;name&quot;:&quot;中国银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0105&quot;,&quot;name&quot;:&quot;建设银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0301&quot;,&quot;name&quot;:&quot;交通银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0302&quot;,&quot;name&quot;:&quot;中信银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0303&quot;,&quot;name&quot;:&quot;光大银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0304&quot;,&quot;name&quot;:&quot;华夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0305&quot;,&quot;name&quot;:&quot;民生银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0306&quot;,&quot;name&quot;:&quot;广发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0308&quot;,&quot;name&quot;:&quot;招商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0309&quot;,&quot;name&quot;:&quot;兴业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0310&quot;,&quot;name&quot;:&quot;浦发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0311&quot;,&quot;name&quot;:&quot;恒丰银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0313&quot;,&quot;name&quot;:&quot;临沂市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0316&quot;,&quot;name&quot;:&quot;浙商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0317&quot;,&quot;name&quot;:&quot;渤海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0318&quot;,&quot;name&quot;:&quot;平安银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0328&quot;,&quot;name&quot;:&quot;新韩银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0329&quot;,&quot;name&quot;:&quot;韩亚银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0336&quot;,&quot;name&quot;:&quot;企业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0401&quot;,&quot;name&quot;:&quot;上海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0402&quot;,&quot;name&quot;:&quot;厦门银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0403&quot;,&quot;name&quot;:&quot;北京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0404&quot;,&quot;name&quot;:&quot;烟台市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0405&quot;,&quot;name&quot;:&quot;福建海峡银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0406&quot;,&quot;name&quot;:&quot;吉林银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0408&quot;,&quot;name&quot;:&quot;宁波银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0412&quot;,&quot;name&quot;:&quot;温州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0413&quot;,&quot;name&quot;:&quot;广州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0414&quot;,&quot;name&quot;:&quot;汉口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0418&quot;,&quot;name&quot;:&quot;洛阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0420&quot;,&quot;name&quot;:&quot;大连银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0422&quot;,&quot;name&quot;:&quot;河北银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0423&quot;,&quot;name&quot;:&quot;杭州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0424&quot;,&quot;name&quot;:&quot;南京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0427&quot;,&quot;name&quot;:&quot;乌鲁木齐市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0428&quot;,&quot;name&quot;:&quot;绍兴银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0433&quot;,&quot;name&quot;:&quot;葫芦岛市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0434&quot;,&quot;name&quot;:&quot;天津银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0435&quot;,&quot;name&quot;:&quot;郑州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0436&quot;,&quot;name&quot;:&quot;宁夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0438&quot;,&quot;name&quot;:&quot;齐商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0439&quot;,&quot;name&quot;:&quot;锦州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0440&quot;,&quot;name&quot;:&quot;徽商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0441&quot;,&quot;name&quot;:&quot;重庆银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0442&quot;,&quot;name&quot;:&quot;哈尔滨银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0443&quot;,&quot;name&quot;:&quot;贵阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0447&quot;,&quot;name&quot;:&quot;兰州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0448&quot;,&quot;name&quot;:&quot;南昌银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0449&quot;,&quot;name&quot;:&quot;晋商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0450&quot;,&quot;name&quot;:&quot;青岛银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0455&quot;,&quot;name&quot;:&quot;日照市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0456&quot;,&quot;name&quot;:&quot;鞍山银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0458&quot;,&quot;name&quot;:&quot;青海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0459&quot;,&quot;name&quot;:&quot;台州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0461&quot;,&quot;name&quot;:&quot;长沙银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0463&quot;,&quot;name&quot;:&quot;赣州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0465&quot;,&quot;name&quot;:&quot;营口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0467&quot;,&quot;name&quot;:&quot;阜新银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0474&quot;,&quot;name&quot;:&quot;内蒙古银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0475&quot;,&quot;name&quot;:&quot;湖州市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0476&quot;,&quot;name&quot;:&quot;沧州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0479&quot;,&quot;name&quot;:&quot;包商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0481&quot;,&quot;name&quot;:&quot;威海商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0483&quot;,&quot;name&quot;:&quot;攀枝花市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0485&quot;,&quot;name&quot;:&quot;绵阳市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0490&quot;,&quot;name&quot;:&quot;张家口市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0492&quot;,&quot;name&quot;:&quot;龙江银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0495&quot;,&quot;name&quot;:&quot;柳州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0497&quot;,&quot;name&quot;:&quot;莱商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0498&quot;,&quot;name&quot;:&quot;德阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0503&quot;,&quot;name&quot;:&quot;晋城银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0505&quot;,&quot;name&quot;:&quot;东莞商行&quot;&#125;,&#123;&quot;code&quot;:&quot;0508&quot;,&quot;name&quot;:&quot;江苏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0513&quot;,&quot;name&quot;:&quot;承德市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0515&quot;,&quot;name&quot;:&quot;德州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0517&quot;,&quot;name&quot;:&quot;邯郸市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0525&quot;,&quot;name&quot;:&quot;浙江民泰商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0526&quot;,&quot;name&quot;:&quot;上饶市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0527&quot;,&quot;name&quot;:&quot;东营银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0528&quot;,&quot;name&quot;:&quot;泰安市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0530&quot;,&quot;name&quot;:&quot;浙江稠州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0534&quot;,&quot;name&quot;:&quot;鄂尔多斯银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0537&quot;,&quot;name&quot;:&quot;济宁银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0547&quot;,&quot;name&quot;:&quot;昆仑银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0554&quot;,&quot;name&quot;:&quot;邢台银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0556&quot;,&quot;name&quot;:&quot;漯河商行&quot;&#125;,&#123;&quot;code&quot;:&quot;1401&quot;,&quot;name&quot;:&quot;上海农商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1402&quot;,&quot;name&quot;:&quot;昆山农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1403&quot;,&quot;name&quot;:&quot;常熟市农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1404&quot;,&quot;name&quot;:&quot;深圳农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1405&quot;,&quot;name&quot;:&quot;广州农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1408&quot;,&quot;name&quot;:&quot;佛山顺德农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1409&quot;,&quot;name&quot;:&quot;昆明农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1410&quot;,&quot;name&quot;:&quot;湖北农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1415&quot;,&quot;name&quot;:&quot;东莞农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1416&quot;,&quot;name&quot;:&quot;张家港农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1417&quot;,&quot;name&quot;:&quot;福建省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1418&quot;,&quot;name&quot;:&quot;北京农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1419&quot;,&quot;name&quot;:&quot;天津农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1420&quot;,&quot;name&quot;:&quot;宁波鄞州农村合作银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1424&quot;,&quot;name&quot;:&quot;江苏省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1428&quot;,&quot;name&quot;:&quot;江苏吴江农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1430&quot;,&quot;name&quot;:&quot;苏州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1443&quot;,&quot;name&quot;:&quot;广西农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1446&quot;,&quot;name&quot;:&quot;黄河农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1447&quot;,&quot;name&quot;:&quot;安徽省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1448&quot;,&quot;name&quot;:&quot;海南省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1513&quot;,&quot;name&quot;:&quot;重庆农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6462&quot;,&quot;name&quot;:&quot;潍坊市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6466&quot;,&quot;name&quot;:&quot;富滇银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6473&quot;,&quot;name&quot;:&quot;浙江泰隆商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6478&quot;,&quot;name&quot;:&quot;广西北部湾银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6567&quot;,&quot;name&quot;:&quot;商丘商行&quot;&#125;]</span><br></pre></td></tr></table></figure>
+
+<p>好了，问题解决了，说实话第一次写代码去解决实际中的碰到的问题，挺好玩，带着要解决的问题去学习的效果会更好一些。感想就是在想学东西或者想做一些事情的时候，不要先想太多，比如把所有资料都准备齐、哪个人的资料好，怎么才能少走弯路，学不好做不好会怎么样,等等…..然后你的激情就没了，这件事也就不了了之了，这些都不好。我们要的就是想做什么立刻去做，just do it。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+            <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"># 爬虫</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/" rel="next" title="Android学习系列之-通知Notification">
+                <i class="fa fa-chevron-left"></i> Android学习系列之-通知Notification
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="华子dev" />
+            
+              <p class="site-author-name" itemprop="name">华子dev</p>
+              <p class="site-description motion-element" itemprop="description">This is a little blog to write my learn.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/huazidev" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="huazi.dev@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#组成爬虫的关键模块"><span class="nav-number">1.</span> <span class="nav-text">组成爬虫的关键模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载网页"><span class="nav-number">2.</span> <span class="nav-text">下载网页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析网页"><span class="nav-number">3.</span> <span class="nav-text">解析网页</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">华子dev</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

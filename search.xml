@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Android学习系列之-通知Notification</title>
+    <url>/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/</url>
+    <content><![CDATA[<p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
+<blockquote>
+<p>通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。<a id="more"></a></p>
+</blockquote>
+<p>具体的展示如下：<br><img src="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500" alt="图1 通知区域中的通知。"><br><img src="http://upload-images.jianshu.io/upload_images/859087-4ece81d9c0de1797.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/400" alt="图2 抽屉式通知栏中的通知"><br>相信看完介绍，大家应该也都明白通知的一些使用场景了。现在大部分的应用都有推送功能，而推送都是用通知来展示的。比如简书每天就不定时的给你发推送。下面就介绍一下通知的具体使用方法。</p>
+<h3 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h3><p>要创建通知，我们就需要Notification这个类，我们可以通过 NotificationCompat.Builder 对象中为通知指定 UI 信息和操作，然后通过调用 NotificationCompat.Builder.build()，它将返回包含您的具体规范的 Notification 对象。然后通过 NotificationManager.notify()<br> 将 Notification 对象传递给系统，由系统来帮你完成后续的处理。<br>Notification对象必须包含以下三个元素：</p>
+<ul>
+<li>小图标，由 setSmallIcon() 方法设置</li>
+<li>标题，由 setContentTitle 方法设置</li>
+<li>详细文本，由  setContentText()设置</li>
+</ul>
+<p>也就是说这三个元素是必须的，不然就算创建了Notification对象也是发不出去的。另外就是需要解释一下这个小图标，小图标是指图一通知区域的小图标，也是图二中通知大图右下角的小图片，他是一个特殊的图。5.0后Android官方要求，所有应用程序的通知栏图标，应该只使用alpha图层来进行绘制，而不应该包括RGB图层。即不要为通知的图标添加任何额外的透明度，渐变色，不要用颜色将通知图标与其他应用，比如系统应用，应用的通知图标(即小图标)只能是在透明的背景上有白色的图案。<br>另外具体的设计可以参考materia design 关于Notification的设计规范，地址<a href="https://material.io/guidelines/patterns/notifications.html" target="_blank" rel="noopener">https://material.io/guidelines/patterns/notifications.html</a><br>下面贴两张图来让大家更明了各个参数对应的UI显示，<br><img src="http://upload-images.jianshu.io/upload_images/859087-cb9f6450f0afce8e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620" alt="small_icon.png"><br><img src="http://upload-images.jianshu.io/upload_images/859087-f08eca29dfbe33a5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="通知各元素对应的显示"></p>
+<p>上图的NotificationIcon 其实是smallIcon，Title即ContentTitle，Message即ContentText,另外还有时间戳等。所有的通知的其他设置都是可选的。</p>
+<h3 id="通知操作"><a href="#通知操作" class="headerlink" title="通知操作"></a>通知操作</h3><p>我们设置好了通知之后，需要再向通知添加一个操作，以用来相应用户的点击操作。当然你也可以不加这个操作，就让它挂在通知栏，用户点了就是没反应，但是这样用户体验多不好。用户点击通知后可以让用户从通知直接跳转到相应的activity，以执行下一步操作。在 Notification内部，操作本身由 PendingIntent 定义，后者包含在应用中启动 Activity的 Intent。</p>
+<h3 id="创建通知"><a href="#创建通知" class="headerlink" title="创建通知"></a>创建通知</h3><p>我们可以通过以下步骤去创建一个通知</p>
+<ol>
+<li><p>先创建NotificationCompat.Builder，并且可以通过这个builder去设置通知需要的内容，来生成Notification。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NotificationCompat.Builder builder &#x3D; new NotificationCompat.Builder(context);</span><br><span class="line">Notification notification &#x3D; builder</span><br><span class="line">.setContentTitle(&quot;这是通知标题&quot;)</span><br><span class="line">.setContentText(&quot;这是通知内容&quot;)</span><br><span class="line">.setSmallIcon(R.mipmap.ic_launcher)</span><br><span class="line">.setLargeIcon(BitmapFactory.decodeResource(</span><br><span class="line">  getResources(), R.mipmap.ic_launcher))</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure></li>
+<li><p>设置优先级<br>通知还有优先级，我们可以通过setPriority() 传入通知的优先级，目前通知的优先级有五个等级，范围从 PRIORITY_MIN (-2) 到 PRIORITY_MAX (2)；如果未设置，则优先级默认为 PRIORITY_DEFAULT (0)。优先级越高，在通知栏就排的越往上。</p>
+</li>
+<li><p>设置一个点击后的动作<br>如之前所说的，我们可以通过pendingIntent来设置一个通知点击后的操作。比如跳转到一个activity。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Intent resultIntent &#x3D; new Intent(this, ResultActivity.class);</span><br><span class="line">PendingIntent resultPendingIntent &#x3D; PendingIntent.getActivity(</span><br><span class="line">            this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);</span><br><span class="line">mBuilder.setContentIntent(resultPendingIntent);</span><br></pre></td></tr></table></figure>
+<p>通过这种方式就可以让用户点击通知后跳转到ResultActivity页面了。</p>
+</li>
+<li><p>用NotificationManager 发送通知</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NotificationManager mNotificationManager &#x3D;</span><br><span class="line">    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">&#x2F;&#x2F; mId allows you to update the notification later on.</span><br><span class="line">mNotificationManager.notify(mId, mBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>更新通知<br>当我们需要更新通知中的内容的时候就可以依据上面设置的通知的id去更新的通知，只需要通知Id相同就可以更新，具体操作其实和创建差不多，官方的示例代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mNotificationManager &#x3D;</span><br><span class="line">        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">&#x2F;&#x2F; Sets an ID for the notification, so it can be updated</span><br><span class="line">int notifyID &#x3D; 1;</span><br><span class="line">mNotifyBuilder &#x3D; new NotificationCompat.Builder(this)</span><br><span class="line">    .setContentTitle(&quot;New Message&quot;)</span><br><span class="line">    .setContentText(&quot;You&#39;ve received new messages.&quot;)</span><br><span class="line">    .setSmallIcon(R.drawable.ic_notify_status)</span><br><span class="line">numMessages &#x3D; 0;</span><br><span class="line">&#x2F;&#x2F; Start of a loop that processes data and then notifies the user</span><br><span class="line">...</span><br><span class="line">    mNotifyBuilder.setContentText(currentText)</span><br><span class="line">        .setNumber(++numMessages);</span><br><span class="line">    &#x2F;&#x2F; Because the ID remains unchanged, the existing notification is</span><br><span class="line">    &#x2F;&#x2F; updated.</span><br><span class="line">    mNotificationManager.notify(</span><br><span class="line">            notifyID,</span><br><span class="line">            mNotifyBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>删除或取消通知<br>当我们需要手动取消通知的时候，可以调用NotificationManager的 cancel()，具体的删除有以下几种方式：</p>
+<ul>
+<li>用户单独或通过使用“全部清除”清除了该通知（如果通知可以清除）。</li>
+<li>用户点击通知，且您在创建通知时调用了 setAutoCancel()</li>
+<li>针对特定的通知 ID 调用了 cancel() 此方法还会删除当前通知。</li>
+<li>调用了cancelAll()方法，该方法将删除之前发出的所有通知。</li>
+</ul>
+</li>
+</ol>
+<p>好了，到这里已经可以创建基本的Notification了，之后再写一些通知的其他使用方式。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Notification</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用hexo+github建个人博客</title>
+    <url>/2016/09/17/hexo-nxet-blog/</url>
+    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>准备开一个博客，记录一下自己平时碰到的一些问题，也可以供以后进行翻阅，查找定位。<br>既然是这样那就需要考虑怎么建博客了，之前大学的时候CSDN和博客园都有账号，可是只是零零星星写过一点东西，就放在那了。也自己买域名和vps用wordpress搭过一个博客，这个运行了接近两年，直到我工作一年后才停了。<a id="more"></a>前期的目的是写点技术博客，可是当时学生党为了盈利，慢慢运营成了电影资源下载网站，收益还可以。期间为了改网站模板也自己学了点php，也算有点收获。工作之后就没怎么管过了，考虑到版权问题以及对个人成长的没有多少帮助就给关了。当时关还是有点小不舍的，毕竟自己一手建的站，运营了那么久。啰里吧嗦那么多就是想说其实是对技术博客还是有点情怀的，于是才有了现在想自己开博客，写点技术文章的想法。<br>好了废话不多说，步入正题。<br>** 本片文章配置是在Mac完成的，其他系统版本应该也差不多 **</p>
+<h3 id="用Github-pages创建个人站"><a href="#用Github-pages创建个人站" class="headerlink" title="用Github pages创建个人站"></a>用Github pages创建个人站</h3><p>我想作为程序员你应该对GitHub不陌生。GitHub提供了Github Pages功能，我们可以用GitHub pages创建自己的个人站。</p>
+<blockquote>
+<p>Github Pages 是面向用户、组织和项目开放的公共静态页面搭建托管服务，站点可以被免费托管在Github 上，你可以选择使用Github Pages 默认提供的域名github.io 或者自定义域名来发布站点。</p>
+</blockquote>
+<ol>
+<li>登录GitHub账户，点击右上角+号，选择New repository,创建一个新的仓库，用于存放你的网站代码。</li>
+<li>按照要求填写仓库名，要使用默认的域名github.io的话仓库名就要以你的用户名命名，命名规则如下<strong>username.github.io</strong>,然后选择公开，点击Create Repository,创建仓库完成。<br>至此我们在GitHub上有了一个代码仓库，等我们在本地写好代码就可以部署上去了。</li>
+</ol>
+<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><p>最简单的方法，去<a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git官网</a>下载安装，也可以通过以下途径安装</p>
+<h4 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h4><p>Debian或Ubuntu Linux，通过一条<code>sudo apt-get install git</code>就可以直接完成Git的安装。</p>
+<h4 id="Mac-OS安装"><a href="#Mac-OS安装" class="headerlink" title="Mac OS安装"></a>Mac OS安装</h4><blockquote>
+<p>安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：<a href="http://brew.sh/" target="_blank" rel="noopener">http://brew.sh/</a></p>
+</blockquote>
+<h4 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h4><p>推荐去官网下载，安装完后在命令行下输入<code>git version</code>检查是否安装成功。</p>
+<h3 id="使用Hexo搭建博客"><a href="#使用Hexo搭建博客" class="headerlink" title="使用Hexo搭建博客"></a>使用Hexo搭建博客</h3><ol>
+<li>安装Node<br>hexo是一款基于Node.js的静态博客框架，所以我们先要安装node。<ul>
+<li>去node<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">官网</a>下载安装包安装。</li>
+<li>有个国内墙的原因，可能上不去官网就算上去了也很慢，推荐使用homebrew安装node</li>
+<li>在bash命令下输入 node -v 如果显示版本号说明安装成功。</li>
+</ul>
+</li>
+<li>安装hexo<br>安装完node就可以用npm去安装hexo了，<a href="https://hexo.io" target="_blank" rel="noopener">hexo官网</a><blockquote>
+<p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题,由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。</p>
+</blockquote>
+</li>
+</ol>
+<p>执行以下命令安装hexo：<br><code>npm install hexo-cli -g    #-g表示全局安装, npm默认为当前项目安装</code><br>然后执行：<br><code>hexo version</code><br>如果出现版本号说明安装成功。如果报错，尝试用下面的命令安装<br><code>npm install hexo --no-optional</code><br>然后使用以下命令：<br><code>hexo init blog   //执行初始化命令到指定的目录,这里的目录是hexo文件夹</code><br><code>cd blog</code><br><code>npm install</code><br><code>hexo generate   //在当前目录下生成静态网页</code><br><code>hexo server     // 启动本地服务</code><br>在浏览器输入 <a href="http://localhost:4000" target="_blank" rel="noopener">http://localhost:4000</a> 就可以看到效果，到此hexo生成静态网站就已经完成。</p>
+<h3 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h3><p>进入你的博客目录，找到配置文件_config.yml修改如下信息</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:username&#x2F;username.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p>这里的username是之前注册的github的用户名<br>现在可以执行：<code>hexo d</code>部署到github了，不过有时候会出现问题，如果报如下错误</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br></pre></td></tr></table></figure>
+<p>说明连接不到远程仓库。一般是需要配置你电脑的SSH Key</p>
+<blockquote>
+<p>为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。<br>当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
+</blockquote>
+<p>关于SSH的原理可以通过阮一峰老师的一篇文章了解一下：<br><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html</a><br>配置SSH Key 的方法可以参考GitHub官网的教程：<br><a href="https://help.github.com/articles/generating-an-ssh-key/" target="_blank" rel="noopener">https://help.github.com/articles/generating-an-ssh-key/</a><br>按步骤测试好之后就可以使用<code>hexo d</code>部署了.部署完之后在浏览器输入：<a href="http://username.github.io/" target="_blank" rel="noopener">http://username.github.io/</a> 就可以看到效果了。</p>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git-分支合并后回退的几种情况分析</title>
+    <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<a id="more"></a><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html" target="_blank" rel="noopener">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
+<ul>
+<li>Git仓库有三个主要组成——工作目录，缓存区和提交历史。</li>
+<li>reset将一个分支的末端指向另一个提交。</li>
+<li>checkout 分支切换。</li>
+<li>revert撤销一个提交的同时会创建一个新的提交。</li>
+</ul>
+<p><code>git revert</code>是个安全的方法。相比<code>git reset</code>他不会改变现在的提交历史，因此<code>git revert</code>可以用在公共分支上，而<code>git reset</code>最好用在私人分支上。</p>
+<p>下面说一下那篇文章介绍的撤销merge的方法：</p>
+<h4 id="Reset-a-Merge："><a href="#Reset-a-Merge：" class="headerlink" title="Reset a Merge："></a>Reset a Merge：</h4><p>reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$  git checkout master</span><br><span class="line">git reset --hard [要回退的commit的sha值]</span><br></pre></td></tr></table></figure>
+<p>简单暴力，不过很好用。</p>
+<h4 id="Reverting-a-Merge"><a href="#Reverting-a-Merge" class="headerlink" title="Reverting a Merge:"></a>Reverting a Merge:</h4><p>当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$  git resert -m [要撤销的那条merge线的编号] [merge前的版本号，即sha值]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 88edd6d] Revert &quot;Merge branch &#39;jk&#x2F;post-checkout&#39;&quot;</span><br><span class="line"> 1 files changed, 0 insertions(+), 2 deletions(-)</span><br></pre></td></tr></table></figure>
+<p>这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git merge jk&#x2F;post-checkout</span><br><span class="line">Already up-to-date.</span><br></pre></td></tr></table></figure>
+<h4 id="Reverting-the-Revert"><a href="#Reverting-the-Revert" class="headerlink" title="Reverting the Revert"></a>Reverting the Revert</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git revert [方法二撤销merge时提交的commit的版本号，这里是88edd6d]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 268e243] Revert &quot;Revert &quot;Merge branch &#39;jk&#x2F;post-checkout&#39;&quot;&quot; 1 files changed, 2 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure>
+<p>这样就可以正常的merge了，不过这可能会产生更多的冲突。<br>现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git merge jk&#x2F;post-checkout</span><br><span class="line">Auto-merging test.txt</span><br><span class="line">Merge made by recursive. test.txt | 1 + 1 files changed, 1 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h4><p>大致的看完之后，发现后面的方法太麻烦，简直是没事找事。不过作者可能完全是基于在公共分支改动的比较复杂的情况，总之，感觉还是在本地分支用reset最方便，或者revert也可以，别整的那个麻烦就行了。<br>最后分享一篇<a href="http://gitbook.liuhui998.com/index.html" target="_blank" rel="noopener">Git Community Book</a>中关于git rebase 的文章，之前不太了解，感觉写的很好：<a href="http://gitbook.liuhui998.com/4_2.html" target="_blank" rel="noopener">http://gitbook.liuhui998.com/4_2.html</a></p>
+]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用Python写一个小的爬虫工具</title>
+    <url>/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/</url>
+    <content><![CDATA[<p>事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。<br>具体链接在这：<a href="https://www.pingxx.com/api#银行编号说明" target="_blank" rel="noopener">https://www.pingxx.com/api#银行编号说明</a><br>那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。<a id="more"></a>要确实要了，但还是要自己弄一下，要善于将生活中可以写代码处理的事用代码去解决。<br>确定了要做什么事就好办了，首先想到的就是用Python爬虫去解析网页，然后分析数据处理。</p>
+<h3 id="组成爬虫的关键模块"><a href="#组成爬虫的关键模块" class="headerlink" title="组成爬虫的关键模块"></a>组成爬虫的关键模块</h3><ul>
+<li>URL管理器<br>用于对需要爬取的URL和已经爬取过的URL进行管理，可以用set管理也可以用其他工具处理，这里只是对单个固定网页爬取，就用字符串代替了</li>
+<li>HTML下载器<br>将URL管理器中的对应的url的网页下载下来，存为字符串，然后可以将这个字符串传给网页解析器解析。这里用的是Python自带的urllib模块，在Python2.7 中该模块就是有名的urllib2，Python3.0中将urllib2 统一放到urllib.request下，使用方法略有不同，自行google</li>
+<li>HTML解析器<br>一方面会解析出有价值的数据，另一方面，由于每一个页面都有很多指向其它页面的网页，这些URL被解析出来之后，可以补充进URL管理器，以备之后爬取。这里用的第三方模块BeautifulSoup，需要安装，安装方法如下:<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ easy_install beautifulsoup4</span><br></pre></td></tr></table></figure>
+或者<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install beautifulsoup4</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="下载网页"><a href="#下载网页" class="headerlink" title="下载网页"></a>下载网页</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line"></span><br><span class="line">response &#x3D; urllib.request.urlopen(&quot;https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明&quot;)</span><br><span class="line">print(response.read())</span><br></pre></td></tr></table></figure>
+<p>没错就需要两行代码就可以下载一个网页，其实一行也可以</p>
+<h3 id="解析网页"><a href="#解析网页" class="headerlink" title="解析网页"></a>解析网页</h3><p>上面下的网页就是一个html的源码，要解析它，BeautifulSoup支持多种方式的解析，获取自己想要的数据。这里就需要去网站看一看源码，我们可以使用Command+option+J 审查元素，来看一下我们需要数据处的源码的一些可用的地方，以方便爬取，下图使我们定位到的源码</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Paste_Image.png"></p>
+<p>查看之后，分析需要的数据在那个div下的table里，我们需要获取table，然后解析table就可以了，但是div不太好直接拿到，但是有个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;h2 id&#x3D;&quot;银行编号说明&quot;&gt;银行编号说明&lt;&#x2F;h2&gt;</span><br></pre></td></tr></table></figure>
+<p>比较好拿，于是就先取他，再拿他的父节点的然后再取table<br>代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response &#x3D; urllib.request.urlopen(&quot;https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明&quot;)</span><br><span class="line">soup &#x3D; BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table &#x3D; soup.find(&quot;h2&quot;, id&#x3D;&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br></pre></td></tr></table></figure>
+<p>这样就获取到了table，剩下的就简单了，就是处理table了。先获取所有的tr，再获取每个tr中的td，然后获取需要td中的值进行拼接Json字符串。<br>完整代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response &#x3D; urllib.request.urlopen(&quot;https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明&quot;)</span><br><span class="line">soup &#x3D; BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table &#x3D; soup.find(&quot;h2&quot;, id&#x3D;&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br><span class="line"></span><br><span class="line">bankJson &#x3D; &quot;[&quot;</span><br><span class="line">for row in table.findAll(&#39;tr&#39;):</span><br><span class="line">    if len(row) &gt; 2:</span><br><span class="line">        cells &#x3D; row.findAll(&#39;td&#39;)</span><br><span class="line">        bank_code &#x3D; cells[0].find(text&#x3D;True)</span><br><span class="line">        bank_name &#x3D; cells[1].find(text&#x3D;True)</span><br><span class="line">        bankJson &#x3D; bankJson + &quot;&#123;&quot; + &quot;\&quot;code\&quot;:\&quot;&quot; + bank_code + &quot;\&quot;,&quot; + &quot;\&quot;name\&quot;:\&quot;&quot; + bank_name + &quot;\&quot;&#125;,&quot;</span><br><span class="line"></span><br><span class="line">bankJson &#x3D; bankJson[0:len(bankJson) - 1] + &quot;]&quot;</span><br><span class="line">print(bankJson)</span><br></pre></td></tr></table></figure>
+
+<p>运行代码就获取到打印的结果：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[&#123;&quot;code&quot;:&quot;0100&quot;,&quot;name&quot;:&quot;中国邮政储蓄银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0102&quot;,&quot;name&quot;:&quot;工商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0103&quot;,&quot;name&quot;:&quot;农业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0104&quot;,&quot;name&quot;:&quot;中国银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0105&quot;,&quot;name&quot;:&quot;建设银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0301&quot;,&quot;name&quot;:&quot;交通银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0302&quot;,&quot;name&quot;:&quot;中信银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0303&quot;,&quot;name&quot;:&quot;光大银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0304&quot;,&quot;name&quot;:&quot;华夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0305&quot;,&quot;name&quot;:&quot;民生银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0306&quot;,&quot;name&quot;:&quot;广发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0308&quot;,&quot;name&quot;:&quot;招商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0309&quot;,&quot;name&quot;:&quot;兴业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0310&quot;,&quot;name&quot;:&quot;浦发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0311&quot;,&quot;name&quot;:&quot;恒丰银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0313&quot;,&quot;name&quot;:&quot;临沂市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0316&quot;,&quot;name&quot;:&quot;浙商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0317&quot;,&quot;name&quot;:&quot;渤海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0318&quot;,&quot;name&quot;:&quot;平安银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0328&quot;,&quot;name&quot;:&quot;新韩银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0329&quot;,&quot;name&quot;:&quot;韩亚银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0336&quot;,&quot;name&quot;:&quot;企业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0401&quot;,&quot;name&quot;:&quot;上海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0402&quot;,&quot;name&quot;:&quot;厦门银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0403&quot;,&quot;name&quot;:&quot;北京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0404&quot;,&quot;name&quot;:&quot;烟台市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0405&quot;,&quot;name&quot;:&quot;福建海峡银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0406&quot;,&quot;name&quot;:&quot;吉林银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0408&quot;,&quot;name&quot;:&quot;宁波银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0412&quot;,&quot;name&quot;:&quot;温州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0413&quot;,&quot;name&quot;:&quot;广州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0414&quot;,&quot;name&quot;:&quot;汉口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0418&quot;,&quot;name&quot;:&quot;洛阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0420&quot;,&quot;name&quot;:&quot;大连银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0422&quot;,&quot;name&quot;:&quot;河北银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0423&quot;,&quot;name&quot;:&quot;杭州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0424&quot;,&quot;name&quot;:&quot;南京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0427&quot;,&quot;name&quot;:&quot;乌鲁木齐市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0428&quot;,&quot;name&quot;:&quot;绍兴银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0433&quot;,&quot;name&quot;:&quot;葫芦岛市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0434&quot;,&quot;name&quot;:&quot;天津银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0435&quot;,&quot;name&quot;:&quot;郑州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0436&quot;,&quot;name&quot;:&quot;宁夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0438&quot;,&quot;name&quot;:&quot;齐商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0439&quot;,&quot;name&quot;:&quot;锦州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0440&quot;,&quot;name&quot;:&quot;徽商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0441&quot;,&quot;name&quot;:&quot;重庆银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0442&quot;,&quot;name&quot;:&quot;哈尔滨银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0443&quot;,&quot;name&quot;:&quot;贵阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0447&quot;,&quot;name&quot;:&quot;兰州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0448&quot;,&quot;name&quot;:&quot;南昌银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0449&quot;,&quot;name&quot;:&quot;晋商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0450&quot;,&quot;name&quot;:&quot;青岛银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0455&quot;,&quot;name&quot;:&quot;日照市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0456&quot;,&quot;name&quot;:&quot;鞍山银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0458&quot;,&quot;name&quot;:&quot;青海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0459&quot;,&quot;name&quot;:&quot;台州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0461&quot;,&quot;name&quot;:&quot;长沙银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0463&quot;,&quot;name&quot;:&quot;赣州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0465&quot;,&quot;name&quot;:&quot;营口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0467&quot;,&quot;name&quot;:&quot;阜新银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0474&quot;,&quot;name&quot;:&quot;内蒙古银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0475&quot;,&quot;name&quot;:&quot;湖州市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0476&quot;,&quot;name&quot;:&quot;沧州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0479&quot;,&quot;name&quot;:&quot;包商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0481&quot;,&quot;name&quot;:&quot;威海商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0483&quot;,&quot;name&quot;:&quot;攀枝花市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0485&quot;,&quot;name&quot;:&quot;绵阳市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0490&quot;,&quot;name&quot;:&quot;张家口市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0492&quot;,&quot;name&quot;:&quot;龙江银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0495&quot;,&quot;name&quot;:&quot;柳州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0497&quot;,&quot;name&quot;:&quot;莱商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0498&quot;,&quot;name&quot;:&quot;德阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0503&quot;,&quot;name&quot;:&quot;晋城银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0505&quot;,&quot;name&quot;:&quot;东莞商行&quot;&#125;,&#123;&quot;code&quot;:&quot;0508&quot;,&quot;name&quot;:&quot;江苏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0513&quot;,&quot;name&quot;:&quot;承德市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0515&quot;,&quot;name&quot;:&quot;德州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0517&quot;,&quot;name&quot;:&quot;邯郸市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0525&quot;,&quot;name&quot;:&quot;浙江民泰商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0526&quot;,&quot;name&quot;:&quot;上饶市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0527&quot;,&quot;name&quot;:&quot;东营银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0528&quot;,&quot;name&quot;:&quot;泰安市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0530&quot;,&quot;name&quot;:&quot;浙江稠州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0534&quot;,&quot;name&quot;:&quot;鄂尔多斯银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0537&quot;,&quot;name&quot;:&quot;济宁银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0547&quot;,&quot;name&quot;:&quot;昆仑银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0554&quot;,&quot;name&quot;:&quot;邢台银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0556&quot;,&quot;name&quot;:&quot;漯河商行&quot;&#125;,&#123;&quot;code&quot;:&quot;1401&quot;,&quot;name&quot;:&quot;上海农商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1402&quot;,&quot;name&quot;:&quot;昆山农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1403&quot;,&quot;name&quot;:&quot;常熟市农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1404&quot;,&quot;name&quot;:&quot;深圳农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1405&quot;,&quot;name&quot;:&quot;广州农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1408&quot;,&quot;name&quot;:&quot;佛山顺德农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1409&quot;,&quot;name&quot;:&quot;昆明农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1410&quot;,&quot;name&quot;:&quot;湖北农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1415&quot;,&quot;name&quot;:&quot;东莞农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1416&quot;,&quot;name&quot;:&quot;张家港农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1417&quot;,&quot;name&quot;:&quot;福建省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1418&quot;,&quot;name&quot;:&quot;北京农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1419&quot;,&quot;name&quot;:&quot;天津农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1420&quot;,&quot;name&quot;:&quot;宁波鄞州农村合作银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1424&quot;,&quot;name&quot;:&quot;江苏省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1428&quot;,&quot;name&quot;:&quot;江苏吴江农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1430&quot;,&quot;name&quot;:&quot;苏州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1443&quot;,&quot;name&quot;:&quot;广西农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1446&quot;,&quot;name&quot;:&quot;黄河农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1447&quot;,&quot;name&quot;:&quot;安徽省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1448&quot;,&quot;name&quot;:&quot;海南省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1513&quot;,&quot;name&quot;:&quot;重庆农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6462&quot;,&quot;name&quot;:&quot;潍坊市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6466&quot;,&quot;name&quot;:&quot;富滇银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6473&quot;,&quot;name&quot;:&quot;浙江泰隆商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6478&quot;,&quot;name&quot;:&quot;广西北部湾银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6567&quot;,&quot;name&quot;:&quot;商丘商行&quot;&#125;]</span><br></pre></td></tr></table></figure>
+
+<p>好了，问题解决了，说实话第一次写代码去解决实际中的碰到的问题，挺好玩，带着要解决的问题去学习的效果会更好一些。感想就是在想学东西或者想做一些事情的时候，不要先想太多，比如把所有资料都准备齐、哪个人的资料好，怎么才能少走弯路，学不好做不好会怎么样,等等…..然后你的激情就没了，这件事也就不了了之了，这些都不好。我们要的就是想做什么立刻去做，just do it。</p>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>爬虫</tag>
+      </tags>
+  </entry>
+</search>
