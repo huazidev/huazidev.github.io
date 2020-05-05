@@ -168,7 +168,7 @@
       </tags>
   </entry>
   <entry>
-    <title>性能优化</title>
+    <title>Android 性能优化总结</title>
     <url>/2017/04/01/performance-optimization/</url>
     <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<a id="more"></a></p>
 <h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
