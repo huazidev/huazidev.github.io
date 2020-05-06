@@ -244,7 +244,7 @@
   <entry>
     <title>【转】Android 复杂的列表视图新写法 MultiType</title>
     <url>/2017/05/06/fork-effect-multitype/</url>
-    <content><![CDATA[<p><strong>本文来自 <code>MultiType</code> 作者 Drakeet。</strong> 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 <code>Github</code> 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。</p>
+    <content><![CDATA[<p><strong>本文来自 <code>MultiType</code> 作者 Drakeet。</strong> 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 <code>Github</code> 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。<a id="more"></a></p>
 <p>以下是原文：</p>
 <hr>
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在开发我的 <strong><a href="https://github.com/drakeet/TimeMachine" target="_blank" rel="noopener">TimeMachine</a></strong> 时，我有一个复杂的聊天页面，于是我设计了我的类型池系统，它是完全解耦的，因此我能够轻松将它抽离出来分享，并给它取名为 <strong>MultiType</strong>.</p>
