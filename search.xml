@@ -1,55 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>使用hexo+github建个人博客</title>
-    <url>/2016/09/17/hexo-nxet-blog/</url>
-    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>准备开一个博客，记录一下自己平时碰到的一些问题，也可以供以后进行翻阅，查找定位。<br>既然是这样那就需要考虑怎么建博客了，之前大学的时候CSDN和博客园都有账号，可是只是零零星星写过一点东西，就放在那了。也自己买域名和vps用wordpress搭过一个博客，这个运行了接近两年，直到我工作一年后才停了。<a id="more"></a>前期的目的是写点技术博客，可是当时学生党为了盈利，慢慢运营成了电影资源下载网站，收益还可以。期间为了改网站模板也自己学了点php，也算有点收获。工作之后就没怎么管过了，考虑到版权问题以及对个人成长的没有多少帮助就给关了。当时关还是有点小不舍的，毕竟自己一手建的站，运营了那么久。啰里吧嗦那么多就是想说其实是对技术博客还是有点情怀的，于是才有了现在想自己开博客，写点技术文章的想法。<br>好了废话不多说，步入正题。<br>** 本片文章配置是在Mac完成的，其他系统版本应该也差不多 **</p>
-<h3 id="用Github-pages创建个人站"><a href="#用Github-pages创建个人站" class="headerlink" title="用Github pages创建个人站"></a>用Github pages创建个人站</h3><p>我想作为程序员你应该对GitHub不陌生。GitHub提供了Github Pages功能，我们可以用GitHub pages创建自己的个人站。</p>
-<blockquote>
-<p>Github Pages 是面向用户、组织和项目开放的公共静态页面搭建托管服务，站点可以被免费托管在Github 上，你可以选择使用Github Pages 默认提供的域名github.io 或者自定义域名来发布站点。</p>
-</blockquote>
-<ol>
-<li>登录GitHub账户，点击右上角+号，选择New repository,创建一个新的仓库，用于存放你的网站代码。</li>
-<li>按照要求填写仓库名，要使用默认的域名github.io的话仓库名就要以你的用户名命名，命名规则如下<strong>username.github.io</strong>,然后选择公开，点击Create Repository,创建仓库完成。<br>至此我们在GitHub上有了一个代码仓库，等我们在本地写好代码就可以部署上去了。</li>
-</ol>
-<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><p>最简单的方法，去<a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git官网</a>下载安装，也可以通过以下途径安装</p>
-<h4 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h4><p>Debian或Ubuntu Linux，通过一条<code>sudo apt-get install git</code>就可以直接完成Git的安装。</p>
-<h4 id="Mac-OS安装"><a href="#Mac-OS安装" class="headerlink" title="Mac OS安装"></a>Mac OS安装</h4><blockquote>
-<p>安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：<a href="http://brew.sh/" target="_blank" rel="noopener">http://brew.sh/</a></p>
-</blockquote>
-<h4 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h4><p>推荐去官网下载，安装完后在命令行下输入<code>git version</code>检查是否安装成功。</p>
-<h3 id="使用Hexo搭建博客"><a href="#使用Hexo搭建博客" class="headerlink" title="使用Hexo搭建博客"></a>使用Hexo搭建博客</h3><ol>
-<li>安装Node<br>hexo是一款基于Node.js的静态博客框架，所以我们先要安装node。<ul>
-<li>去node<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">官网</a>下载安装包安装。</li>
-<li>有个国内墙的原因，可能上不去官网就算上去了也很慢，推荐使用homebrew安装node</li>
-<li>在bash命令下输入 node -v 如果显示版本号说明安装成功。</li>
-</ul>
-</li>
-<li>安装hexo<br>安装完node就可以用npm去安装hexo了，<a href="https://hexo.io" target="_blank" rel="noopener">hexo官网</a><blockquote>
-<p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题,由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。</p>
-</blockquote>
-</li>
-</ol>
-<p>执行以下命令安装hexo：<br><code>npm install hexo-cli -g    #-g表示全局安装, npm默认为当前项目安装</code><br>然后执行：<br><code>hexo version</code><br>如果出现版本号说明安装成功。如果报错，尝试用下面的命令安装<br><code>npm install hexo --no-optional</code><br>然后使用以下命令：<br><code>hexo init blog   //执行初始化命令到指定的目录,这里的目录是hexo文件夹</code><br><code>cd blog</code><br><code>npm install</code><br><code>hexo generate   //在当前目录下生成静态网页</code><br><code>hexo server     // 启动本地服务</code><br>在浏览器输入 <a href="http://localhost:4000" target="_blank" rel="noopener">http://localhost:4000</a> 就可以看到效果，到此hexo生成静态网站就已经完成。</p>
-<h3 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h3><p>进入你的博客目录，找到配置文件_config.yml修改如下信息</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:username&#x2F;username.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
-<p>这里的username是之前注册的github的用户名<br>现在可以执行：<code>hexo d</code>部署到github了，不过有时候会出现问题，如果报如下错误</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br></pre></td></tr></table></figure>
-<p>说明连接不到远程仓库。一般是需要配置你电脑的SSH Key</p>
-<blockquote>
-<p>为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。<br>当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
-</blockquote>
-<p>关于SSH的原理可以通过阮一峰老师的一篇文章了解一下：<br><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html</a><br>配置SSH Key 的方法可以参考GitHub官网的教程：<br><a href="https://help.github.com/articles/generating-an-ssh-key/" target="_blank" rel="noopener">https://help.github.com/articles/generating-an-ssh-key/</a><br>按步骤测试好之后就可以使用<code>hexo d</code>部署了.部署完之后在浏览器输入：<a href="http://username.github.io/" target="_blank" rel="noopener">http://username.github.io/</a> 就可以看到效果了。</p>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Git-分支合并后回退的几种情况分析</title>
     <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<a id="more"></a><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html" target="_blank" rel="noopener">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
@@ -129,6 +80,55 @@
       <tags>
         <tag>Android</tag>
         <tag>Notification</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用hexo+github建个人博客</title>
+    <url>/2016/09/17/hexo-nxet-blog/</url>
+    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>准备开一个博客，记录一下自己平时碰到的一些问题，也可以供以后进行翻阅，查找定位。<br>既然是这样那就需要考虑怎么建博客了，之前大学的时候CSDN和博客园都有账号，可是只是零零星星写过一点东西，就放在那了。也自己买域名和vps用wordpress搭过一个博客，这个运行了接近两年，直到我工作一年后才停了。<a id="more"></a>前期的目的是写点技术博客，可是当时学生党为了盈利，慢慢运营成了电影资源下载网站，收益还可以。期间为了改网站模板也自己学了点php，也算有点收获。工作之后就没怎么管过了，考虑到版权问题以及对个人成长的没有多少帮助就给关了。当时关还是有点小不舍的，毕竟自己一手建的站，运营了那么久。啰里吧嗦那么多就是想说其实是对技术博客还是有点情怀的，于是才有了现在想自己开博客，写点技术文章的想法。<br>好了废话不多说，步入正题。<br>** 本片文章配置是在Mac完成的，其他系统版本应该也差不多 **</p>
+<h3 id="用Github-pages创建个人站"><a href="#用Github-pages创建个人站" class="headerlink" title="用Github pages创建个人站"></a>用Github pages创建个人站</h3><p>我想作为程序员你应该对GitHub不陌生。GitHub提供了Github Pages功能，我们可以用GitHub pages创建自己的个人站。</p>
+<blockquote>
+<p>Github Pages 是面向用户、组织和项目开放的公共静态页面搭建托管服务，站点可以被免费托管在Github 上，你可以选择使用Github Pages 默认提供的域名github.io 或者自定义域名来发布站点。</p>
+</blockquote>
+<ol>
+<li>登录GitHub账户，点击右上角+号，选择New repository,创建一个新的仓库，用于存放你的网站代码。</li>
+<li>按照要求填写仓库名，要使用默认的域名github.io的话仓库名就要以你的用户名命名，命名规则如下<strong>username.github.io</strong>,然后选择公开，点击Create Repository,创建仓库完成。<br>至此我们在GitHub上有了一个代码仓库，等我们在本地写好代码就可以部署上去了。</li>
+</ol>
+<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><p>最简单的方法，去<a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git官网</a>下载安装，也可以通过以下途径安装</p>
+<h4 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h4><p>Debian或Ubuntu Linux，通过一条<code>sudo apt-get install git</code>就可以直接完成Git的安装。</p>
+<h4 id="Mac-OS安装"><a href="#Mac-OS安装" class="headerlink" title="Mac OS安装"></a>Mac OS安装</h4><blockquote>
+<p>安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：<a href="http://brew.sh/" target="_blank" rel="noopener">http://brew.sh/</a></p>
+</blockquote>
+<h4 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h4><p>推荐去官网下载，安装完后在命令行下输入<code>git version</code>检查是否安装成功。</p>
+<h3 id="使用Hexo搭建博客"><a href="#使用Hexo搭建博客" class="headerlink" title="使用Hexo搭建博客"></a>使用Hexo搭建博客</h3><ol>
+<li>安装Node<br>hexo是一款基于Node.js的静态博客框架，所以我们先要安装node。<ul>
+<li>去node<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">官网</a>下载安装包安装。</li>
+<li>有个国内墙的原因，可能上不去官网就算上去了也很慢，推荐使用homebrew安装node</li>
+<li>在bash命令下输入 node -v 如果显示版本号说明安装成功。</li>
+</ul>
+</li>
+<li>安装hexo<br>安装完node就可以用npm去安装hexo了，<a href="https://hexo.io" target="_blank" rel="noopener">hexo官网</a><blockquote>
+<p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题,由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。</p>
+</blockquote>
+</li>
+</ol>
+<p>执行以下命令安装hexo：<br><code>npm install hexo-cli -g    #-g表示全局安装, npm默认为当前项目安装</code><br>然后执行：<br><code>hexo version</code><br>如果出现版本号说明安装成功。如果报错，尝试用下面的命令安装<br><code>npm install hexo --no-optional</code><br>然后使用以下命令：<br><code>hexo init blog   //执行初始化命令到指定的目录,这里的目录是hexo文件夹</code><br><code>cd blog</code><br><code>npm install</code><br><code>hexo generate   //在当前目录下生成静态网页</code><br><code>hexo server     // 启动本地服务</code><br>在浏览器输入 <a href="http://localhost:4000" target="_blank" rel="noopener">http://localhost:4000</a> 就可以看到效果，到此hexo生成静态网站就已经完成。</p>
+<h3 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h3><p>进入你的博客目录，找到配置文件_config.yml修改如下信息</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:username&#x2F;username.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p>这里的username是之前注册的github的用户名<br>现在可以执行：<code>hexo d</code>部署到github了，不过有时候会出现问题，如果报如下错误</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br></pre></td></tr></table></figure>
+<p>说明连接不到远程仓库。一般是需要配置你电脑的SSH Key</p>
+<blockquote>
+<p>为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。<br>当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
+</blockquote>
+<p>关于SSH的原理可以通过阮一峰老师的一篇文章了解一下：<br><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html</a><br>配置SSH Key 的方法可以参考GitHub官网的教程：<br><a href="https://help.github.com/articles/generating-an-ssh-key/" target="_blank" rel="noopener">https://help.github.com/articles/generating-an-ssh-key/</a><br>按步骤测试好之后就可以使用<code>hexo d</code>部署了.部署完之后在浏览器输入：<a href="http://username.github.io/" target="_blank" rel="noopener">http://username.github.io/</a> 就可以看到效果了。</p>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>github</tag>
       </tags>
   </entry>
   <entry>
@@ -492,6 +492,242 @@
       <tags>
         <tag>Android</tag>
         <tag>RecyclerView</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第1章</title>
+    <url>/2017/05/15/android-art-search-1/</url>
+    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+<ul>
+<li>onCreate: 表示 Activity 正在被创建</li>
+<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
+<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
+<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
+<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
+<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
+<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+</ul>
+<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
+<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
+<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
+<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
+<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
+<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
+<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
+<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
+<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
+<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
+<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
+<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
+</ul>
+<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
+<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
+<p>问题：分享到第三方应用，使用什么启动方式？</p>
+<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
+<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
+<p>IntentFliter 过滤信息有 action, category, data</p>
+<ul>
+<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
+<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
+<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>启动模式</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第2章</title>
+    <url>/2017/05/21/android-art-search-2/</url>
+    <content><![CDATA[<p>IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。</p>
+<p>线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。<br>多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应用获取数据。</p>
+<a id="more"></a>
+<p>Android 中使用多进程只有一种方法，就是给四大组件在 AndroidMenifest 中指定 android:process 属性，除此之外别无他法。<code>adb shell ps</code> 命令可以查看进程信息。</p>
+<p>进程名以 <code>:</code> 开头的进程属于当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程；<br>进程名不以 <code>:</code> 开头的进程属于全局进程，其他应用通过 ShareUID 方式可以和它跑在同一个进程中。系统会为每个应用配备唯一的 UID, 具有相同 UID 的应用才能共享数据。<br>Android 中每个进程分配了独立的虚拟机，每个虚拟机分配不同的地址空间。运行在不在进程中的四大组件，他们之间想通过内存共享数据，都会共享失败。</p>
+<p>多进程会造成如下几个问题：</p>
+<ol>
+<li>静态成员和单例模式完全失效。</li>
+<li>线程同步机制完全失效。</li>
+<li>SharePreferences 的可靠性下降。</li>
+<li>Application 会多次创建。</li>
+</ol>
+<p>对于1，2是同一个问题，不管是锁对象还是锁全局类都无法保证线程同步，因为不同进程锁的不是同一个对象。</p>
+<p>SharePreferences 不支持两个进程同时进行写操作，因为SharePreferences 底层是通过读写 xml 文件实现的，并发读写都有可能出现问题。</p>
+<p>运行在不同进程中的组件属于两个不同的虚拟机和 Application。每启动一个进程就会走一遍 Application onCreate。</p>
+<h3 id="IPC-基础概念"><a href="#IPC-基础概念" class="headerlink" title="IPC 基础概念"></a>IPC 基础概念</h3><p>IPC 基本概念主要包括三方面，Serializable 接口，Parcelable 接口，以及 Binder，Serializable 和 Parcelable 可以完成对象的序列化过程，Intent 和 Binder 传输数据时就需要使用 Serializable 和 Parcelable。</p>
+<h4 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h4><p>Serializable 是 Java 中提供的序列化接口，为对象提供标准的序列化和反序列化操作。<br><code>serialVersionUID</code> 是用来辅助序列化和反序列化过程的，原则上序列化后的数据中的 <code>serialVersionUID</code> 只有和当前类的 <code>serialVersionUID</code> 相同才能够正常的被反序列化。序列化的时候，系统会把当前类的 <code>serialVersionUID</code> 写入序列化的文件中，当反序列化的时候系统去检测文件中的 <code>serialVersionUID</code> 是否和当前类的 <code>serialVersionUID</code> 相同，一致则正常反序列化，否则无法正常发序列化。一般来说需要手动指定 <code>serialVersionUID</code>。如果不指定，当前类有所改变会重新计算当前类的 hash 值并把它赋值给 <code>serialVersionUID</code>。</p>
+<ol>
+<li>静态成员变量属于类，不属于对象，所以不会参与序列化过程。</li>
+<li><code>transient</code> 标记的变量不参与序列化的过程。<h4 id="Parcelable"><a href="#Parcelable" class="headerlink" title="Parcelable"></a>Parcelable</h4>Android 提供的新的序列化方式：<code>Parcelable</code>，也是一个接口。序列化功能由 <code>writeToParcel</code> 完成。Intent，Bundle，Bitmap 都实现了此接口，可以直接序列化。</li>
+</ol>
+<p>Serializable 是 Java 接口，使用起来简单但开销很大，序列化和反序列化需要大量 I/O 操作。</p>
+<p>Parcelable 使用麻烦，效率高，推荐使用。</p>
+<p>将序列化对象存储到设备中或将对象序列化后通过网络传输，推荐使用 Serialzalble。</p>
+<h4 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h4><p>Android 开发中 Binder 主要用在 Service，AIDL 和 Messenger 中，普通的 Service 中的 Binder 不涉及进程间通信。Messenger 底层是 AIDL。Binder 的唯一标识，一般用当前的 Binder 类名表示。</p>
+<p>Binder 是 ServiceManager 连接各种 Manager (ActivityManager, WindowManager,等)和相应 ManagerService 的桥梁。</p>
+<p>系统生成的 Binder 类参数解析：</p>
+<ul>
+<li>DESCRIPTOR, Binder 的唯一表示，一般用当前 Binder 的类名表示</li>
+<li>asInterface(android.os.IBinder obj), 用于将服务端的 Binder 对象转成客户端所需的 AIDL 接口类型的对象，这种转换是分进程的，如果客户端，服务端位于同一进程，那么此方法返回的就是服务端的Stub 对象本身，否则返回系统封装后的 Stub.proxy 对象。</li>
+<li>adBinder， 返回当前 Binder 对象</li>
+<li>onTransact, 运行在服务端的 Binder 线程池中，当客户端发起请求时，远程请求会通过底层封装后交由此方法来处理。</li>
+</ul>
+<p>Binder 工作机制还需注意两点：</p>
+<ol>
+<li>当客户端发起远程请求时，当前线程会被挂起直到服务端进程返回数据，是个耗时操作。</li>
+<li>服务端 Binder 方法运行在 Binder 线程池中所以 Binder 方法不管是否耗时都应该采用同步方式去实现。</li>
+</ol>
+<p>Binder 的工作机制图：<br><img src="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png" alt="Binder工作流程.png"></p>
+<p>Binder 运行在服务端，如果服务端由于某中原因导致进程终止，会导致远程调用失败，Binder 提供了两个方法 <code>linkToDeath</code> 和 <code>unLinkToDeath</code> 可以设置 Binder 的死亡代理。</p>
+<p>通过 Binder 的方法 isBinderAlive 也可以判断 Binder 是否死亡。</p>
+<h3 id="Android-中的-IPC-方式"><a href="#Android-中的-IPC-方式" class="headerlink" title="Android 中的 IPC 方式"></a>Android 中的 IPC 方式</h3><ol>
+<li><p>Bundle<br>Bundle 实现了 Parcelable 接口，所以方便的在进程中传输。</p>
+</li>
+<li><p>使用文件共享<br>两个进程通过读写同一个文件交换数据。并发读写会有问题，尽量避免并发写的情况，考虑使用线程同步来限制多个线程的写操作。<br>SharePrefrences 也属于文件的一种，系统对他的读写有缓存策略，多进程模式下，读写不可靠。</p>
+</li>
+<li><p>使用 Messenger<br>Messenger 是一种轻量级的 IPC，底层实现是 AIDL。Messenger 以串行的方式处理客户端的消息。主要是为了传递消息。<br>工作原理图：<br><img src="https://i.loli.net/2020/05/21/WnT2w671ikfchzp.png" alt="messenger工作原理.png"></p>
+</li>
+<li><p>使用 AIDL<br>使用 AIDL 进行进程间通信分为服务端和客户端两方面，大致流程：服务端首先创建 Service 用来监听客户端请求，然后创建AIDL文件将暴露给客户端的接口在这个 AIDL 中声明，随后在 Service 中实现这个 AIDL 接口。客户端绑定服务端的 Service，绑定成功后，将服务端返回的 Binder 对象转成 AIDL 接口所属的类型，接着调用 AIDL 方法。</p>
+</li>
+<li><p>使用 ContentProvider<br>Android 中专门为不同应用间进行数据共享的方式，底层实现是 Binder。ContentProvider 对底层数据存储没有要求。</p>
+</li>
+</ol>
+<p>首先需要注册 Provider，其中 <code>android:authorities</code> 是 Provider 的唯一标识，通过这个就可以访问 Provider。</p>
+<p>Provider 的 onCreate 运行在主线程，其他方法运行在 Binder 线程池中。query，update，insert，delete是存在多线程并发，因此方法内部做好线程同步。</p>
+<ol start="6">
+<li>使用 Socket</li>
+</ol>
+<p>Socket 是网络通信的概念。</p>
+<ul>
+<li>TCP 面向连接协议，提供稳定的双向通信功能。</li>
+<li>UDP 无连接协议，提供不稳定的单向通信功能，也可以提供双向通信，有更好的效率，缺点是不能保证正确传输。</li>
+</ul>
+<h4 id="Binder-连接池"><a href="#Binder-连接池" class="headerlink" title="Binder 连接池"></a>Binder 连接池</h4><p>使用 AIDL 大致流程：首先创建一个 Service 和 AIDL 接口，接着创建一个继承自 AIDL 接口中的 Stub 类并实现 Stub 中的抽象方法，在 Service 的 onBinder 方法中返回这个类的对象，然后再客户端就可以绑定服务端的 Service，建立连接后就可以远程访问服务端的方法了。</p>
+<p>当项目规模很大的时候，创建很多个 Service 是不对的做法，因Service 是系统资源，太多的 Service 会使得应用看起来很重，所以最好是将所有的 AIDL 放在同一个 Service中去管理。</p>
+<p>Binder 连接池的作用是将每个业务模块的 Binder 请求统一转发的远程 Service 中去执行，避免了重复创建 Service 的过程。</p>
+<p>BinderPool 极大的提高 AIDL 的开发效率，避免大量创建 Service，建议在 AIDL 中引入 BinderPool。</p>
+<h4 id="选择合适的-IPC-方式"><a href="#选择合适的-IPC-方式" class="headerlink" title="选择合适的 IPC 方式"></a>选择合适的 IPC 方式</h4><table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+<th align="center">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Bundle</td>
+<td align="center">简单易用</td>
+<td align="center">只能传输 Bundle 支持的数据类型</td>
+<td align="center">自大组件间的进程通信</td>
+</tr>
+<tr>
+<td align="center">文件共享</td>
+<td align="center">简单易用</td>
+<td align="center">不适合高并发场景，无法做到进程间及时通信</td>
+<td align="center">无并发访问情形，交换简单的数据实时性不高的场景</td>
+</tr>
+<tr>
+<td align="center">AIDL</td>
+<td align="center">功能强大，支持一对多并发通信，支持实时通信</td>
+<td align="center">使用稍复杂，需要处理好线程同步</td>
+<td align="center">一对多通信有RPC需求</td>
+</tr>
+<tr>
+<td align="center">Messenger</td>
+<td align="center">功能一般，支持一对多串行通信，支持实时通信</td>
+<td align="center">不能很好的处理高并发情形，不支持 RPC，数据通过message传输，只能传输 Bundle 支持的数据类型</td>
+<td align="center">低并发的一对多即时通信，无RPC需求，或者无需发挥结果的RPC 需求</td>
+</tr>
+<tr>
+<td align="center">ContentProvider</td>
+<td align="center">在数据源访问方面功能强大，支持一对多并发数据共享，可以通过 Call 方法扩展</td>
+<td align="center">可以理解为受约束的 AIDL，主要提供数据源的 CRUD</td>
+<td align="center">一对多的进程间数据共享</td>
+</tr>
+<tr>
+<td align="center">Socket</td>
+<td align="center">功能强大，可以通过网络传输字节流，支持一对多并发实时通信</td>
+<td align="center">实现细节稍微繁琐，不支持直接 RPC</td>
+<td align="center">网络数据交换</td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>Binder</tag>
+        <tag>IPC</tag>
+        <tag>进程通信</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义 ViewGroup 实现流式布局</title>
+    <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
+    <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
+<a id="more"></a>
+
+<p>但是我们今天说的并不是它，而是怎么自定义一个流式布局，通过这个自定义布局来复习和实战一下《Android 开发艺术探索》一书中的第四章的内容。另外说明下，本文代码使用 Kotlin 编写。 </p>
+<p>首先分析下流式布局的特点：</p>
+<ul>
+<li>自动从左向右排列</li>
+<li>剩余空间不能显示则自动换行</li>
+</ul>
+<p>既然我们把它定位为布局，那么肯定是要自定义 ViewGroup，这里选择了直接继承 ViewGroup 来实现。我们看源码会知道 ViewGroup 是个抽象类，他的子类必须实现 <code>onLayout()</code> 方法来处理布局，当然还得自己处理测量，同时还要处理子元素的测量和布局。</p>
+<h4 id="测量尺寸"><a href="#测量尺寸" class="headerlink" title="测量尺寸"></a>测量尺寸</h4><p>自定义 View 需要测量，布局，绘制三个流程。我个人感觉最复杂是测量这一过程。想理解测量就必须先理解 <code>MeasureSpec</code>，关于 <code>MeasureSpec</code> 这里需要说一下。</p>
+<h5 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h5><p>MeasureSpec 直译就是测量规格，它参与了 View 的绘制过程。<br>MeasureSpecc 代表了一个 32 位的 int 值，高 2 位代表 SpecMode，低 30 位代表 SpecSize，SpecMode 是指测量模式，SpecSize 是指在某种测量模式下的规格大小。<br>测量模式主要有三种，每种的含义如下：</p>
+<ul>
+<li>UNSOECIFIED<br>  父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部测量</li>
+<li>EXACTLY<br>  父容器已经检测出 View 所需的精确大小，这时候 View 的最终大小就是 SpecSize 的值，它对应与 LayoutParams 中的 match_parent 和具体的数值两种模式。</li>
+<li>AT_MOST<br>  父容器指定了一个可用大小 SpecSize，View 的大小不能超过这个值，具体是什么值要看不同 View 的具体实现，它对应与 LayoutParams 中的 wrap_content。</li>
+</ul>
+<p>因此，我们知道 MeasureSpec 就能知道 SpecMode 和 SpecSize 了，然后我们可以根据这两个值去处理 View 的大小。</p>
+<p>自定义 View 只要考虑 <code>MeasureSpec.EXACTLY</code> 和 <code>MeasureSpec.AT_MOST</code> 即可。</p>
+<p>好了，了解了 MeasureSpec，我们继续说测量的事，分析下流失布局的特点，我们先看一下 FlexboxLayout 在 <code>app:flexWrap=&quot;wrap&quot;</code>模式下的显示情况，然后我们来实现这种效果，（布局中每个View 的 margin=5dp）<br><img src="https://i.loli.net/2020/05/21/XS9wnOhobfeWAId.png" alt=""></p>
+<p>根据上图分析下测量的实现思路：</p>
+<ol>
+<li>首先测量就是测 View 尺寸，需要确定 View 的宽高。</li>
+<li>根据布局的特点，测量最小的宽高尺寸，并且这个数值不能大于 parent 给出的建议 size。</li>
+<li>对于宽度，子 View 有多行，每行长度不一致，最长的那一行就是 View 的宽度。</li>
+<li>对于高度，子 View 的高度不一致，每一行的最大高度的和就是 View 的高度。</li>
+<li>要考虑Layout自身的 pading 和子 view 的 margin。</li>
+</ol>
+<p>相关代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;</span><br><span class="line">        Log.d(TAG, &quot;onMeasure&quot;)</span><br><span class="line"></span><br><span class="line">        val widthSpecMode &#x3D; MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">        val widthSpecSize &#x3D; MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">        val heightSpecMode &#x3D; MeasureSpec.getMode(heightMeasureSpec)</span><br><span class="line">        val heightSpecSize &#x3D; MeasureSpec.getSize(heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 测量子 View 尺寸</span><br><span class="line">        measureChildren(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        var lineWidth &#x3D; 0</span><br><span class="line">        var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">        var maxWidthSize &#x3D; 0</span><br><span class="line">        var height &#x3D; 0</span><br><span class="line"></span><br><span class="line">        for (i in 0 until childCount) &#123;</span><br><span class="line">            val child &#x3D; getChildAt(i)</span><br><span class="line">            if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">                &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">                if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                    maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                    height +&#x3D; lineHeight</span><br><span class="line">                &#125;</span><br><span class="line">                continue</span><br><span class="line">            &#125;</span><br><span class="line">            val childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line">            &#x2F;&#x2F; 子 View 的宽高包含他们的 margin</span><br><span class="line">            val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">            val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">            if (lineWidth + childWidth &gt; widthSpecSize - paddingLeft - paddingRight) &#123; &#x2F;&#x2F; 换行</span><br><span class="line">                &#x2F;&#x2F; 记录最大宽度</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                &#x2F;&#x2F; 重置 lineWidth</span><br><span class="line">                lineWidth &#x3D; childWidth</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">                lineHeight &#x3D; childHeight</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lineWidth +&#x3D; childWidth</span><br><span class="line">                lineHeight &#x3D; max(childHeight, lineHeight)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">            if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultWidth &#x3D; if (widthSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            widthSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(maxWidthSize + paddingLeft + paddingRight, widthSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultHeight &#x3D; if (heightSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            heightSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(height + paddingTop + paddingBottom, heightSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setMeasuredDimension(resultWidth, resultHeight)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>还是看上图，布局比较简单，就是从左向右排列，如果子 View 的显示超出了 Layout 的最大宽度就换行。所以思路就是依次遍历所有的子 View，然后从左向右依次排列，确定子 View 的位置，每次对子 View 进行 layout 之前，要预算它的显示范围，如果超出了 parent 的宽度，那么它就需要换行。</p>
+<p>定位 View 主要是确定 View 的四个顶点的位置。再简化一下，只需要知道左上角顶点的位置加上 View 的宽高就能定位一个 View，而左上角顶点就是 left, top。对于同一行，left 依次向右移动，如果定位的 View 的长度超出了 ViewGroup 最大宽大度就换行，然后更新 left，top，每换一行 top 向下移动。</p>
+<p>相关代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) &#123;</span><br><span class="line">    Log.d(TAG, &quot;onLayout&quot;)</span><br><span class="line"></span><br><span class="line">    var childLeft &#x3D; paddingLeft</span><br><span class="line">    var childTop &#x3D; paddingTop</span><br><span class="line">    var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">    var childParams: MarginLayoutParams</span><br><span class="line"></span><br><span class="line">    val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">    for (i in 0 until childCount) &#123;</span><br><span class="line">        val child &#x3D; get(i)</span><br><span class="line">        if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line"></span><br><span class="line">        val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">        val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">        if (childLeft + childWidth &gt; width - paddingRight) &#123;</span><br><span class="line">            &#x2F;&#x2F; 换行, 更新 childLeft，childTop，lineHeight</span><br><span class="line">            childLeft &#x3D; paddingLeft</span><br><span class="line">            childTop +&#x3D; lineHeight</span><br><span class="line">            lineHeight &#x3D; childHeight</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            lineHeight &#x3D; max(lineHeight, childHeight)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setChildFrame(child, childLeft + childParams.leftMargin, childTop + childParams.topMargin, child.measuredWidth, child.measuredHeight)</span><br><span class="line">        childLeft +&#x3D; childWidth</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到了这里我们的流式布局基本就完成了，但是还有个问题，测量的时候最大宽度是给定的 parentSize，那如果单个 View 的宽度为一个很大的值，超过了这个 parentSize，我们再布局的时候该怎么处理呢？</p>
+<p>看了一下 LinearLayout 的情况，是直接将按 View 的宽高来布局的，就是 View 会延伸到屏幕外面，然后看一下 RelativeLayout 则是限制了最大宽度，如果超过 parentSize 则最大为 parentSize</p>
+<p>具体情况看下图：<br><img src="https://i.loli.net/2020/05/22/1yG8UYd3zwMp2H4.png" alt="linearlayout-RelativeLayout.png"></p>
+<p>又看了下 FlexboxLayout 也是和 RelativeLayout 一样， 所以怎么处理看自己情况吧。这边给出我自己的处理情况：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private fun setChildFrame(child: View, left: Int, top: Int, width: Int, height: Int) &#123;</span><br><span class="line">        &#x2F;&#x2F; 可有可无，仿照 FlexboxLayout 做了此操作</span><br><span class="line">        val right &#x3D; if (left + width &gt; getWidth()) &#123;</span><br><span class="line">            getWidth() - (child.layoutParams as MarginLayoutParams).rightMargin</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            left + width</span><br><span class="line">        &#125;</span><br><span class="line">        Log.d(TAG, &quot;left&#x3D;$left,right&#x3D;$right,top&#x3D;$top,bottom&#x3D;$&#123;top + height&#125;&quot;)</span><br><span class="line">        child.layout(left, top, right, top + height)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>View 绘制相关的方法是 <code>onDraw()</code>, 这个需求中并不需要特殊的绘制，所以可以不用管它。</p>
+<p>到这里基本上都处理完了，下面看一下效果图，上面是 tag 标签，下面纯 View 组合：<br><img src="https://i.loli.net/2020/05/22/AJFehr81dDRx5K2.png" alt="hflowlayout-sceenshot.png"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>自定义 ViewGroup 的基础是清楚 View 的工作原理以及工作流程。其中工作流程主要是指 measure，layout，draw 三大流程，即测量，布局，绘制，其中 measure 确定 View 的测量宽高，layout 确定 View 的最终宽高和四个顶点的位置，而 draw 则将 View 绘制到屏幕上。只有做到对于每个流程都能了然于心才能在自定义 View 时游刃有余。当有了这些基础之后，实现一个自定义 View 主要放在了功能实现上。另外一个体会就是编码之前重要的是要学会分析需求，考虑到各个方面，这个情况个人觉得跟算法比较像，多做算法题有利于提高自己的逻辑思维能力和分析问题解决问题的能力。又给自己找到一个学习算法的的理由，哈哈哈哈哈哈，加油吧，骚年。。。</p>
+<h5 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h5><p>重新整理了代码，放在了github：<br><a href="https://github.com/huazidev/HFlowLayout" target="_blank" rel="noopener">https://github.com/huazidev/HFlowLayout</a></p>
+]]></content>
+      <categories>
+        <category>Anroid</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>自定义ViewGroup</tag>
+        <tag>流式布局</tag>
       </tags>
   </entry>
 </search>
