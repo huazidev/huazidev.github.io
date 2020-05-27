@@ -1,56 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Android学习系列之-通知Notification</title>
-    <url>/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/</url>
-    <content><![CDATA[<p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
-<blockquote>
-<p>通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。<a id="more"></a></p>
-</blockquote>
-<p>具体的展示如下：<br><img src="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500" alt="图1 通知区域中的通知。"><br><img src="http://upload-images.jianshu.io/upload_images/859087-4ece81d9c0de1797.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/400" alt="图2 抽屉式通知栏中的通知"><br>相信看完介绍，大家应该也都明白通知的一些使用场景了。现在大部分的应用都有推送功能，而推送都是用通知来展示的。比如简书每天就不定时的给你发推送。下面就介绍一下通知的具体使用方法。</p>
-<h3 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h3><p>要创建通知，我们就需要Notification这个类，我们可以通过 NotificationCompat.Builder 对象中为通知指定 UI 信息和操作，然后通过调用 NotificationCompat.Builder.build()，它将返回包含您的具体规范的 Notification 对象。然后通过 NotificationManager.notify()<br> 将 Notification 对象传递给系统，由系统来帮你完成后续的处理。<br>Notification对象必须包含以下三个元素：</p>
-<ul>
-<li>小图标，由 setSmallIcon() 方法设置</li>
-<li>标题，由 setContentTitle 方法设置</li>
-<li>详细文本，由  setContentText()设置</li>
-</ul>
-<p>也就是说这三个元素是必须的，不然就算创建了Notification对象也是发不出去的。另外就是需要解释一下这个小图标，小图标是指图一通知区域的小图标，也是图二中通知大图右下角的小图片，他是一个特殊的图。5.0后Android官方要求，所有应用程序的通知栏图标，应该只使用alpha图层来进行绘制，而不应该包括RGB图层。即不要为通知的图标添加任何额外的透明度，渐变色，不要用颜色将通知图标与其他应用，比如系统应用，应用的通知图标(即小图标)只能是在透明的背景上有白色的图案。<br>另外具体的设计可以参考materia design 关于Notification的设计规范，地址<a href="https://material.io/guidelines/patterns/notifications.html" target="_blank" rel="noopener">https://material.io/guidelines/patterns/notifications.html</a><br>下面贴两张图来让大家更明了各个参数对应的UI显示，<br><img src="http://upload-images.jianshu.io/upload_images/859087-cb9f6450f0afce8e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620" alt="small_icon.png"><br><img src="http://upload-images.jianshu.io/upload_images/859087-f08eca29dfbe33a5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="通知各元素对应的显示"></p>
-<p>上图的NotificationIcon 其实是smallIcon，Title即ContentTitle，Message即ContentText,另外还有时间戳等。所有的通知的其他设置都是可选的。</p>
-<h3 id="通知操作"><a href="#通知操作" class="headerlink" title="通知操作"></a>通知操作</h3><p>我们设置好了通知之后，需要再向通知添加一个操作，以用来相应用户的点击操作。当然你也可以不加这个操作，就让它挂在通知栏，用户点了就是没反应，但是这样用户体验多不好。用户点击通知后可以让用户从通知直接跳转到相应的activity，以执行下一步操作。在 Notification内部，操作本身由 PendingIntent 定义，后者包含在应用中启动 Activity的 Intent。</p>
-<h3 id="创建通知"><a href="#创建通知" class="headerlink" title="创建通知"></a>创建通知</h3><p>我们可以通过以下步骤去创建一个通知</p>
-<ol>
-<li><p>先创建NotificationCompat.Builder，并且可以通过这个builder去设置通知需要的内容，来生成Notification。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NotificationCompat.Builder builder &#x3D; new NotificationCompat.Builder(context);</span><br><span class="line">Notification notification &#x3D; builder</span><br><span class="line">.setContentTitle(&quot;这是通知标题&quot;)</span><br><span class="line">.setContentText(&quot;这是通知内容&quot;)</span><br><span class="line">.setSmallIcon(R.mipmap.ic_launcher)</span><br><span class="line">.setLargeIcon(BitmapFactory.decodeResource(</span><br><span class="line">  getResources(), R.mipmap.ic_launcher))</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure></li>
-<li><p>设置优先级<br>通知还有优先级，我们可以通过setPriority() 传入通知的优先级，目前通知的优先级有五个等级，范围从 PRIORITY_MIN (-2) 到 PRIORITY_MAX (2)；如果未设置，则优先级默认为 PRIORITY_DEFAULT (0)。优先级越高，在通知栏就排的越往上。</p>
-</li>
-<li><p>设置一个点击后的动作<br>如之前所说的，我们可以通过pendingIntent来设置一个通知点击后的操作。比如跳转到一个activity。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Intent resultIntent &#x3D; new Intent(this, ResultActivity.class);</span><br><span class="line">PendingIntent resultPendingIntent &#x3D; PendingIntent.getActivity(</span><br><span class="line">            this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);</span><br><span class="line">mBuilder.setContentIntent(resultPendingIntent);</span><br></pre></td></tr></table></figure>
-<p>通过这种方式就可以让用户点击通知后跳转到ResultActivity页面了。</p>
-</li>
-<li><p>用NotificationManager 发送通知</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NotificationManager mNotificationManager &#x3D;</span><br><span class="line">    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">&#x2F;&#x2F; mId allows you to update the notification later on.</span><br><span class="line">mNotificationManager.notify(mId, mBuilder.build());</span><br></pre></td></tr></table></figure></li>
-<li><p>更新通知<br>当我们需要更新通知中的内容的时候就可以依据上面设置的通知的id去更新的通知，只需要通知Id相同就可以更新，具体操作其实和创建差不多，官方的示例代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mNotificationManager &#x3D;</span><br><span class="line">        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">&#x2F;&#x2F; Sets an ID for the notification, so it can be updated</span><br><span class="line">int notifyID &#x3D; 1;</span><br><span class="line">mNotifyBuilder &#x3D; new NotificationCompat.Builder(this)</span><br><span class="line">    .setContentTitle(&quot;New Message&quot;)</span><br><span class="line">    .setContentText(&quot;You&#39;ve received new messages.&quot;)</span><br><span class="line">    .setSmallIcon(R.drawable.ic_notify_status)</span><br><span class="line">numMessages &#x3D; 0;</span><br><span class="line">&#x2F;&#x2F; Start of a loop that processes data and then notifies the user</span><br><span class="line">...</span><br><span class="line">    mNotifyBuilder.setContentText(currentText)</span><br><span class="line">        .setNumber(++numMessages);</span><br><span class="line">    &#x2F;&#x2F; Because the ID remains unchanged, the existing notification is</span><br><span class="line">    &#x2F;&#x2F; updated.</span><br><span class="line">    mNotificationManager.notify(</span><br><span class="line">            notifyID,</span><br><span class="line">            mNotifyBuilder.build());</span><br></pre></td></tr></table></figure></li>
-<li><p>删除或取消通知<br>当我们需要手动取消通知的时候，可以调用NotificationManager的 cancel()，具体的删除有以下几种方式：</p>
-<ul>
-<li>用户单独或通过使用“全部清除”清除了该通知（如果通知可以清除）。</li>
-<li>用户点击通知，且您在创建通知时调用了 setAutoCancel()</li>
-<li>针对特定的通知 ID 调用了 cancel() 此方法还会删除当前通知。</li>
-<li>调用了cancelAll()方法，该方法将删除之前发出的所有通知。</li>
-</ul>
-</li>
-</ol>
-<p>好了，到这里已经可以创建基本的Notification了，之后再写一些通知的其他使用方式。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>Notification</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Git-分支合并后回退的几种情况分析</title>
     <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<a id="more"></a><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html" target="_blank" rel="noopener">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
@@ -128,6 +78,56 @@
         <tag>Android</tag>
         <tag>启动模式</tag>
         <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android学习系列之-通知Notification</title>
+    <url>/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/</url>
+    <content><![CDATA[<p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
+<blockquote>
+<p>通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。<a id="more"></a></p>
+</blockquote>
+<p>具体的展示如下：<br><img src="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500" alt="图1 通知区域中的通知。"><br><img src="http://upload-images.jianshu.io/upload_images/859087-4ece81d9c0de1797.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/400" alt="图2 抽屉式通知栏中的通知"><br>相信看完介绍，大家应该也都明白通知的一些使用场景了。现在大部分的应用都有推送功能，而推送都是用通知来展示的。比如简书每天就不定时的给你发推送。下面就介绍一下通知的具体使用方法。</p>
+<h3 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h3><p>要创建通知，我们就需要Notification这个类，我们可以通过 NotificationCompat.Builder 对象中为通知指定 UI 信息和操作，然后通过调用 NotificationCompat.Builder.build()，它将返回包含您的具体规范的 Notification 对象。然后通过 NotificationManager.notify()<br> 将 Notification 对象传递给系统，由系统来帮你完成后续的处理。<br>Notification对象必须包含以下三个元素：</p>
+<ul>
+<li>小图标，由 setSmallIcon() 方法设置</li>
+<li>标题，由 setContentTitle 方法设置</li>
+<li>详细文本，由  setContentText()设置</li>
+</ul>
+<p>也就是说这三个元素是必须的，不然就算创建了Notification对象也是发不出去的。另外就是需要解释一下这个小图标，小图标是指图一通知区域的小图标，也是图二中通知大图右下角的小图片，他是一个特殊的图。5.0后Android官方要求，所有应用程序的通知栏图标，应该只使用alpha图层来进行绘制，而不应该包括RGB图层。即不要为通知的图标添加任何额外的透明度，渐变色，不要用颜色将通知图标与其他应用，比如系统应用，应用的通知图标(即小图标)只能是在透明的背景上有白色的图案。<br>另外具体的设计可以参考materia design 关于Notification的设计规范，地址<a href="https://material.io/guidelines/patterns/notifications.html" target="_blank" rel="noopener">https://material.io/guidelines/patterns/notifications.html</a><br>下面贴两张图来让大家更明了各个参数对应的UI显示，<br><img src="http://upload-images.jianshu.io/upload_images/859087-cb9f6450f0afce8e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620" alt="small_icon.png"><br><img src="http://upload-images.jianshu.io/upload_images/859087-f08eca29dfbe33a5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="通知各元素对应的显示"></p>
+<p>上图的NotificationIcon 其实是smallIcon，Title即ContentTitle，Message即ContentText,另外还有时间戳等。所有的通知的其他设置都是可选的。</p>
+<h3 id="通知操作"><a href="#通知操作" class="headerlink" title="通知操作"></a>通知操作</h3><p>我们设置好了通知之后，需要再向通知添加一个操作，以用来相应用户的点击操作。当然你也可以不加这个操作，就让它挂在通知栏，用户点了就是没反应，但是这样用户体验多不好。用户点击通知后可以让用户从通知直接跳转到相应的activity，以执行下一步操作。在 Notification内部，操作本身由 PendingIntent 定义，后者包含在应用中启动 Activity的 Intent。</p>
+<h3 id="创建通知"><a href="#创建通知" class="headerlink" title="创建通知"></a>创建通知</h3><p>我们可以通过以下步骤去创建一个通知</p>
+<ol>
+<li><p>先创建NotificationCompat.Builder，并且可以通过这个builder去设置通知需要的内容，来生成Notification。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NotificationCompat.Builder builder &#x3D; new NotificationCompat.Builder(context);</span><br><span class="line">Notification notification &#x3D; builder</span><br><span class="line">.setContentTitle(&quot;这是通知标题&quot;)</span><br><span class="line">.setContentText(&quot;这是通知内容&quot;)</span><br><span class="line">.setSmallIcon(R.mipmap.ic_launcher)</span><br><span class="line">.setLargeIcon(BitmapFactory.decodeResource(</span><br><span class="line">  getResources(), R.mipmap.ic_launcher))</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure></li>
+<li><p>设置优先级<br>通知还有优先级，我们可以通过setPriority() 传入通知的优先级，目前通知的优先级有五个等级，范围从 PRIORITY_MIN (-2) 到 PRIORITY_MAX (2)；如果未设置，则优先级默认为 PRIORITY_DEFAULT (0)。优先级越高，在通知栏就排的越往上。</p>
+</li>
+<li><p>设置一个点击后的动作<br>如之前所说的，我们可以通过pendingIntent来设置一个通知点击后的操作。比如跳转到一个activity。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Intent resultIntent &#x3D; new Intent(this, ResultActivity.class);</span><br><span class="line">PendingIntent resultPendingIntent &#x3D; PendingIntent.getActivity(</span><br><span class="line">            this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);</span><br><span class="line">mBuilder.setContentIntent(resultPendingIntent);</span><br></pre></td></tr></table></figure>
+<p>通过这种方式就可以让用户点击通知后跳转到ResultActivity页面了。</p>
+</li>
+<li><p>用NotificationManager 发送通知</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">NotificationManager mNotificationManager &#x3D;</span><br><span class="line">    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">&#x2F;&#x2F; mId allows you to update the notification later on.</span><br><span class="line">mNotificationManager.notify(mId, mBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>更新通知<br>当我们需要更新通知中的内容的时候就可以依据上面设置的通知的id去更新的通知，只需要通知Id相同就可以更新，具体操作其实和创建差不多，官方的示例代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mNotificationManager &#x3D;</span><br><span class="line">        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">&#x2F;&#x2F; Sets an ID for the notification, so it can be updated</span><br><span class="line">int notifyID &#x3D; 1;</span><br><span class="line">mNotifyBuilder &#x3D; new NotificationCompat.Builder(this)</span><br><span class="line">    .setContentTitle(&quot;New Message&quot;)</span><br><span class="line">    .setContentText(&quot;You&#39;ve received new messages.&quot;)</span><br><span class="line">    .setSmallIcon(R.drawable.ic_notify_status)</span><br><span class="line">numMessages &#x3D; 0;</span><br><span class="line">&#x2F;&#x2F; Start of a loop that processes data and then notifies the user</span><br><span class="line">...</span><br><span class="line">    mNotifyBuilder.setContentText(currentText)</span><br><span class="line">        .setNumber(++numMessages);</span><br><span class="line">    &#x2F;&#x2F; Because the ID remains unchanged, the existing notification is</span><br><span class="line">    &#x2F;&#x2F; updated.</span><br><span class="line">    mNotificationManager.notify(</span><br><span class="line">            notifyID,</span><br><span class="line">            mNotifyBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>删除或取消通知<br>当我们需要手动取消通知的时候，可以调用NotificationManager的 cancel()，具体的删除有以下几种方式：</p>
+<ul>
+<li>用户单独或通过使用“全部清除”清除了该通知（如果通知可以清除）。</li>
+<li>用户点击通知，且您在创建通知时调用了 setAutoCancel()</li>
+<li>针对特定的通知 ID 调用了 cancel() 此方法还会删除当前通知。</li>
+<li>调用了cancelAll()方法，该方法将删除之前发出的所有通知。</li>
+</ul>
+</li>
+</ol>
+<p>好了，到这里已经可以创建基本的Notification了，之后再写一些通知的其他使用方式。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Notification</tag>
       </tags>
   </entry>
   <entry>
@@ -465,65 +465,6 @@
       </tags>
   </entry>
   <entry>
-    <title>自定义 ViewGroup 实现流式布局</title>
-    <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
-    <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
-<a id="more"></a>
-
-<p>但是我们今天说的并不是它，而是怎么自定义一个流式布局，通过这个自定义布局来复习和实战一下《Android 开发艺术探索》一书中的第四章的内容。另外说明下，本文代码使用 Kotlin 编写。 </p>
-<p>首先分析下流式布局的特点：</p>
-<ul>
-<li>自动从左向右排列</li>
-<li>剩余空间不能显示则自动换行</li>
-</ul>
-<p>既然我们把它定位为布局，那么肯定是要自定义 ViewGroup，这里选择了直接继承 ViewGroup 来实现。我们看源码会知道 ViewGroup 是个抽象类，他的子类必须实现 <code>onLayout()</code> 方法来处理布局，当然还得自己处理测量，同时还要处理子元素的测量和布局。</p>
-<h4 id="测量尺寸"><a href="#测量尺寸" class="headerlink" title="测量尺寸"></a>测量尺寸</h4><p>自定义 View 需要测量，布局，绘制三个流程。我个人感觉最复杂是测量这一过程。想理解测量就必须先理解 <code>MeasureSpec</code>，关于 <code>MeasureSpec</code> 这里需要说一下。</p>
-<h5 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h5><p>MeasureSpec 直译就是测量规格，它参与了 View 的绘制过程。<br>MeasureSpecc 代表了一个 32 位的 int 值，高 2 位代表 SpecMode，低 30 位代表 SpecSize，SpecMode 是指测量模式，SpecSize 是指在某种测量模式下的规格大小。<br>测量模式主要有三种，每种的含义如下：</p>
-<ul>
-<li>UNSOECIFIED<br>  父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部测量</li>
-<li>EXACTLY<br>  父容器已经检测出 View 所需的精确大小，这时候 View 的最终大小就是 SpecSize 的值，它对应与 LayoutParams 中的 match_parent 和具体的数值两种模式。</li>
-<li>AT_MOST<br>  父容器指定了一个可用大小 SpecSize，View 的大小不能超过这个值，具体是什么值要看不同 View 的具体实现，它对应与 LayoutParams 中的 wrap_content。</li>
-</ul>
-<p>因此，我们知道 MeasureSpec 就能知道 SpecMode 和 SpecSize 了，然后我们可以根据这两个值去处理 View 的大小。</p>
-<p>自定义 View 只要考虑 <code>MeasureSpec.EXACTLY</code> 和 <code>MeasureSpec.AT_MOST</code> 即可。</p>
-<p>好了，了解了 MeasureSpec，我们继续说测量的事，分析下流失布局的特点，我们先看一下 FlexboxLayout 在 <code>app:flexWrap=&quot;wrap&quot;</code>模式下的显示情况，然后我们来实现这种效果，（布局中每个View 的 margin=5dp）<br><img src="https://i.loli.net/2020/05/21/XS9wnOhobfeWAId.png" alt=""></p>
-<p>根据上图分析下测量的实现思路：</p>
-<ol>
-<li>首先测量就是测 View 尺寸，需要确定 View 的宽高。</li>
-<li>根据布局的特点，测量最小的宽高尺寸，并且这个数值不能大于 parent 给出的建议 size。</li>
-<li>对于宽度，子 View 有多行，每行长度不一致，最长的那一行就是 View 的宽度。</li>
-<li>对于高度，子 View 的高度不一致，每一行的最大高度的和就是 View 的高度。</li>
-<li>要考虑Layout自身的 pading 和子 view 的 margin。</li>
-</ol>
-<p>相关代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;</span><br><span class="line">        Log.d(TAG, &quot;onMeasure&quot;)</span><br><span class="line"></span><br><span class="line">        val widthSpecMode &#x3D; MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">        val widthSpecSize &#x3D; MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">        val heightSpecMode &#x3D; MeasureSpec.getMode(heightMeasureSpec)</span><br><span class="line">        val heightSpecSize &#x3D; MeasureSpec.getSize(heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 测量子 View 尺寸</span><br><span class="line">        measureChildren(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        var lineWidth &#x3D; 0</span><br><span class="line">        var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">        var maxWidthSize &#x3D; 0</span><br><span class="line">        var height &#x3D; 0</span><br><span class="line"></span><br><span class="line">        for (i in 0 until childCount) &#123;</span><br><span class="line">            val child &#x3D; getChildAt(i)</span><br><span class="line">            if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">                &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">                if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                    maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                    height +&#x3D; lineHeight</span><br><span class="line">                &#125;</span><br><span class="line">                continue</span><br><span class="line">            &#125;</span><br><span class="line">            val childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line">            &#x2F;&#x2F; 子 View 的宽高包含他们的 margin</span><br><span class="line">            val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">            val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">            if (lineWidth + childWidth &gt; widthSpecSize - paddingLeft - paddingRight) &#123; &#x2F;&#x2F; 换行</span><br><span class="line">                &#x2F;&#x2F; 记录最大宽度</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                &#x2F;&#x2F; 重置 lineWidth</span><br><span class="line">                lineWidth &#x3D; childWidth</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">                lineHeight &#x3D; childHeight</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lineWidth +&#x3D; childWidth</span><br><span class="line">                lineHeight &#x3D; max(childHeight, lineHeight)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">            if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultWidth &#x3D; if (widthSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            widthSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(maxWidthSize + paddingLeft + paddingRight, widthSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultHeight &#x3D; if (heightSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            heightSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(height + paddingTop + paddingBottom, heightSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setMeasuredDimension(resultWidth, resultHeight)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>还是看上图，布局比较简单，就是从左向右排列，如果子 View 的显示超出了 Layout 的最大宽度就换行。所以思路就是依次遍历所有的子 View，然后从左向右依次排列，确定子 View 的位置，每次对子 View 进行 layout 之前，要预算它的显示范围，如果超出了 parent 的宽度，那么它就需要换行。</p>
-<p>定位 View 主要是确定 View 的四个顶点的位置。再简化一下，只需要知道左上角顶点的位置加上 View 的宽高就能定位一个 View，而左上角顶点就是 left, top。对于同一行，left 依次向右移动，如果定位的 View 的长度超出了 ViewGroup 最大宽大度就换行，然后更新 left，top，每换一行 top 向下移动。</p>
-<p>相关代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) &#123;</span><br><span class="line">    Log.d(TAG, &quot;onLayout&quot;)</span><br><span class="line"></span><br><span class="line">    var childLeft &#x3D; paddingLeft</span><br><span class="line">    var childTop &#x3D; paddingTop</span><br><span class="line">    var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">    var childParams: MarginLayoutParams</span><br><span class="line"></span><br><span class="line">    val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">    for (i in 0 until childCount) &#123;</span><br><span class="line">        val child &#x3D; get(i)</span><br><span class="line">        if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line"></span><br><span class="line">        val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">        val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">        if (childLeft + childWidth &gt; width - paddingRight) &#123;</span><br><span class="line">            &#x2F;&#x2F; 换行, 更新 childLeft，childTop，lineHeight</span><br><span class="line">            childLeft &#x3D; paddingLeft</span><br><span class="line">            childTop +&#x3D; lineHeight</span><br><span class="line">            lineHeight &#x3D; childHeight</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            lineHeight &#x3D; max(lineHeight, childHeight)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setChildFrame(child, childLeft + childParams.leftMargin, childTop + childParams.topMargin, child.measuredWidth, child.measuredHeight)</span><br><span class="line">        childLeft +&#x3D; childWidth</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>到了这里我们的流式布局基本就完成了，但是还有个问题，测量的时候最大宽度是给定的 parentSize，那如果单个 View 的宽度为一个很大的值，超过了这个 parentSize，我们再布局的时候该怎么处理呢？</p>
-<p>看了一下 LinearLayout 的情况，是直接将按 View 的宽高来布局的，就是 View 会延伸到屏幕外面，然后看一下 RelativeLayout 则是限制了最大宽度，如果超过 parentSize 则最大为 parentSize</p>
-<p>具体情况看下图：<br><img src="https://i.loli.net/2020/05/22/1yG8UYd3zwMp2H4.png" alt="linearlayout-RelativeLayout.png"></p>
-<p>又看了下 FlexboxLayout 也是和 RelativeLayout 一样， 所以怎么处理看自己情况吧。这边给出我自己的处理情况：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private fun setChildFrame(child: View, left: Int, top: Int, width: Int, height: Int) &#123;</span><br><span class="line">        &#x2F;&#x2F; 可有可无，仿照 FlexboxLayout 做了此操作</span><br><span class="line">        val right &#x3D; if (left + width &gt; getWidth()) &#123;</span><br><span class="line">            getWidth() - (child.layoutParams as MarginLayoutParams).rightMargin</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            left + width</span><br><span class="line">        &#125;</span><br><span class="line">        Log.d(TAG, &quot;left&#x3D;$left,right&#x3D;$right,top&#x3D;$top,bottom&#x3D;$&#123;top + height&#125;&quot;)</span><br><span class="line">        child.layout(left, top, right, top + height)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>View 绘制相关的方法是 <code>onDraw()</code>, 这个需求中并不需要特殊的绘制，所以可以不用管它。</p>
-<p>到这里基本上都处理完了，下面看一下效果图，上面是 tag 标签，下面纯 View 组合：<br><img src="https://i.loli.net/2020/05/22/AJFehr81dDRx5K2.png" alt="hflowlayout-sceenshot.png"></p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>自定义 ViewGroup 的基础是清楚 View 的工作原理以及工作流程。其中工作流程主要是指 measure，layout，draw 三大流程，即测量，布局，绘制，其中 measure 确定 View 的测量宽高，layout 确定 View 的最终宽高和四个顶点的位置，而 draw 则将 View 绘制到屏幕上。只有做到对于每个流程都能了然于心才能在自定义 View 时游刃有余。当有了这些基础之后，实现一个自定义 View 主要放在了功能实现上。另外一个体会就是编码之前重要的是要学会分析需求，考虑到各个方面，这个情况个人觉得跟算法比较像，多做算法题有利于提高自己的逻辑思维能力和分析问题解决问题的能力。又给自己找到一个学习算法的的理由，哈哈哈哈哈哈，加油吧，骚年。。。</p>
-<h5 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h5><p>重新整理了代码，放在了github：<br><a href="https://github.com/huazidev/HFlowLayout" target="_blank" rel="noopener">https://github.com/huazidev/HFlowLayout</a></p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>自定义ViewGroup</tag>
-        <tag>流式布局</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>《Android开发艺术探索》笔记-第11章-线程和线程池</title>
     <url>/2018/05/25/android-art-explore-11/</url>
     <content><![CDATA[<p>AsyncTask 封装了线程池和 handler，主要hi为了方便开发者在子线程中更新UI。<br>HandlerThread 是一种具有消息循环的线程，他的内部可以使用 Handler。<br>IntentService 是一个服务，系统对其进行了封装，以便执行后台任务，IntentService 内部采用 HanderThread 来执行任务，当任务完成后会自动退出 IntentService，他是一种服务，不容易被系统杀死从而尽量保证任务的执行。</p>
@@ -597,6 +538,65 @@
         <tag>笔记</tag>
         <tag>线程</tag>
         <tag>线程池</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义 ViewGroup 实现流式布局</title>
+    <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
+    <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
+<a id="more"></a>
+
+<p>但是我们今天说的并不是它，而是怎么自定义一个流式布局，通过这个自定义布局来复习和实战一下《Android 开发艺术探索》一书中的第四章的内容。另外说明下，本文代码使用 Kotlin 编写。 </p>
+<p>首先分析下流式布局的特点：</p>
+<ul>
+<li>自动从左向右排列</li>
+<li>剩余空间不能显示则自动换行</li>
+</ul>
+<p>既然我们把它定位为布局，那么肯定是要自定义 ViewGroup，这里选择了直接继承 ViewGroup 来实现。我们看源码会知道 ViewGroup 是个抽象类，他的子类必须实现 <code>onLayout()</code> 方法来处理布局，当然还得自己处理测量，同时还要处理子元素的测量和布局。</p>
+<h4 id="测量尺寸"><a href="#测量尺寸" class="headerlink" title="测量尺寸"></a>测量尺寸</h4><p>自定义 View 需要测量，布局，绘制三个流程。我个人感觉最复杂是测量这一过程。想理解测量就必须先理解 <code>MeasureSpec</code>，关于 <code>MeasureSpec</code> 这里需要说一下。</p>
+<h5 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h5><p>MeasureSpec 直译就是测量规格，它参与了 View 的绘制过程。<br>MeasureSpecc 代表了一个 32 位的 int 值，高 2 位代表 SpecMode，低 30 位代表 SpecSize，SpecMode 是指测量模式，SpecSize 是指在某种测量模式下的规格大小。<br>测量模式主要有三种，每种的含义如下：</p>
+<ul>
+<li>UNSOECIFIED<br>  父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部测量</li>
+<li>EXACTLY<br>  父容器已经检测出 View 所需的精确大小，这时候 View 的最终大小就是 SpecSize 的值，它对应与 LayoutParams 中的 match_parent 和具体的数值两种模式。</li>
+<li>AT_MOST<br>  父容器指定了一个可用大小 SpecSize，View 的大小不能超过这个值，具体是什么值要看不同 View 的具体实现，它对应与 LayoutParams 中的 wrap_content。</li>
+</ul>
+<p>因此，我们知道 MeasureSpec 就能知道 SpecMode 和 SpecSize 了，然后我们可以根据这两个值去处理 View 的大小。</p>
+<p>自定义 View 只要考虑 <code>MeasureSpec.EXACTLY</code> 和 <code>MeasureSpec.AT_MOST</code> 即可。</p>
+<p>好了，了解了 MeasureSpec，我们继续说测量的事，分析下流失布局的特点，我们先看一下 FlexboxLayout 在 <code>app:flexWrap=&quot;wrap&quot;</code>模式下的显示情况，然后我们来实现这种效果，（布局中每个View 的 margin=5dp）<br><img src="https://i.loli.net/2020/05/21/XS9wnOhobfeWAId.png" alt=""></p>
+<p>根据上图分析下测量的实现思路：</p>
+<ol>
+<li>首先测量就是测 View 尺寸，需要确定 View 的宽高。</li>
+<li>根据布局的特点，测量最小的宽高尺寸，并且这个数值不能大于 parent 给出的建议 size。</li>
+<li>对于宽度，子 View 有多行，每行长度不一致，最长的那一行就是 View 的宽度。</li>
+<li>对于高度，子 View 的高度不一致，每一行的最大高度的和就是 View 的高度。</li>
+<li>要考虑Layout自身的 pading 和子 view 的 margin。</li>
+</ol>
+<p>相关代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;</span><br><span class="line">        Log.d(TAG, &quot;onMeasure&quot;)</span><br><span class="line"></span><br><span class="line">        val widthSpecMode &#x3D; MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">        val widthSpecSize &#x3D; MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">        val heightSpecMode &#x3D; MeasureSpec.getMode(heightMeasureSpec)</span><br><span class="line">        val heightSpecSize &#x3D; MeasureSpec.getSize(heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 测量子 View 尺寸</span><br><span class="line">        measureChildren(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        var lineWidth &#x3D; 0</span><br><span class="line">        var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">        var maxWidthSize &#x3D; 0</span><br><span class="line">        var height &#x3D; 0</span><br><span class="line"></span><br><span class="line">        for (i in 0 until childCount) &#123;</span><br><span class="line">            val child &#x3D; getChildAt(i)</span><br><span class="line">            if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">                &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">                if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                    maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                    height +&#x3D; lineHeight</span><br><span class="line">                &#125;</span><br><span class="line">                continue</span><br><span class="line">            &#125;</span><br><span class="line">            val childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line">            &#x2F;&#x2F; 子 View 的宽高包含他们的 margin</span><br><span class="line">            val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">            val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">            if (lineWidth + childWidth &gt; widthSpecSize - paddingLeft - paddingRight) &#123; &#x2F;&#x2F; 换行</span><br><span class="line">                &#x2F;&#x2F; 记录最大宽度</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                &#x2F;&#x2F; 重置 lineWidth</span><br><span class="line">                lineWidth &#x3D; childWidth</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">                lineHeight &#x3D; childHeight</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lineWidth +&#x3D; childWidth</span><br><span class="line">                lineHeight &#x3D; max(childHeight, lineHeight)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">            if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultWidth &#x3D; if (widthSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            widthSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(maxWidthSize + paddingLeft + paddingRight, widthSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultHeight &#x3D; if (heightSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            heightSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(height + paddingTop + paddingBottom, heightSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setMeasuredDimension(resultWidth, resultHeight)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>还是看上图，布局比较简单，就是从左向右排列，如果子 View 的显示超出了 Layout 的最大宽度就换行。所以思路就是依次遍历所有的子 View，然后从左向右依次排列，确定子 View 的位置，每次对子 View 进行 layout 之前，要预算它的显示范围，如果超出了 parent 的宽度，那么它就需要换行。</p>
+<p>定位 View 主要是确定 View 的四个顶点的位置。再简化一下，只需要知道左上角顶点的位置加上 View 的宽高就能定位一个 View，而左上角顶点就是 left, top。对于同一行，left 依次向右移动，如果定位的 View 的长度超出了 ViewGroup 最大宽大度就换行，然后更新 left，top，每换一行 top 向下移动。</p>
+<p>相关代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) &#123;</span><br><span class="line">    Log.d(TAG, &quot;onLayout&quot;)</span><br><span class="line"></span><br><span class="line">    var childLeft &#x3D; paddingLeft</span><br><span class="line">    var childTop &#x3D; paddingTop</span><br><span class="line">    var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">    var childParams: MarginLayoutParams</span><br><span class="line"></span><br><span class="line">    val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">    for (i in 0 until childCount) &#123;</span><br><span class="line">        val child &#x3D; get(i)</span><br><span class="line">        if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line"></span><br><span class="line">        val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">        val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">        if (childLeft + childWidth &gt; width - paddingRight) &#123;</span><br><span class="line">            &#x2F;&#x2F; 换行, 更新 childLeft，childTop，lineHeight</span><br><span class="line">            childLeft &#x3D; paddingLeft</span><br><span class="line">            childTop +&#x3D; lineHeight</span><br><span class="line">            lineHeight &#x3D; childHeight</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            lineHeight &#x3D; max(lineHeight, childHeight)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setChildFrame(child, childLeft + childParams.leftMargin, childTop + childParams.topMargin, child.measuredWidth, child.measuredHeight)</span><br><span class="line">        childLeft +&#x3D; childWidth</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到了这里我们的流式布局基本就完成了，但是还有个问题，测量的时候最大宽度是给定的 parentSize，那如果单个 View 的宽度为一个很大的值，超过了这个 parentSize，我们再布局的时候该怎么处理呢？</p>
+<p>看了一下 LinearLayout 的情况，是直接将按 View 的宽高来布局的，就是 View 会延伸到屏幕外面，然后看一下 RelativeLayout 则是限制了最大宽度，如果超过 parentSize 则最大为 parentSize</p>
+<p>具体情况看下图：<br><img src="https://i.loli.net/2020/05/22/1yG8UYd3zwMp2H4.png" alt="linearlayout-RelativeLayout.png"></p>
+<p>又看了下 FlexboxLayout 也是和 RelativeLayout 一样， 所以怎么处理看自己情况吧。这边给出我自己的处理情况：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private fun setChildFrame(child: View, left: Int, top: Int, width: Int, height: Int) &#123;</span><br><span class="line">        &#x2F;&#x2F; 可有可无，仿照 FlexboxLayout 做了此操作</span><br><span class="line">        val right &#x3D; if (left + width &gt; getWidth()) &#123;</span><br><span class="line">            getWidth() - (child.layoutParams as MarginLayoutParams).rightMargin</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            left + width</span><br><span class="line">        &#125;</span><br><span class="line">        Log.d(TAG, &quot;left&#x3D;$left,right&#x3D;$right,top&#x3D;$top,bottom&#x3D;$&#123;top + height&#125;&quot;)</span><br><span class="line">        child.layout(left, top, right, top + height)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>View 绘制相关的方法是 <code>onDraw()</code>, 这个需求中并不需要特殊的绘制，所以可以不用管它。</p>
+<p>到这里基本上都处理完了，下面看一下效果图，上面是 tag 标签，下面纯 View 组合：<br><img src="https://i.loli.net/2020/05/22/AJFehr81dDRx5K2.png" alt="hflowlayout-sceenshot.png"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>自定义 ViewGroup 的基础是清楚 View 的工作原理以及工作流程。其中工作流程主要是指 measure，layout，draw 三大流程，即测量，布局，绘制，其中 measure 确定 View 的测量宽高，layout 确定 View 的最终宽高和四个顶点的位置，而 draw 则将 View 绘制到屏幕上。只有做到对于每个流程都能了然于心才能在自定义 View 时游刃有余。当有了这些基础之后，实现一个自定义 View 主要放在了功能实现上。另外一个体会就是编码之前重要的是要学会分析需求，考虑到各个方面，这个情况个人觉得跟算法比较像，多做算法题有利于提高自己的逻辑思维能力和分析问题解决问题的能力。又给自己找到一个学习算法的的理由，哈哈哈哈哈哈，加油吧，骚年。。。</p>
+<h5 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h5><p>重新整理了代码，放在了github：<br><a href="https://github.com/huazidev/HFlowLayout" target="_blank" rel="noopener">https://github.com/huazidev/HFlowLayout</a></p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>自定义ViewGroup</tag>
+        <tag>流式布局</tag>
       </tags>
   </entry>
   <entry>
