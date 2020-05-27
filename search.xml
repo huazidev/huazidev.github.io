@@ -1,38 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Git-分支合并后回退的几种情况分析</title>
-    <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<a id="more"></a><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html" target="_blank" rel="noopener">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
-<ul>
-<li>Git仓库有三个主要组成——工作目录，缓存区和提交历史。</li>
-<li>reset将一个分支的末端指向另一个提交。</li>
-<li>checkout 分支切换。</li>
-<li>revert撤销一个提交的同时会创建一个新的提交。</li>
-</ul>
-<p><code>git revert</code>是个安全的方法。相比<code>git reset</code>他不会改变现在的提交历史，因此<code>git revert</code>可以用在公共分支上，而<code>git reset</code>最好用在私人分支上。</p>
-<p>下面说一下那篇文章介绍的撤销merge的方法：</p>
-<h4 id="Reset-a-Merge："><a href="#Reset-a-Merge：" class="headerlink" title="Reset a Merge："></a>Reset a Merge：</h4><p>reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$  git checkout master</span><br><span class="line">git reset --hard [要回退的commit的sha值]</span><br></pre></td></tr></table></figure>
-<p>简单暴力，不过很好用。</p>
-<h4 id="Reverting-a-Merge"><a href="#Reverting-a-Merge" class="headerlink" title="Reverting a Merge:"></a>Reverting a Merge:</h4><p>当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$  git resert -m [要撤销的那条merge线的编号] [merge前的版本号，即sha值]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 88edd6d] Revert &quot;Merge branch &#39;jk&#x2F;post-checkout&#39;&quot;</span><br><span class="line"> 1 files changed, 0 insertions(+), 2 deletions(-)</span><br></pre></td></tr></table></figure>
-<p>这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git merge jk&#x2F;post-checkout</span><br><span class="line">Already up-to-date.</span><br></pre></td></tr></table></figure>
-<h4 id="Reverting-the-Revert"><a href="#Reverting-the-Revert" class="headerlink" title="Reverting the Revert"></a>Reverting the Revert</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git revert [方法二撤销merge时提交的commit的版本号，这里是88edd6d]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 268e243] Revert &quot;Revert &quot;Merge branch &#39;jk&#x2F;post-checkout&#39;&quot;&quot; 1 files changed, 2 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure>
-<p>这样就可以正常的merge了，不过这可能会产生更多的冲突。<br>现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git merge jk&#x2F;post-checkout</span><br><span class="line">Auto-merging test.txt</span><br><span class="line">Merge made by recursive. test.txt | 1 + 1 files changed, 1 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure>
-<hr>
-<h4 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h4><p>大致的看完之后，发现后面的方法太麻烦，简直是没事找事。不过作者可能完全是基于在公共分支改动的比较复杂的情况，总之，感觉还是在本地分支用reset最方便，或者revert也可以，别整的那个麻烦就行了。<br>最后分享一篇<a href="http://gitbook.liuhui998.com/index.html" target="_blank" rel="noopener">Git Community Book</a>中关于git rebase 的文章，之前不太了解，感觉写的很好：<a href="http://gitbook.liuhui998.com/4_2.html" target="_blank" rel="noopener">http://gitbook.liuhui998.com/4_2.html</a></p>
-]]></content>
-      <categories>
-        <category>git</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android学习系列之-通知Notification</title>
     <url>/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/</url>
     <content><![CDATA[<p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
@@ -80,6 +48,102 @@
       <tags>
         <tag>Android</tag>
         <tag>Notification</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git-分支合并后回退的几种情况分析</title>
+    <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<a id="more"></a><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html" target="_blank" rel="noopener">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
+<ul>
+<li>Git仓库有三个主要组成——工作目录，缓存区和提交历史。</li>
+<li>reset将一个分支的末端指向另一个提交。</li>
+<li>checkout 分支切换。</li>
+<li>revert撤销一个提交的同时会创建一个新的提交。</li>
+</ul>
+<p><code>git revert</code>是个安全的方法。相比<code>git reset</code>他不会改变现在的提交历史，因此<code>git revert</code>可以用在公共分支上，而<code>git reset</code>最好用在私人分支上。</p>
+<p>下面说一下那篇文章介绍的撤销merge的方法：</p>
+<h4 id="Reset-a-Merge："><a href="#Reset-a-Merge：" class="headerlink" title="Reset a Merge："></a>Reset a Merge：</h4><p>reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$  git checkout master</span><br><span class="line">git reset --hard [要回退的commit的sha值]</span><br></pre></td></tr></table></figure>
+<p>简单暴力，不过很好用。</p>
+<h4 id="Reverting-a-Merge"><a href="#Reverting-a-Merge" class="headerlink" title="Reverting a Merge:"></a>Reverting a Merge:</h4><p>当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$  git resert -m [要撤销的那条merge线的编号] [merge前的版本号，即sha值]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 88edd6d] Revert &quot;Merge branch &#39;jk&#x2F;post-checkout&#39;&quot;</span><br><span class="line"> 1 files changed, 0 insertions(+), 2 deletions(-)</span><br></pre></td></tr></table></figure>
+<p>这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git merge jk&#x2F;post-checkout</span><br><span class="line">Already up-to-date.</span><br></pre></td></tr></table></figure>
+<h4 id="Reverting-the-Revert"><a href="#Reverting-the-Revert" class="headerlink" title="Reverting the Revert"></a>Reverting the Revert</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git revert [方法二撤销merge时提交的commit的版本号，这里是88edd6d]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 268e243] Revert &quot;Revert &quot;Merge branch &#39;jk&#x2F;post-checkout&#39;&quot;&quot; 1 files changed, 2 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure>
+<p>这样就可以正常的merge了，不过这可能会产生更多的冲突。<br>现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git merge jk&#x2F;post-checkout</span><br><span class="line">Auto-merging test.txt</span><br><span class="line">Merge made by recursive. test.txt | 1 + 1 files changed, 1 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h4><p>大致的看完之后，发现后面的方法太麻烦，简直是没事找事。不过作者可能完全是基于在公共分支改动的比较复杂的情况，总之，感觉还是在本地分支用reset最方便，或者revert也可以，别整的那个麻烦就行了。<br>最后分享一篇<a href="http://gitbook.liuhui998.com/index.html" target="_blank" rel="noopener">Git Community Book</a>中关于git rebase 的文章，之前不太了解，感觉写的很好：<a href="http://gitbook.liuhui998.com/4_2.html" target="_blank" rel="noopener">http://gitbook.liuhui998.com/4_2.html</a></p>
+]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第1章</title>
+    <url>/2017/05/15/android-art-explore-1/</url>
+    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+<ul>
+<li>onCreate: 表示 Activity 正在被创建</li>
+<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
+<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
+<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
+<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
+<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
+<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+</ul>
+<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
+<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
+<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
+<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
+<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
+<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
+<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
+<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
+<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
+<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
+<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
+<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
+</ul>
+<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
+<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
+<p>问题：分享到第三方应用，使用什么启动方式？</p>
+<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
+<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
+<p>IntentFliter 过滤信息有 action, category, data</p>
+<ul>
+<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
+<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
+<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>启动模式</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Handler相关知识总结</title>
+    <url>/2018/06/25/handler/</url>
+    <content><![CDATA[<p>直接放总结的脑图吧，简单明了：</p>
+<p><img src="https://i.loli.net/2020/05/27/uSNYLOc2kGJEPAK.png" alt="Handler.png"></p>
+<a id="more"></a>]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Handler</tag>
+        <tag>MessageQueue</tag>
+        <tag>Looper</tag>
       </tags>
   </entry>
   <entry>
@@ -203,6 +267,336 @@
       <tags>
         <tag>Android</tag>
         <tag>性能优化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第10章-消息机制</title>
+    <url>/2018/05/20/android-art-explore-10/</url>
+    <content><![CDATA[<p>Android 的消息机制主要是指 Handler 的运行机制，Handler 底层需要 MessageQueue 和 Looper 的支撑。</p>
+<p>主线程，也叫 UI 线程，即 ActivityThread，主线程被创建时就会初始化 Looper。</p>
+<a id="more"></a>
+<p>Handler 主要作用是将一个任务切换到指定的线程去执行，主要是为了在主线程中更新 UI，解决子线程无法访问 UI 的问题。ViewRootImpl 对 UI 操作做了验证，是由 ViewRootImpl 的 checkThread 方法来完成的。</p>
+<p>系统为什么不允许在子线程中访问 UI？</p>
+<blockquote>
+<p>因为 Android 的 UI 控件不是线程安全的，如果在多线程中并发访问有可能导致 UI 控件处于不可预期的状态。</p>
+</blockquote>
+<p>为什么不对 UI 控件加上锁机制？ </p>
+<blockquote>
+<p>首先，加上锁机制会让 UI 访问的逻辑变得复杂；其次，锁机制会降低 UI 的访问效率，因为锁机制会阻塞某些线程的执行，基于这两个缺点，最简单高效的做法就是采用单线程来处理 UI 操作。</p>
+</blockquote>
+<p>Handler 会采用当前线程的 Looper 来构建内部的消息循环系统，如果当前线程没有 Looper，那么就会报错。解决办法就是，为当前线程创建 Looper 即可，子线程的 Looper 不会自动结束，需要手动结束。</p>
+<p>Handler 创建完毕后，其内部的 Looper 以及 MessageQueue 就可以和 Handler 一起工作了，然后通过 Handler 的 post/send 方法将一个 Runnable 投递到 Handler 的内部的 Looper 中处理，post 方法最终通过 send 方法完成，send 方法会调用 MessageQueue 的 enqueueMessage 方法将消息放入消息队列，然后 Looper 会发现有新消息，就会处理这个消息，然后这个消息中的 Runnable 或者 Handler 的 handleMessage 方法就会被调用。</p>
+<h5 id="ThreadLocal-的工作原理"><a href="#ThreadLocal-的工作原理" class="headerlink" title="ThreadLocal 的工作原理"></a>ThreadLocal 的工作原理</h5><p>ThreadLocal 是一个线程内部的数据存储类，通过它可以在指定的线程中存储数据，数据存储以后，只能在指定的线程中可以获取到存储的数据，对于其他线程无法获取数据。<br>当某些数据是以线程为作用域，且不同的线程具有不同的数据副本时，可以考虑使用 ThreadLocal。</p>
+<p>不同的线程中可以访问同一个 ThreadLocal 对象，但是他们的值是不一样的。原因是，不同线程访问同一个 ThreadLocal 的 get 方法，ThreadLocal 内部会从各自的线程中取出一个数组，然后再从数组中根据当前 ThreadLocal 的索引去查找对应的 value 值。</p>
+<p>ThreadLocal 的 set 方法如下(Api 版本 28)：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public void set(T value) &#123;</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ThreadLocalMap getMap(Thread t) &#123;</span><br><span class="line">    return t.threadLocals;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void createMap(Thread t, T firstValue) &#123;</span><br><span class="line">    t.threadLocals &#x3D; new ThreadLocalMap(this, firstValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>会先获取当前线程的 ThreadLocal.ThreadLocalMap 如果 map 为空就创建并且把 value 存入，不为空直接存入。</p>
+<p>再看下 get 方法：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e &#x3D; map.getEntry(this);</span><br><span class="line">        if (e !&#x3D; null) &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result &#x3D; (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过 get 和 set 方法可以看出，他们所操作的都是当前线程的 threadLocals 的 Entry 数组，因此不同线程访问同一个 ThreadLocal 的 set ，get 方法的操作权限仅限于各自线程的内部。</p>
+<h5 id="消息队列的工作原理"><a href="#消息队列的工作原理" class="headerlink" title="消息队列的工作原理"></a>消息队列的工作原理</h5><p>MessageQueue 主要包含两个操作，插入和读取，读取本身会带着删除操作，插入和读取对应的方法为 enqueueMessage 和 next。其中 enqueueMessage 往消息队列中插入消息，next 取消息并且从消息队列中移除。<br>MessageQueue 内部是通过单链表来维护消息列表，单链表在插入和删除上比较有优势。</p>
+<p>next 方法是一个无线循环的方法，如果消息队列中没有消息，那么 next 方法就一直阻塞在这里，当有新消息到来时，next 方法会返回这条消息并将其从单链表中移除。</p>
+<h5 id="Looper-工作原理"><a href="#Looper-工作原理" class="headerlink" title="Looper 工作原理"></a>Looper 工作原理</h5><p>Looper 在 Android 的消息机制中扮演着消息循环的角色，它会不停地从 MessageQueue 中查看是否有新消息，如果有新消息就立刻处理，否则就会阻塞在那里。<br>构造方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private Looper(boolean quitAllowed) &#123;</span><br><span class="line">    mQueue &#x3D; new MessageQueue(quitAllowed);</span><br><span class="line">    mThread &#x3D; Thread.currentThread();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 通过构造方法，会创建消息队列，并把当前线程保存起来。<br> 通过 Looper.prepare() 可以为当前线程创建 Looper，通过 Looper.loop() 来开启消息循环。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Looper.prepare();</span><br><span class="line">Handler handler &#x3D; Handler()</span><br><span class="line">Looper.loop();</span><br></pre></td></tr></table></figure>
+<p> Looper 可以退出，Looper 退出后，Handler 发消息会失败， send 方法会返回 false。子线程，创建了 looper，所有事情处理完成后，就应该调用 quit/quitSafely 方法来终止循环，否则子线程会一直处于等待状态，如果退出 Looper 后，这个线程就会立刻终止，因此建议不需要的时候终止 Looper。</p>
+<p>Looper 的 loop 方法是个死循环，唯一跳出循环的方式是 MessageQueue.next 返回了 null。当 Looper quit 后，会通知消息队列退出，当消息队列标记为退出桩体，它的 next 方法就会返回 null。也就是说 Looper 必须退出，否则 loop 方法就会一致循环下去。next 是个阻塞操作，没有消息时会阻塞，导致 loop 一致阻塞，如果返回了消息，Looper 就会处理消息<code>msg.target.dispatchMessage</code>,这里的 msg.target 是发送消息的 handler 对象，这样就保证了不会把消息发送给其他的 handler，最终交给了 dispatchMessage 方法处理，dispatchMessage 方法是在创建 Handler 时所使用的 Looper 中执行的，这样就成功将代码逻辑切换到了指定的线程中执行。</p>
+<h5 id="Handler-工作原理"><a href="#Handler-工作原理" class="headerlink" title="Handler 工作原理"></a>Handler 工作原理</h5><p>Handler 主要工作包括消息的发送和接收过程，可以通过 post/send 的一系列方法来实现，post 最终是通过 send 系列方法来实现的。看代码一目了然：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public final boolean sendMessage(Message msg)</span><br><span class="line">&#123;</span><br><span class="line">    return sendMessageDelayed(msg, 0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public final boolean sendMessageDelayed(Message msg, long delayMillis)</span><br><span class="line">&#123;</span><br><span class="line">    if (delayMillis &lt; 0) &#123;</span><br><span class="line">        delayMillis &#x3D; 0;</span><br><span class="line">    &#125;</span><br><span class="line">    return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean sendMessageAtTime(Message msg, long uptimeMillis) &#123;</span><br><span class="line">    MessageQueue queue &#x3D; mQueue;</span><br><span class="line">    if (queue &#x3D;&#x3D; null) &#123;</span><br><span class="line">        RuntimeException e &#x3D; new RuntimeException(</span><br><span class="line">                this + &quot; sendMessageAtTime() called with no mQueue&quot;);</span><br><span class="line">        Log.w(&quot;Looper&quot;, e.getMessage(), e);</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    return enqueueMessage(queue, msg, uptimeMillis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) &#123;</span><br><span class="line">    msg.target &#x3D; this;</span><br><span class="line">    if (mAsynchronous) &#123;</span><br><span class="line">        msg.setAsynchronous(true);</span><br><span class="line">    &#125;</span><br><span class="line">    return queue.enqueueMessage(msg, uptimeMillis);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Handler 发送消息的过程仅仅是向消息队列中插入了一条消息，会根据delayMillis 来判断插入位置。然后 MessageQueue.next() 会放回这条消息给 looper，Looper 收到消息后就开始处理，最终交给 handler 处理。再看下处理代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public void dispatchMessage(Message msg) &#123;</span><br><span class="line">    if (msg.callback !&#x3D; null) &#123;</span><br><span class="line">        handleCallback(msg);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (mCallback !&#x3D; null) &#123;</span><br><span class="line">            if (mCallback.handleMessage(msg)) &#123;</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        handleMessage(msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先，检查 Message 的 callback 是否为空，不为空就通过 handleCallback 处理，message 的 callback 是个 Runnable 对象，实际上就是 post 方法所传递的 Runnable 参数。</p>
+<p>其次，检查 mCallback 是否为空，不为空就调用 mCallback 的 handleMessage 方法处理消息，Callback 是个接口，定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * Callback interface you can use when instantiating a Handler to avoid</span><br><span class="line"> * having to implement your own subclass of Handler.</span><br><span class="line"> *&#x2F;</span><br><span class="line">public interface Callback &#123;</span><br><span class="line">    &#x2F;**</span><br><span class="line">     * @param msg A &#123;@link android.os.Message Message&#125; object</span><br><span class="line">     * @return True if no further handling is desired</span><br><span class="line">     *&#x2F;</span><br><span class="line">    public boolean handleMessage(Message msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Callback 可以通过如下方式创建：<code>Handler handler = new Handler(callback)</code>。他的意义，注释已说明：可以用来创建一个 Handler 实例，但不需要派生出 Handler 子类。日常开发中，创建 Handler 常见的方式就是派生出 Handler 的子类并重写其 handleMessage 方法，而 Callback 给我们提供了另一种方式。</p>
+<p>最后，调用 Handler 的 handlerMessage 方法来处理消息。<br>Handler 还有一个构造方法，可以指定 Looper，方便切换线程。</p>
+<h5 id="主线程的消息循环"><a href="#主线程的消息循环" class="headerlink" title="主线程的消息循环"></a>主线程的消息循环</h5><p>主线程是指 ActivitThread，<strong>严格来说它不是线程</strong>，但可以把它当做主线程。</p>
+<blockquote>
+<p>ActivityThread并没有真正继承Thread类，只是往往运行在主线程，给人以线程的感觉，其实承载ActivityThread的主线程就是由Zygote fork而创建的进程。</p>
+</blockquote>
+<p>ActivitThread 入口方法为 main，在 main 中通过 <code>Looper.prepareMainLooper();</code> 创建主线程的 Looper 和 MessageQueue，并通过 Looper.loop() 开启主线程的消息循环。<br>ActivitThread 中的 Handler 为 ActivitThread.H，它内部定义了一组消息类型，主要包含了组件的启动和停止过程。</p>
+<p>ActivitThread 通过 ApplicationThread 和 AMS 进行进程间通信，AMS 以进程间通信的方式完成 ActivitThread 的请求后会回调，ApplicationThread 中的 Binder 方法，然后 ApplicationThread 会向 H 发送消息，H 收到消息会将 ApplicationThread 的逻辑切换到 ActivitThread 中执行，即切换到主线程中执行。</p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>Android 的消息机制很重要，要充分理解其工作机制，以及 Handler, MessageQueue, Message, Looper 是如何共同工作的。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>Handler</tag>
+        <tag>消息机制</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第2章</title>
+    <url>/2017/05/21/android-art-explore-2/</url>
+    <content><![CDATA[<p>IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。</p>
+<p>线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。<br>多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应用获取数据。</p>
+<a id="more"></a>
+<p>Android 中使用多进程只有一种方法，就是给四大组件在 AndroidMenifest 中指定 android:process 属性，除此之外别无他法。<code>adb shell ps</code> 命令可以查看进程信息。</p>
+<p>进程名以 <code>:</code> 开头的进程属于当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程；<br>进程名不以 <code>:</code> 开头的进程属于全局进程，其他应用通过 ShareUID 方式可以和它跑在同一个进程中。系统会为每个应用配备唯一的 UID, 具有相同 UID 的应用才能共享数据。<br>Android 中每个进程分配了独立的虚拟机，每个虚拟机分配不同的地址空间。运行在不在进程中的四大组件，他们之间想通过内存共享数据，都会共享失败。</p>
+<p>多进程会造成如下几个问题：</p>
+<ol>
+<li>静态成员和单例模式完全失效。</li>
+<li>线程同步机制完全失效。</li>
+<li>SharePreferences 的可靠性下降。</li>
+<li>Application 会多次创建。</li>
+</ol>
+<p>对于1，2是同一个问题，不管是锁对象还是锁全局类都无法保证线程同步，因为不同进程锁的不是同一个对象。</p>
+<p>SharePreferences 不支持两个进程同时进行写操作，因为SharePreferences 底层是通过读写 xml 文件实现的，并发读写都有可能出现问题。</p>
+<p>运行在不同进程中的组件属于两个不同的虚拟机和 Application。每启动一个进程就会走一遍 Application onCreate。</p>
+<h3 id="IPC-基础概念"><a href="#IPC-基础概念" class="headerlink" title="IPC 基础概念"></a>IPC 基础概念</h3><p>IPC 基本概念主要包括三方面，Serializable 接口，Parcelable 接口，以及 Binder，Serializable 和 Parcelable 可以完成对象的序列化过程，Intent 和 Binder 传输数据时就需要使用 Serializable 和 Parcelable。</p>
+<h4 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h4><p>Serializable 是 Java 中提供的序列化接口，为对象提供标准的序列化和反序列化操作。<br><code>serialVersionUID</code> 是用来辅助序列化和反序列化过程的，原则上序列化后的数据中的 <code>serialVersionUID</code> 只有和当前类的 <code>serialVersionUID</code> 相同才能够正常的被反序列化。序列化的时候，系统会把当前类的 <code>serialVersionUID</code> 写入序列化的文件中，当反序列化的时候系统去检测文件中的 <code>serialVersionUID</code> 是否和当前类的 <code>serialVersionUID</code> 相同，一致则正常反序列化，否则无法正常发序列化。一般来说需要手动指定 <code>serialVersionUID</code>。如果不指定，当前类有所改变会重新计算当前类的 hash 值并把它赋值给 <code>serialVersionUID</code>。</p>
+<ol>
+<li>静态成员变量属于类，不属于对象，所以不会参与序列化过程。</li>
+<li><code>transient</code> 标记的变量不参与序列化的过程。<h4 id="Parcelable"><a href="#Parcelable" class="headerlink" title="Parcelable"></a>Parcelable</h4>Android 提供的新的序列化方式：<code>Parcelable</code>，也是一个接口。序列化功能由 <code>writeToParcel</code> 完成。Intent，Bundle，Bitmap 都实现了此接口，可以直接序列化。</li>
+</ol>
+<p>Serializable 是 Java 接口，使用起来简单但开销很大，序列化和反序列化需要大量 I/O 操作。</p>
+<p>Parcelable 使用麻烦，效率高，推荐使用。</p>
+<p>将序列化对象存储到设备中或将对象序列化后通过网络传输，推荐使用 Serialzalble。</p>
+<h4 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h4><p>Android 开发中 Binder 主要用在 Service，AIDL 和 Messenger 中，普通的 Service 中的 Binder 不涉及进程间通信。Messenger 底层是 AIDL。Binder 的唯一标识，一般用当前的 Binder 类名表示。</p>
+<p>Binder 是 ServiceManager 连接各种 Manager (ActivityManager, WindowManager,等)和相应 ManagerService 的桥梁。</p>
+<p>系统生成的 Binder 类参数解析：</p>
+<ul>
+<li>DESCRIPTOR, Binder 的唯一表示，一般用当前 Binder 的类名表示</li>
+<li>asInterface(android.os.IBinder obj), 用于将服务端的 Binder 对象转成客户端所需的 AIDL 接口类型的对象，这种转换是分进程的，如果客户端，服务端位于同一进程，那么此方法返回的就是服务端的Stub 对象本身，否则返回系统封装后的 Stub.proxy 对象。</li>
+<li>adBinder， 返回当前 Binder 对象</li>
+<li>onTransact, 运行在服务端的 Binder 线程池中，当客户端发起请求时，远程请求会通过底层封装后交由此方法来处理。</li>
+</ul>
+<p>Binder 工作机制还需注意两点：</p>
+<ol>
+<li>当客户端发起远程请求时，当前线程会被挂起直到服务端进程返回数据，是个耗时操作。</li>
+<li>服务端 Binder 方法运行在 Binder 线程池中所以 Binder 方法不管是否耗时都应该采用同步方式去实现。</li>
+</ol>
+<p>Binder 的工作机制图：<br><img src="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png" alt="Binder工作流程.png"></p>
+<p>Binder 运行在服务端，如果服务端由于某中原因导致进程终止，会导致远程调用失败，Binder 提供了两个方法 <code>linkToDeath</code> 和 <code>unLinkToDeath</code> 可以设置 Binder 的死亡代理。</p>
+<p>通过 Binder 的方法 isBinderAlive 也可以判断 Binder 是否死亡。</p>
+<h3 id="Android-中的-IPC-方式"><a href="#Android-中的-IPC-方式" class="headerlink" title="Android 中的 IPC 方式"></a>Android 中的 IPC 方式</h3><ol>
+<li><p>Bundle<br>Bundle 实现了 Parcelable 接口，所以方便的在进程中传输。</p>
+</li>
+<li><p>使用文件共享<br>两个进程通过读写同一个文件交换数据。并发读写会有问题，尽量避免并发写的情况，考虑使用线程同步来限制多个线程的写操作。<br>SharePrefrences 也属于文件的一种，系统对他的读写有缓存策略，多进程模式下，读写不可靠。</p>
+</li>
+<li><p>使用 Messenger<br>Messenger 是一种轻量级的 IPC，底层实现是 AIDL。Messenger 以串行的方式处理客户端的消息。主要是为了传递消息。<br>工作原理图：<br><img src="https://i.loli.net/2020/05/21/WnT2w671ikfchzp.png" alt="messenger工作原理.png"></p>
+</li>
+<li><p>使用 AIDL<br>使用 AIDL 进行进程间通信分为服务端和客户端两方面，大致流程：服务端首先创建 Service 用来监听客户端请求，然后创建AIDL文件将暴露给客户端的接口在这个 AIDL 中声明，随后在 Service 中实现这个 AIDL 接口。客户端绑定服务端的 Service，绑定成功后，将服务端返回的 Binder 对象转成 AIDL 接口所属的类型，接着调用 AIDL 方法。</p>
+</li>
+<li><p>使用 ContentProvider<br>Android 中专门为不同应用间进行数据共享的方式，底层实现是 Binder。ContentProvider 对底层数据存储没有要求。</p>
+</li>
+</ol>
+<p>首先需要注册 Provider，其中 <code>android:authorities</code> 是 Provider 的唯一标识，通过这个就可以访问 Provider。</p>
+<p>Provider 的 onCreate 运行在主线程，其他方法运行在 Binder 线程池中。query，update，insert，delete是存在多线程并发，因此方法内部做好线程同步。</p>
+<ol start="6">
+<li>使用 Socket</li>
+</ol>
+<p>Socket 是网络通信的概念。</p>
+<ul>
+<li>TCP 面向连接协议，提供稳定的双向通信功能。</li>
+<li>UDP 无连接协议，提供不稳定的单向通信功能，也可以提供双向通信，有更好的效率，缺点是不能保证正确传输。</li>
+</ul>
+<h4 id="Binder-连接池"><a href="#Binder-连接池" class="headerlink" title="Binder 连接池"></a>Binder 连接池</h4><p>使用 AIDL 大致流程：首先创建一个 Service 和 AIDL 接口，接着创建一个继承自 AIDL 接口中的 Stub 类并实现 Stub 中的抽象方法，在 Service 的 onBinder 方法中返回这个类的对象，然后再客户端就可以绑定服务端的 Service，建立连接后就可以远程访问服务端的方法了。</p>
+<p>当项目规模很大的时候，创建很多个 Service 是不对的做法，因Service 是系统资源，太多的 Service 会使得应用看起来很重，所以最好是将所有的 AIDL 放在同一个 Service中去管理。</p>
+<p>Binder 连接池的作用是将每个业务模块的 Binder 请求统一转发的远程 Service 中去执行，避免了重复创建 Service 的过程。</p>
+<p>BinderPool 极大的提高 AIDL 的开发效率，避免大量创建 Service，建议在 AIDL 中引入 BinderPool。</p>
+<h4 id="选择合适的-IPC-方式"><a href="#选择合适的-IPC-方式" class="headerlink" title="选择合适的 IPC 方式"></a>选择合适的 IPC 方式</h4><table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+<th align="center">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Bundle</td>
+<td align="center">简单易用</td>
+<td align="center">只能传输 Bundle 支持的数据类型</td>
+<td align="center">自大组件间的进程通信</td>
+</tr>
+<tr>
+<td align="center">文件共享</td>
+<td align="center">简单易用</td>
+<td align="center">不适合高并发场景，无法做到进程间及时通信</td>
+<td align="center">无并发访问情形，交换简单的数据实时性不高的场景</td>
+</tr>
+<tr>
+<td align="center">AIDL</td>
+<td align="center">功能强大，支持一对多并发通信，支持实时通信</td>
+<td align="center">使用稍复杂，需要处理好线程同步</td>
+<td align="center">一对多通信有RPC需求</td>
+</tr>
+<tr>
+<td align="center">Messenger</td>
+<td align="center">功能一般，支持一对多串行通信，支持实时通信</td>
+<td align="center">不能很好的处理高并发情形，不支持 RPC，数据通过message传输，只能传输 Bundle 支持的数据类型</td>
+<td align="center">低并发的一对多即时通信，无RPC需求，或者无需发挥结果的RPC 需求</td>
+</tr>
+<tr>
+<td align="center">ContentProvider</td>
+<td align="center">在数据源访问方面功能强大，支持一对多并发数据共享，可以通过 Call 方法扩展</td>
+<td align="center">可以理解为受约束的 AIDL，主要提供数据源的 CRUD</td>
+<td align="center">一对多的进程间数据共享</td>
+</tr>
+<tr>
+<td align="center">Socket</td>
+<td align="center">功能强大，可以通过网络传输字节流，支持一对多并发实时通信</td>
+<td align="center">实现细节稍微繁琐，不支持直接 RPC</td>
+<td align="center">网络数据交换</td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>Binder</tag>
+        <tag>IPC</tag>
+        <tag>进程通信</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义 ViewGroup 实现流式布局</title>
+    <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
+    <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
+<a id="more"></a>
+
+<p>但是我们今天说的并不是它，而是怎么自定义一个流式布局，通过这个自定义布局来复习和实战一下《Android 开发艺术探索》一书中的第四章的内容。另外说明下，本文代码使用 Kotlin 编写。 </p>
+<p>首先分析下流式布局的特点：</p>
+<ul>
+<li>自动从左向右排列</li>
+<li>剩余空间不能显示则自动换行</li>
+</ul>
+<p>既然我们把它定位为布局，那么肯定是要自定义 ViewGroup，这里选择了直接继承 ViewGroup 来实现。我们看源码会知道 ViewGroup 是个抽象类，他的子类必须实现 <code>onLayout()</code> 方法来处理布局，当然还得自己处理测量，同时还要处理子元素的测量和布局。</p>
+<h4 id="测量尺寸"><a href="#测量尺寸" class="headerlink" title="测量尺寸"></a>测量尺寸</h4><p>自定义 View 需要测量，布局，绘制三个流程。我个人感觉最复杂是测量这一过程。想理解测量就必须先理解 <code>MeasureSpec</code>，关于 <code>MeasureSpec</code> 这里需要说一下。</p>
+<h5 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h5><p>MeasureSpec 直译就是测量规格，它参与了 View 的绘制过程。<br>MeasureSpecc 代表了一个 32 位的 int 值，高 2 位代表 SpecMode，低 30 位代表 SpecSize，SpecMode 是指测量模式，SpecSize 是指在某种测量模式下的规格大小。<br>测量模式主要有三种，每种的含义如下：</p>
+<ul>
+<li>UNSOECIFIED<br>  父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部测量</li>
+<li>EXACTLY<br>  父容器已经检测出 View 所需的精确大小，这时候 View 的最终大小就是 SpecSize 的值，它对应与 LayoutParams 中的 match_parent 和具体的数值两种模式。</li>
+<li>AT_MOST<br>  父容器指定了一个可用大小 SpecSize，View 的大小不能超过这个值，具体是什么值要看不同 View 的具体实现，它对应与 LayoutParams 中的 wrap_content。</li>
+</ul>
+<p>因此，我们知道 MeasureSpec 就能知道 SpecMode 和 SpecSize 了，然后我们可以根据这两个值去处理 View 的大小。</p>
+<p>自定义 View 只要考虑 <code>MeasureSpec.EXACTLY</code> 和 <code>MeasureSpec.AT_MOST</code> 即可。</p>
+<p>好了，了解了 MeasureSpec，我们继续说测量的事，分析下流失布局的特点，我们先看一下 FlexboxLayout 在 <code>app:flexWrap=&quot;wrap&quot;</code>模式下的显示情况，然后我们来实现这种效果，（布局中每个View 的 margin=5dp）<br><img src="https://i.loli.net/2020/05/21/XS9wnOhobfeWAId.png" alt=""></p>
+<p>根据上图分析下测量的实现思路：</p>
+<ol>
+<li>首先测量就是测 View 尺寸，需要确定 View 的宽高。</li>
+<li>根据布局的特点，测量最小的宽高尺寸，并且这个数值不能大于 parent 给出的建议 size。</li>
+<li>对于宽度，子 View 有多行，每行长度不一致，最长的那一行就是 View 的宽度。</li>
+<li>对于高度，子 View 的高度不一致，每一行的最大高度的和就是 View 的高度。</li>
+<li>要考虑Layout自身的 pading 和子 view 的 margin。</li>
+</ol>
+<p>相关代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;</span><br><span class="line">        Log.d(TAG, &quot;onMeasure&quot;)</span><br><span class="line"></span><br><span class="line">        val widthSpecMode &#x3D; MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">        val widthSpecSize &#x3D; MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">        val heightSpecMode &#x3D; MeasureSpec.getMode(heightMeasureSpec)</span><br><span class="line">        val heightSpecSize &#x3D; MeasureSpec.getSize(heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 测量子 View 尺寸</span><br><span class="line">        measureChildren(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        var lineWidth &#x3D; 0</span><br><span class="line">        var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">        var maxWidthSize &#x3D; 0</span><br><span class="line">        var height &#x3D; 0</span><br><span class="line"></span><br><span class="line">        for (i in 0 until childCount) &#123;</span><br><span class="line">            val child &#x3D; getChildAt(i)</span><br><span class="line">            if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">                &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">                if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                    maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                    height +&#x3D; lineHeight</span><br><span class="line">                &#125;</span><br><span class="line">                continue</span><br><span class="line">            &#125;</span><br><span class="line">            val childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line">            &#x2F;&#x2F; 子 View 的宽高包含他们的 margin</span><br><span class="line">            val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">            val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">            if (lineWidth + childWidth &gt; widthSpecSize - paddingLeft - paddingRight) &#123; &#x2F;&#x2F; 换行</span><br><span class="line">                &#x2F;&#x2F; 记录最大宽度</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                &#x2F;&#x2F; 重置 lineWidth</span><br><span class="line">                lineWidth &#x3D; childWidth</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">                lineHeight &#x3D; childHeight</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lineWidth +&#x3D; childWidth</span><br><span class="line">                lineHeight &#x3D; max(childHeight, lineHeight)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">            if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultWidth &#x3D; if (widthSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            widthSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(maxWidthSize + paddingLeft + paddingRight, widthSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultHeight &#x3D; if (heightSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            heightSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(height + paddingTop + paddingBottom, heightSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setMeasuredDimension(resultWidth, resultHeight)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>还是看上图，布局比较简单，就是从左向右排列，如果子 View 的显示超出了 Layout 的最大宽度就换行。所以思路就是依次遍历所有的子 View，然后从左向右依次排列，确定子 View 的位置，每次对子 View 进行 layout 之前，要预算它的显示范围，如果超出了 parent 的宽度，那么它就需要换行。</p>
+<p>定位 View 主要是确定 View 的四个顶点的位置。再简化一下，只需要知道左上角顶点的位置加上 View 的宽高就能定位一个 View，而左上角顶点就是 left, top。对于同一行，left 依次向右移动，如果定位的 View 的长度超出了 ViewGroup 最大宽大度就换行，然后更新 left，top，每换一行 top 向下移动。</p>
+<p>相关代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) &#123;</span><br><span class="line">    Log.d(TAG, &quot;onLayout&quot;)</span><br><span class="line"></span><br><span class="line">    var childLeft &#x3D; paddingLeft</span><br><span class="line">    var childTop &#x3D; paddingTop</span><br><span class="line">    var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">    var childParams: MarginLayoutParams</span><br><span class="line"></span><br><span class="line">    val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">    for (i in 0 until childCount) &#123;</span><br><span class="line">        val child &#x3D; get(i)</span><br><span class="line">        if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line"></span><br><span class="line">        val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">        val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">        if (childLeft + childWidth &gt; width - paddingRight) &#123;</span><br><span class="line">            &#x2F;&#x2F; 换行, 更新 childLeft，childTop，lineHeight</span><br><span class="line">            childLeft &#x3D; paddingLeft</span><br><span class="line">            childTop +&#x3D; lineHeight</span><br><span class="line">            lineHeight &#x3D; childHeight</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            lineHeight &#x3D; max(lineHeight, childHeight)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setChildFrame(child, childLeft + childParams.leftMargin, childTop + childParams.topMargin, child.measuredWidth, child.measuredHeight)</span><br><span class="line">        childLeft +&#x3D; childWidth</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到了这里我们的流式布局基本就完成了，但是还有个问题，测量的时候最大宽度是给定的 parentSize，那如果单个 View 的宽度为一个很大的值，超过了这个 parentSize，我们再布局的时候该怎么处理呢？</p>
+<p>看了一下 LinearLayout 的情况，是直接将按 View 的宽高来布局的，就是 View 会延伸到屏幕外面，然后看一下 RelativeLayout 则是限制了最大宽度，如果超过 parentSize 则最大为 parentSize</p>
+<p>具体情况看下图：<br><img src="https://i.loli.net/2020/05/22/1yG8UYd3zwMp2H4.png" alt="linearlayout-RelativeLayout.png"></p>
+<p>又看了下 FlexboxLayout 也是和 RelativeLayout 一样， 所以怎么处理看自己情况吧。这边给出我自己的处理情况：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private fun setChildFrame(child: View, left: Int, top: Int, width: Int, height: Int) &#123;</span><br><span class="line">        &#x2F;&#x2F; 可有可无，仿照 FlexboxLayout 做了此操作</span><br><span class="line">        val right &#x3D; if (left + width &gt; getWidth()) &#123;</span><br><span class="line">            getWidth() - (child.layoutParams as MarginLayoutParams).rightMargin</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            left + width</span><br><span class="line">        &#125;</span><br><span class="line">        Log.d(TAG, &quot;left&#x3D;$left,right&#x3D;$right,top&#x3D;$top,bottom&#x3D;$&#123;top + height&#125;&quot;)</span><br><span class="line">        child.layout(left, top, right, top + height)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>View 绘制相关的方法是 <code>onDraw()</code>, 这个需求中并不需要特殊的绘制，所以可以不用管它。</p>
+<p>到这里基本上都处理完了，下面看一下效果图，上面是 tag 标签，下面纯 View 组合：<br><img src="https://i.loli.net/2020/05/22/AJFehr81dDRx5K2.png" alt="hflowlayout-sceenshot.png"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>自定义 ViewGroup 的基础是清楚 View 的工作原理以及工作流程。其中工作流程主要是指 measure，layout，draw 三大流程，即测量，布局，绘制，其中 measure 确定 View 的测量宽高，layout 确定 View 的最终宽高和四个顶点的位置，而 draw 则将 View 绘制到屏幕上。只有做到对于每个流程都能了然于心才能在自定义 View 时游刃有余。当有了这些基础之后，实现一个自定义 View 主要放在了功能实现上。另外一个体会就是编码之前重要的是要学会分析需求，考虑到各个方面，这个情况个人觉得跟算法比较像，多做算法题有利于提高自己的逻辑思维能力和分析问题解决问题的能力。又给自己找到一个学习算法的的理由，哈哈哈哈哈哈，加油吧，骚年。。。</p>
+<h5 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h5><p>重新整理了代码，放在了github：<br><a href="https://github.com/huazidev/HFlowLayout" target="_blank" rel="noopener">https://github.com/huazidev/HFlowLayout</a></p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>自定义ViewGroup</tag>
+        <tag>流式布局</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第11章-线程和线程池</title>
+    <url>/2018/05/25/android-art-explore-11/</url>
+    <content><![CDATA[<p>AsyncTask 封装了线程池和 handler，主要hi为了方便开发者在子线程中更新UI。<br>HandlerThread 是一种具有消息循环的线程，他的内部可以使用 Handler。<br>IntentService 是一个服务，系统对其进行了封装，以便执行后台任务，IntentService 内部采用 HanderThread 来执行任务，当任务完成后会自动退出 IntentService，他是一种服务，不容易被系统杀死从而尽量保证任务的执行。</p>
+<a id="more"></a>
+
+<p>在操作系统中，线程是操作系统调度的最小单元，同时线程也是一种受限的系统资源，即线程不能无限的产生，线程的创建都有相应的开销，线程不能做到绝对的并行，除非线程数量小于等于 CPU 核心数。正确的做法是采用线程池，一个线程池会缓存一定数量的线程，通过线程池可以避免因为频繁的创建线程带来的系统开销。Android 的线程来源于 Java，主要是通过 Executor 来派生特定类型的线程池。</p>
+<h5 id="AysncTask"><a href="#AysncTask" class="headerlink" title="AysncTask"></a>AysncTask</h5><p>AysncTask 是一种轻量级的异步任务，他可以在线程池中执行后台任务，然后把执行进度和最终结果传递给主线程。<br>AysncTask 封装了 Thread 和 Handler。AysncTask 并不适合进行特别耗时的任务，对于特别耗时的任务来说建议使用线程池。</p>
+<p>AysncTask 使用过程中的一些限制：</p>
+<ol>
+<li>一个 AysncTask 对象只能调用一次 execute 方法，否则会报运行异常。</li>
+<li>AysncTask 默认采用一个串行执行任务，我们可以通过 <code>executeOnExecutor</code> 方法来并行执行任务。</li>
+</ol>
+<p>通过查看源码后发现：<br>26 版本之后已经可以在子线程中创建 AysncTask，因为默认构造函数使用的是通过 MainLooper 创建的handler。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> public AsyncTask() &#123;</span><br><span class="line">     this((Looper) null);</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> public AsyncTask(@Nullable Looper callbackLooper) &#123;</span><br><span class="line">        mHandler &#x3D; callbackLooper &#x3D;&#x3D; null || callbackLooper &#x3D;&#x3D; Looper.getMainLooper()</span><br><span class="line">            ? getMainHandler()</span><br><span class="line">            : new Handler(callbackLooper);</span><br><span class="line">&#x2F;&#x2F; 省略其他代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AsyncTask 中有两个线程池，SerialExecutor 和 THREAD_POOL_EXECUTOR ，其中线程池 SerialExecutor 用于任务排队，而线程池 THREAD_POOL_EXECUTOR 用于真正的执行。还有一个 InternalHandler 用于将执行环境从线程池切换到主线程。</p>
+<p>看一下 SerialExecutor 的实现：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private static class SerialExecutor implements Executor &#123;</span><br><span class="line">        final ArrayDeque&lt;Runnable&gt; mTasks &#x3D; new ArrayDeque&lt;Runnable&gt;();</span><br><span class="line">        Runnable mActive;</span><br><span class="line"></span><br><span class="line">        public synchronized void execute(final Runnable r) &#123;</span><br><span class="line">            mTasks.offer(new Runnable() &#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        r.run();</span><br><span class="line">                    &#125; finally &#123;</span><br><span class="line">                        scheduleNext();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            if (mActive &#x3D;&#x3D; null) &#123;</span><br><span class="line">                scheduleNext();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        protected synchronized void scheduleNext() &#123;</span><br><span class="line">            if ((mActive &#x3D; mTasks.poll()) !&#x3D; null) &#123;</span><br><span class="line">                THREAD_POOL_EXECUTOR.execute(mActive);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面代码可以分析 AsyncTask 的排队过程。首先系统会把 AsyncTask 的 params 参数封装成 FutureTask 对象，FutureTask 是个并发类，在这里他充当了 Runnable 的作用。接着这个 FutureTask 会交给 SerialExecutor 的 execut 方法去处理， SerialExecutor 的 execut 方法首先会把 FutureTask 对象插入到任务队列 mTasks 中，如果这个时候没有正在活动的 AsyncTask 任务，那么就会调用 SerialExecutor 的 scheduleNext 方法来执行下一个任务，同时 AsyncTask 执行完任务后，AsyncTask 会继续执行其他任务直到所有的任务都被执行完毕为止。</p>
+<h5 id="HandlerThread"><a href="#HandlerThread" class="headerlink" title="HandlerThread"></a>HandlerThread</h5><p>HandlerThread 继承自 Thread ,它是一种可以使用 handler 的 Thread 就是 在run 方法中通过 Looper.prepare 来创建消息队列，并通过 Looper.loop() 来开启消息循环。</p>
+<p>普通 Thread 主要用于在 run 方法中执行一个耗时任务，而 HandlerThread 内部创建了消息队列，外界需要通过 Handler 的消息方式来通知 HandlerThread 执行具体任务。HandlerThread 的具体使用场景是 IntentService 。<br>由于 HandlerThread 的 run 是一个无线循环，因此当明确不需要 HandlerThread 时可以通过 quit 或 quitSafely 来终止线程的执行。</p>
+<h5 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h5><p>IntentService 是一种特殊的 Service，它继承自 Service 并且是个抽象类，必须创建自己的子类才能使用。IntentService 可用于执行后台的耗时任务，当任务执行后自动停止，由于是服务，所以优先级比单纯的线程高，所以 IntentService 适合高优先级的后台任务。IntentService 封装了 HandlerThread 和 Handler .</p>
+<p>onHandleIntent 可以对不同的任务做处理，当onHandleIntent 执行结束后 IntentService 会通过 stopSelf 尝试停止服务。</p>
+<h5 id="Android-中的线程池"><a href="#Android-中的线程池" class="headerlink" title="Android 中的线程池"></a>Android 中的线程池</h5><p>线程池的优点：</p>
+<ol>
+<li>重用线程池中的线程，避免因为线程的创建和销毁带来的性能开销。</li>
+<li>有效控制线程池的最大并发数，避免大量的线程间因互相抢占资源而导致的阻塞的现象。</li>
+<li>能够对线程进行简单的管理，并提供定时执行以及间隔循环执行等功能。</li>
+</ol>
+<p>ThreadPoolExecutor 是线程池的真正实现，他的构造方法提供了一系列参数来配置线程池，个参数的意义如下：</p>
+<ul>
+<li><p>corePoolSize<br>线程池的核心线程数，默认情况下，核心线程会在线程池中一直存活，即使他们处于闲置状态。如果将 ThreadPoolExecutor 的 allowCoreThreadTimeOut 设为 true，那么闲置的核心线程在等待新任务到来时会有超时策略，这个时间间隔由 keepAliveTime 所指定，等待时间超过 keepAliveTime 时间，核心线程就会被终止。</p>
+</li>
+<li><p>maximumPoolSize<br>线程池所能容纳的最大线程数，当活动线程数达到这个数值后，后续的新任务会被阻塞。</p>
+</li>
+<li><p>keepAliveTime<br>非核心线程闲置的超时时长，超过这个时长非核心线程会被回收，当 ThreadPoolExecutor 的 allowCoreThreadTimeOut 为 true 时，keepAliveTime 同样作用于核心线程。</p>
+</li>
+<li><p>unit<br>用于指定 keepAliveTime 参数的时间单位，是个枚举</p>
+</li>
+<li><p>workQueue<br>线程池中的任务队列，通过线程池的 execute 方法提交 Runnable 对象会存储在这个参数中。</p>
+</li>
+<li><p>threadFactory<br>线程工厂，为线程池提供创建新线程的功能，ThreadFactory 是个接口，它只有一个方法：new Thread(Runnable r)</p>
+</li>
+</ul>
+<p>ThreadPoolExecutor 执行任务时大致遵循如下原则：</p>
+<ol>
+<li>如果线程池中的线程数量未达到核心线程数的数量，那么会启动一个核心线程来执行任务。</li>
+<li>如果线程池的线程数量已经达到或者超过核心线程的数量，那么任务会被插入到任务队列中排队等待执行。</li>
+<li>如果在步骤2中，无法插入到任务队列中，往往是由于任务队列已满，这个时候如果线程数量未达到线程池规定的最大值，那么立即启动一个非核心线程来执行任务。</li>
+<li>如果步骤3 中的线程数量已经达到线程池规定的最大值，那么就拒绝此任务，ThreadPoolExecutor 会调用 RejectedExecutionHandler 的 rejectExcecution 来通知调用者。</li>
+</ol>
+<h5 id="线程池的分类"><a href="#线程池的分类" class="headerlink" title="线程池的分类"></a>线程池的分类</h5><ol>
+<li><p>FixedThreadPool<br>通过 Executors 的 newFixedThreadPool 方法来创建，它是一种线程数量固定的线程池，只有核心线程，并且核心线程不会被回收，可以快速响应外界的确请求。</p>
+</li>
+<li><p>CachedThreadPool<br>通过 Executors 的 newCachedThreadPool 方法来创建，是一种线程数量不定的线程池，只有非核心线程，线程最大数为 Integer.MAX_VALUE ，超过60 秒闲置线程会被回收，适合执行大量耗时较少的任务。</p>
+</li>
+<li><p>ScheduledThreadPool<br>通过 Executors 的 newScheduledThreadPool 方法来创建，它的核心线程数量是固定的，，非核心线程没有限制，当非核心线程闲置会被立即回收，只要适用于，执行定时任务和具有周期的重复任务。</p>
+</li>
+<li><p>SingleThreadExecutor<br>通过 Executors 的 newSingleThreadExecutor 方法来创建，线程池中只有一个核心线程，确保所有的任务都在同一个线程中按顺序执行，意义也在于此，使得任务之间不需要处理线程同步的问题。</p>
+</li>
+</ol>
+<p>出了上面的四种还可以根据需要灵活配置线程池。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>线程</tag>
+        <tag>线程池</tag>
       </tags>
   </entry>
   <entry>
@@ -492,242 +886,6 @@
       <tags>
         <tag>Android</tag>
         <tag>RecyclerView</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《Android开发艺术探索》笔记-第1章</title>
-    <url>/2017/05/15/android-art-search-1/</url>
-    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
-<ul>
-<li>onCreate: 表示 Activity 正在被创建</li>
-<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
-<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
-<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
-<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
-<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
-<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
-</ul>
-<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
-<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
-<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
-<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
-<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
-<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
-<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
-<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
-<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
-<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
-<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
-<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
-</ul>
-<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
-<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
-<p>问题：分享到第三方应用，使用什么启动方式？</p>
-<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
-<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
-<p>IntentFliter 过滤信息有 action, category, data</p>
-<ul>
-<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
-<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
-<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Android</category>
-        <category>笔记</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>启动模式</tag>
-        <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《Android开发艺术探索》笔记-第2章</title>
-    <url>/2017/05/21/android-art-search-2/</url>
-    <content><![CDATA[<p>IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。</p>
-<p>线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。<br>多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应用获取数据。</p>
-<a id="more"></a>
-<p>Android 中使用多进程只有一种方法，就是给四大组件在 AndroidMenifest 中指定 android:process 属性，除此之外别无他法。<code>adb shell ps</code> 命令可以查看进程信息。</p>
-<p>进程名以 <code>:</code> 开头的进程属于当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程；<br>进程名不以 <code>:</code> 开头的进程属于全局进程，其他应用通过 ShareUID 方式可以和它跑在同一个进程中。系统会为每个应用配备唯一的 UID, 具有相同 UID 的应用才能共享数据。<br>Android 中每个进程分配了独立的虚拟机，每个虚拟机分配不同的地址空间。运行在不在进程中的四大组件，他们之间想通过内存共享数据，都会共享失败。</p>
-<p>多进程会造成如下几个问题：</p>
-<ol>
-<li>静态成员和单例模式完全失效。</li>
-<li>线程同步机制完全失效。</li>
-<li>SharePreferences 的可靠性下降。</li>
-<li>Application 会多次创建。</li>
-</ol>
-<p>对于1，2是同一个问题，不管是锁对象还是锁全局类都无法保证线程同步，因为不同进程锁的不是同一个对象。</p>
-<p>SharePreferences 不支持两个进程同时进行写操作，因为SharePreferences 底层是通过读写 xml 文件实现的，并发读写都有可能出现问题。</p>
-<p>运行在不同进程中的组件属于两个不同的虚拟机和 Application。每启动一个进程就会走一遍 Application onCreate。</p>
-<h3 id="IPC-基础概念"><a href="#IPC-基础概念" class="headerlink" title="IPC 基础概念"></a>IPC 基础概念</h3><p>IPC 基本概念主要包括三方面，Serializable 接口，Parcelable 接口，以及 Binder，Serializable 和 Parcelable 可以完成对象的序列化过程，Intent 和 Binder 传输数据时就需要使用 Serializable 和 Parcelable。</p>
-<h4 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h4><p>Serializable 是 Java 中提供的序列化接口，为对象提供标准的序列化和反序列化操作。<br><code>serialVersionUID</code> 是用来辅助序列化和反序列化过程的，原则上序列化后的数据中的 <code>serialVersionUID</code> 只有和当前类的 <code>serialVersionUID</code> 相同才能够正常的被反序列化。序列化的时候，系统会把当前类的 <code>serialVersionUID</code> 写入序列化的文件中，当反序列化的时候系统去检测文件中的 <code>serialVersionUID</code> 是否和当前类的 <code>serialVersionUID</code> 相同，一致则正常反序列化，否则无法正常发序列化。一般来说需要手动指定 <code>serialVersionUID</code>。如果不指定，当前类有所改变会重新计算当前类的 hash 值并把它赋值给 <code>serialVersionUID</code>。</p>
-<ol>
-<li>静态成员变量属于类，不属于对象，所以不会参与序列化过程。</li>
-<li><code>transient</code> 标记的变量不参与序列化的过程。<h4 id="Parcelable"><a href="#Parcelable" class="headerlink" title="Parcelable"></a>Parcelable</h4>Android 提供的新的序列化方式：<code>Parcelable</code>，也是一个接口。序列化功能由 <code>writeToParcel</code> 完成。Intent，Bundle，Bitmap 都实现了此接口，可以直接序列化。</li>
-</ol>
-<p>Serializable 是 Java 接口，使用起来简单但开销很大，序列化和反序列化需要大量 I/O 操作。</p>
-<p>Parcelable 使用麻烦，效率高，推荐使用。</p>
-<p>将序列化对象存储到设备中或将对象序列化后通过网络传输，推荐使用 Serialzalble。</p>
-<h4 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h4><p>Android 开发中 Binder 主要用在 Service，AIDL 和 Messenger 中，普通的 Service 中的 Binder 不涉及进程间通信。Messenger 底层是 AIDL。Binder 的唯一标识，一般用当前的 Binder 类名表示。</p>
-<p>Binder 是 ServiceManager 连接各种 Manager (ActivityManager, WindowManager,等)和相应 ManagerService 的桥梁。</p>
-<p>系统生成的 Binder 类参数解析：</p>
-<ul>
-<li>DESCRIPTOR, Binder 的唯一表示，一般用当前 Binder 的类名表示</li>
-<li>asInterface(android.os.IBinder obj), 用于将服务端的 Binder 对象转成客户端所需的 AIDL 接口类型的对象，这种转换是分进程的，如果客户端，服务端位于同一进程，那么此方法返回的就是服务端的Stub 对象本身，否则返回系统封装后的 Stub.proxy 对象。</li>
-<li>adBinder， 返回当前 Binder 对象</li>
-<li>onTransact, 运行在服务端的 Binder 线程池中，当客户端发起请求时，远程请求会通过底层封装后交由此方法来处理。</li>
-</ul>
-<p>Binder 工作机制还需注意两点：</p>
-<ol>
-<li>当客户端发起远程请求时，当前线程会被挂起直到服务端进程返回数据，是个耗时操作。</li>
-<li>服务端 Binder 方法运行在 Binder 线程池中所以 Binder 方法不管是否耗时都应该采用同步方式去实现。</li>
-</ol>
-<p>Binder 的工作机制图：<br><img src="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png" alt="Binder工作流程.png"></p>
-<p>Binder 运行在服务端，如果服务端由于某中原因导致进程终止，会导致远程调用失败，Binder 提供了两个方法 <code>linkToDeath</code> 和 <code>unLinkToDeath</code> 可以设置 Binder 的死亡代理。</p>
-<p>通过 Binder 的方法 isBinderAlive 也可以判断 Binder 是否死亡。</p>
-<h3 id="Android-中的-IPC-方式"><a href="#Android-中的-IPC-方式" class="headerlink" title="Android 中的 IPC 方式"></a>Android 中的 IPC 方式</h3><ol>
-<li><p>Bundle<br>Bundle 实现了 Parcelable 接口，所以方便的在进程中传输。</p>
-</li>
-<li><p>使用文件共享<br>两个进程通过读写同一个文件交换数据。并发读写会有问题，尽量避免并发写的情况，考虑使用线程同步来限制多个线程的写操作。<br>SharePrefrences 也属于文件的一种，系统对他的读写有缓存策略，多进程模式下，读写不可靠。</p>
-</li>
-<li><p>使用 Messenger<br>Messenger 是一种轻量级的 IPC，底层实现是 AIDL。Messenger 以串行的方式处理客户端的消息。主要是为了传递消息。<br>工作原理图：<br><img src="https://i.loli.net/2020/05/21/WnT2w671ikfchzp.png" alt="messenger工作原理.png"></p>
-</li>
-<li><p>使用 AIDL<br>使用 AIDL 进行进程间通信分为服务端和客户端两方面，大致流程：服务端首先创建 Service 用来监听客户端请求，然后创建AIDL文件将暴露给客户端的接口在这个 AIDL 中声明，随后在 Service 中实现这个 AIDL 接口。客户端绑定服务端的 Service，绑定成功后，将服务端返回的 Binder 对象转成 AIDL 接口所属的类型，接着调用 AIDL 方法。</p>
-</li>
-<li><p>使用 ContentProvider<br>Android 中专门为不同应用间进行数据共享的方式，底层实现是 Binder。ContentProvider 对底层数据存储没有要求。</p>
-</li>
-</ol>
-<p>首先需要注册 Provider，其中 <code>android:authorities</code> 是 Provider 的唯一标识，通过这个就可以访问 Provider。</p>
-<p>Provider 的 onCreate 运行在主线程，其他方法运行在 Binder 线程池中。query，update，insert，delete是存在多线程并发，因此方法内部做好线程同步。</p>
-<ol start="6">
-<li>使用 Socket</li>
-</ol>
-<p>Socket 是网络通信的概念。</p>
-<ul>
-<li>TCP 面向连接协议，提供稳定的双向通信功能。</li>
-<li>UDP 无连接协议，提供不稳定的单向通信功能，也可以提供双向通信，有更好的效率，缺点是不能保证正确传输。</li>
-</ul>
-<h4 id="Binder-连接池"><a href="#Binder-连接池" class="headerlink" title="Binder 连接池"></a>Binder 连接池</h4><p>使用 AIDL 大致流程：首先创建一个 Service 和 AIDL 接口，接着创建一个继承自 AIDL 接口中的 Stub 类并实现 Stub 中的抽象方法，在 Service 的 onBinder 方法中返回这个类的对象，然后再客户端就可以绑定服务端的 Service，建立连接后就可以远程访问服务端的方法了。</p>
-<p>当项目规模很大的时候，创建很多个 Service 是不对的做法，因Service 是系统资源，太多的 Service 会使得应用看起来很重，所以最好是将所有的 AIDL 放在同一个 Service中去管理。</p>
-<p>Binder 连接池的作用是将每个业务模块的 Binder 请求统一转发的远程 Service 中去执行，避免了重复创建 Service 的过程。</p>
-<p>BinderPool 极大的提高 AIDL 的开发效率，避免大量创建 Service，建议在 AIDL 中引入 BinderPool。</p>
-<h4 id="选择合适的-IPC-方式"><a href="#选择合适的-IPC-方式" class="headerlink" title="选择合适的 IPC 方式"></a>选择合适的 IPC 方式</h4><table>
-<thead>
-<tr>
-<th align="center">名称</th>
-<th align="center">优点</th>
-<th align="center">缺点</th>
-<th align="center">适用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">Bundle</td>
-<td align="center">简单易用</td>
-<td align="center">只能传输 Bundle 支持的数据类型</td>
-<td align="center">自大组件间的进程通信</td>
-</tr>
-<tr>
-<td align="center">文件共享</td>
-<td align="center">简单易用</td>
-<td align="center">不适合高并发场景，无法做到进程间及时通信</td>
-<td align="center">无并发访问情形，交换简单的数据实时性不高的场景</td>
-</tr>
-<tr>
-<td align="center">AIDL</td>
-<td align="center">功能强大，支持一对多并发通信，支持实时通信</td>
-<td align="center">使用稍复杂，需要处理好线程同步</td>
-<td align="center">一对多通信有RPC需求</td>
-</tr>
-<tr>
-<td align="center">Messenger</td>
-<td align="center">功能一般，支持一对多串行通信，支持实时通信</td>
-<td align="center">不能很好的处理高并发情形，不支持 RPC，数据通过message传输，只能传输 Bundle 支持的数据类型</td>
-<td align="center">低并发的一对多即时通信，无RPC需求，或者无需发挥结果的RPC 需求</td>
-</tr>
-<tr>
-<td align="center">ContentProvider</td>
-<td align="center">在数据源访问方面功能强大，支持一对多并发数据共享，可以通过 Call 方法扩展</td>
-<td align="center">可以理解为受约束的 AIDL，主要提供数据源的 CRUD</td>
-<td align="center">一对多的进程间数据共享</td>
-</tr>
-<tr>
-<td align="center">Socket</td>
-<td align="center">功能强大，可以通过网络传输字节流，支持一对多并发实时通信</td>
-<td align="center">实现细节稍微繁琐，不支持直接 RPC</td>
-<td align="center">网络数据交换</td>
-</tr>
-</tbody></table>
-]]></content>
-      <categories>
-        <category>Android</category>
-        <category>笔记</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>笔记</tag>
-        <tag>Binder</tag>
-        <tag>IPC</tag>
-        <tag>进程通信</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自定义 ViewGroup 实现流式布局</title>
-    <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
-    <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
-<a id="more"></a>
-
-<p>但是我们今天说的并不是它，而是怎么自定义一个流式布局，通过这个自定义布局来复习和实战一下《Android 开发艺术探索》一书中的第四章的内容。另外说明下，本文代码使用 Kotlin 编写。 </p>
-<p>首先分析下流式布局的特点：</p>
-<ul>
-<li>自动从左向右排列</li>
-<li>剩余空间不能显示则自动换行</li>
-</ul>
-<p>既然我们把它定位为布局，那么肯定是要自定义 ViewGroup，这里选择了直接继承 ViewGroup 来实现。我们看源码会知道 ViewGroup 是个抽象类，他的子类必须实现 <code>onLayout()</code> 方法来处理布局，当然还得自己处理测量，同时还要处理子元素的测量和布局。</p>
-<h4 id="测量尺寸"><a href="#测量尺寸" class="headerlink" title="测量尺寸"></a>测量尺寸</h4><p>自定义 View 需要测量，布局，绘制三个流程。我个人感觉最复杂是测量这一过程。想理解测量就必须先理解 <code>MeasureSpec</code>，关于 <code>MeasureSpec</code> 这里需要说一下。</p>
-<h5 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h5><p>MeasureSpec 直译就是测量规格，它参与了 View 的绘制过程。<br>MeasureSpecc 代表了一个 32 位的 int 值，高 2 位代表 SpecMode，低 30 位代表 SpecSize，SpecMode 是指测量模式，SpecSize 是指在某种测量模式下的规格大小。<br>测量模式主要有三种，每种的含义如下：</p>
-<ul>
-<li>UNSOECIFIED<br>  父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部测量</li>
-<li>EXACTLY<br>  父容器已经检测出 View 所需的精确大小，这时候 View 的最终大小就是 SpecSize 的值，它对应与 LayoutParams 中的 match_parent 和具体的数值两种模式。</li>
-<li>AT_MOST<br>  父容器指定了一个可用大小 SpecSize，View 的大小不能超过这个值，具体是什么值要看不同 View 的具体实现，它对应与 LayoutParams 中的 wrap_content。</li>
-</ul>
-<p>因此，我们知道 MeasureSpec 就能知道 SpecMode 和 SpecSize 了，然后我们可以根据这两个值去处理 View 的大小。</p>
-<p>自定义 View 只要考虑 <code>MeasureSpec.EXACTLY</code> 和 <code>MeasureSpec.AT_MOST</code> 即可。</p>
-<p>好了，了解了 MeasureSpec，我们继续说测量的事，分析下流失布局的特点，我们先看一下 FlexboxLayout 在 <code>app:flexWrap=&quot;wrap&quot;</code>模式下的显示情况，然后我们来实现这种效果，（布局中每个View 的 margin=5dp）<br><img src="https://i.loli.net/2020/05/21/XS9wnOhobfeWAId.png" alt=""></p>
-<p>根据上图分析下测量的实现思路：</p>
-<ol>
-<li>首先测量就是测 View 尺寸，需要确定 View 的宽高。</li>
-<li>根据布局的特点，测量最小的宽高尺寸，并且这个数值不能大于 parent 给出的建议 size。</li>
-<li>对于宽度，子 View 有多行，每行长度不一致，最长的那一行就是 View 的宽度。</li>
-<li>对于高度，子 View 的高度不一致，每一行的最大高度的和就是 View 的高度。</li>
-<li>要考虑Layout自身的 pading 和子 view 的 margin。</li>
-</ol>
-<p>相关代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;</span><br><span class="line">        Log.d(TAG, &quot;onMeasure&quot;)</span><br><span class="line"></span><br><span class="line">        val widthSpecMode &#x3D; MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">        val widthSpecSize &#x3D; MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">        val heightSpecMode &#x3D; MeasureSpec.getMode(heightMeasureSpec)</span><br><span class="line">        val heightSpecSize &#x3D; MeasureSpec.getSize(heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 测量子 View 尺寸</span><br><span class="line">        measureChildren(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        var lineWidth &#x3D; 0</span><br><span class="line">        var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">        var maxWidthSize &#x3D; 0</span><br><span class="line">        var height &#x3D; 0</span><br><span class="line"></span><br><span class="line">        for (i in 0 until childCount) &#123;</span><br><span class="line">            val child &#x3D; getChildAt(i)</span><br><span class="line">            if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">                &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">                if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                    maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                    height +&#x3D; lineHeight</span><br><span class="line">                &#125;</span><br><span class="line">                continue</span><br><span class="line">            &#125;</span><br><span class="line">            val childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line">            &#x2F;&#x2F; 子 View 的宽高包含他们的 margin</span><br><span class="line">            val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">            val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">            if (lineWidth + childWidth &gt; widthSpecSize - paddingLeft - paddingRight) &#123; &#x2F;&#x2F; 换行</span><br><span class="line">                &#x2F;&#x2F; 记录最大宽度</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                &#x2F;&#x2F; 重置 lineWidth</span><br><span class="line">                lineWidth &#x3D; childWidth</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">                lineHeight &#x3D; childHeight</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lineWidth +&#x3D; childWidth</span><br><span class="line">                lineHeight &#x3D; max(childHeight, lineHeight)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F; 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">            if (i &#x3D;&#x3D; childCount - 1) &#123;</span><br><span class="line">                maxWidthSize &#x3D; max(lineWidth, maxWidthSize)</span><br><span class="line">                height +&#x3D; lineHeight</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultWidth &#x3D; if (widthSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            widthSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(maxWidthSize + paddingLeft + paddingRight, widthSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultHeight &#x3D; if (heightSpecMode &#x3D;&#x3D; MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            heightSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(height + paddingTop + paddingBottom, heightSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setMeasuredDimension(resultWidth, resultHeight)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>还是看上图，布局比较简单，就是从左向右排列，如果子 View 的显示超出了 Layout 的最大宽度就换行。所以思路就是依次遍历所有的子 View，然后从左向右依次排列，确定子 View 的位置，每次对子 View 进行 layout 之前，要预算它的显示范围，如果超出了 parent 的宽度，那么它就需要换行。</p>
-<p>定位 View 主要是确定 View 的四个顶点的位置。再简化一下，只需要知道左上角顶点的位置加上 View 的宽高就能定位一个 View，而左上角顶点就是 left, top。对于同一行，left 依次向右移动，如果定位的 View 的长度超出了 ViewGroup 最大宽大度就换行，然后更新 left，top，每换一行 top 向下移动。</p>
-<p>相关代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) &#123;</span><br><span class="line">    Log.d(TAG, &quot;onLayout&quot;)</span><br><span class="line"></span><br><span class="line">    var childLeft &#x3D; paddingLeft</span><br><span class="line">    var childTop &#x3D; paddingTop</span><br><span class="line">    var lineHeight &#x3D; 0</span><br><span class="line"></span><br><span class="line">    var childParams: MarginLayoutParams</span><br><span class="line"></span><br><span class="line">    val childCount &#x3D; childCount</span><br><span class="line"></span><br><span class="line">    for (i in 0 until childCount) &#123;</span><br><span class="line">        val child &#x3D; get(i)</span><br><span class="line">        if (child.visibility &#x3D;&#x3D; View.GONE) &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childParams &#x3D; child.layoutParams as MarginLayoutParams</span><br><span class="line"></span><br><span class="line">        val childWidth &#x3D; child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">        val childHeight &#x3D; child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">        if (childLeft + childWidth &gt; width - paddingRight) &#123;</span><br><span class="line">            &#x2F;&#x2F; 换行, 更新 childLeft，childTop，lineHeight</span><br><span class="line">            childLeft &#x3D; paddingLeft</span><br><span class="line">            childTop +&#x3D; lineHeight</span><br><span class="line">            lineHeight &#x3D; childHeight</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            lineHeight &#x3D; max(lineHeight, childHeight)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setChildFrame(child, childLeft + childParams.leftMargin, childTop + childParams.topMargin, child.measuredWidth, child.measuredHeight)</span><br><span class="line">        childLeft +&#x3D; childWidth</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>到了这里我们的流式布局基本就完成了，但是还有个问题，测量的时候最大宽度是给定的 parentSize，那如果单个 View 的宽度为一个很大的值，超过了这个 parentSize，我们再布局的时候该怎么处理呢？</p>
-<p>看了一下 LinearLayout 的情况，是直接将按 View 的宽高来布局的，就是 View 会延伸到屏幕外面，然后看一下 RelativeLayout 则是限制了最大宽度，如果超过 parentSize 则最大为 parentSize</p>
-<p>具体情况看下图：<br><img src="https://i.loli.net/2020/05/22/1yG8UYd3zwMp2H4.png" alt="linearlayout-RelativeLayout.png"></p>
-<p>又看了下 FlexboxLayout 也是和 RelativeLayout 一样， 所以怎么处理看自己情况吧。这边给出我自己的处理情况：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private fun setChildFrame(child: View, left: Int, top: Int, width: Int, height: Int) &#123;</span><br><span class="line">        &#x2F;&#x2F; 可有可无，仿照 FlexboxLayout 做了此操作</span><br><span class="line">        val right &#x3D; if (left + width &gt; getWidth()) &#123;</span><br><span class="line">            getWidth() - (child.layoutParams as MarginLayoutParams).rightMargin</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            left + width</span><br><span class="line">        &#125;</span><br><span class="line">        Log.d(TAG, &quot;left&#x3D;$left,right&#x3D;$right,top&#x3D;$top,bottom&#x3D;$&#123;top + height&#125;&quot;)</span><br><span class="line">        child.layout(left, top, right, top + height)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>View 绘制相关的方法是 <code>onDraw()</code>, 这个需求中并不需要特殊的绘制，所以可以不用管它。</p>
-<p>到这里基本上都处理完了，下面看一下效果图，上面是 tag 标签，下面纯 View 组合：<br><img src="https://i.loli.net/2020/05/22/AJFehr81dDRx5K2.png" alt="hflowlayout-sceenshot.png"></p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>自定义 ViewGroup 的基础是清楚 View 的工作原理以及工作流程。其中工作流程主要是指 measure，layout，draw 三大流程，即测量，布局，绘制，其中 measure 确定 View 的测量宽高，layout 确定 View 的最终宽高和四个顶点的位置，而 draw 则将 View 绘制到屏幕上。只有做到对于每个流程都能了然于心才能在自定义 View 时游刃有余。当有了这些基础之后，实现一个自定义 View 主要放在了功能实现上。另外一个体会就是编码之前重要的是要学会分析需求，考虑到各个方面，这个情况个人觉得跟算法比较像，多做算法题有利于提高自己的逻辑思维能力和分析问题解决问题的能力。又给自己找到一个学习算法的的理由，哈哈哈哈哈哈，加油吧，骚年。。。</p>
-<h5 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h5><p>重新整理了代码，放在了github：<br><a href="https://github.com/huazidev/HFlowLayout" target="_blank" rel="noopener">https://github.com/huazidev/HFlowLayout</a></p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>自定义ViewGroup</tag>
-        <tag>流式布局</tag>
       </tags>
   </entry>
 </search>
