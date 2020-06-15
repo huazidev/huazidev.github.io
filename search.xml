@@ -33,54 +33,6 @@
       </tags>
   </entry>
   <entry>
-    <title>《Android开发艺术探索》笔记-第1章</title>
-    <url>/2017/05/15/android-art-explore-1/</url>
-    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
-<ul>
-<li>onCreate: 表示 Activity 正在被创建</li>
-<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
-<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
-<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
-<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
-<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
-<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
-</ul>
-<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
-<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
-<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
-<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
-<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
-<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
-<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
-<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
-<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
-<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
-<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
-<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
-</ul>
-<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
-<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
-<p>问题：分享到第三方应用，使用什么启动方式？</p>
-<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
-<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
-<p>IntentFliter 过滤信息有 action, category, data</p>
-<ul>
-<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
-<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
-<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Android</category>
-        <category>笔记</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>启动模式</tag>
-        <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android学习系列之-通知Notification</title>
     <url>/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/</url>
     <content><![CDATA[<p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
@@ -131,10 +83,58 @@
       </tags>
   </entry>
   <entry>
+    <title>《Android开发艺术探索》笔记-第1章</title>
+    <url>/2017/05/15/android-art-explore-1/</url>
+    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+<ul>
+<li>onCreate: 表示 Activity 正在被创建</li>
+<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
+<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
+<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
+<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
+<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
+<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+</ul>
+<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
+<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
+<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
+<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
+<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
+<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
+<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
+<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
+<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
+<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
+<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
+<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
+</ul>
+<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
+<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
+<p>问题：分享到第三方应用，使用什么启动方式？</p>
+<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
+<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
+<p>IntentFliter 过滤信息有 action, category, data</p>
+<ul>
+<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
+<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
+<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>启动模式</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Handler相关知识总结</title>
     <url>/2018/06/25/handler/</url>
     <content><![CDATA[<p>直接放总结的脑图吧，简单明了：</p>
-<p><img src="https://i.loli.net/2020/05/27/uSNYLOc2kGJEPAK.png" alt="Handler.png"></p>
+<p><img src="https://i.loli.net/2020/06/04/a4U7LyxW1vpPlhZ.png" alt="handler.png"></p>
 <a id="more"></a>]]></content>
       <categories>
         <category>Android</category>
@@ -196,77 +196,80 @@
       </tags>
   </entry>
   <entry>
-    <title>Android 性能优化总结</title>
-    <url>/2017/04/01/performance-optimization/</url>
-    <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<a id="more"></a></p>
-<h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
+    <title>《Android开发艺术探索》笔记-第11章-线程和线程池</title>
+    <url>/2018/05/25/android-art-explore-11/</url>
+    <content><![CDATA[<p>AsyncTask 封装了线程池和 handler，主要hi为了方便开发者在子线程中更新UI。<br>HandlerThread 是一种具有消息循环的线程，他的内部可以使用 Handler。<br>IntentService 是一个服务，系统对其进行了封装，以便执行后台任务，IntentService 内部采用 HanderThread 来执行任务，当任务完成后会自动退出 IntentService，他是一种服务，不容易被系统杀死从而尽量保证任务的执行。</p>
+<a id="more"></a>
+
+<p>在操作系统中，线程是操作系统调度的最小单元，同时线程也是一种受限的系统资源，即线程不能无限的产生，线程的创建都有相应的开销，线程不能做到绝对的并行，除非线程数量小于等于 CPU 核心数。正确的做法是采用线程池，一个线程池会缓存一定数量的线程，通过线程池可以避免因为频繁的创建线程带来的系统开销。Android 的线程来源于 Java，主要是通过 Executor 来派生特定类型的线程池。</p>
+<h5 id="AysncTask"><a href="#AysncTask" class="headerlink" title="AysncTask"></a>AysncTask</h5><p>AysncTask 是一种轻量级的异步任务，他可以在线程池中执行后台任务，然后把执行进度和最终结果传递给主线程。<br>AysncTask 封装了 Thread 和 Handler。AysncTask 并不适合进行特别耗时的任务，对于特别耗时的任务来说建议使用线程池。</p>
+<p>AysncTask 使用过程中的一些限制：</p>
+<ol>
+<li>一个 AysncTask 对象只能调用一次 execute 方法，否则会报运行异常。</li>
+<li>AysncTask 默认采用一个串行执行任务，我们可以通过 <code>executeOnExecutor</code> 方法来并行执行任务。</li>
+</ol>
+<p>通过查看源码后发现：<br>26 版本之后已经可以在子线程中创建 AysncTask，因为默认构造函数使用的是通过 MainLooper 创建的handler。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> public AsyncTask() &#123;</span><br><span class="line">     this((Looper) null);</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> public AsyncTask(@Nullable Looper callbackLooper) &#123;</span><br><span class="line">        mHandler &#x3D; callbackLooper &#x3D;&#x3D; null || callbackLooper &#x3D;&#x3D; Looper.getMainLooper()</span><br><span class="line">            ? getMainHandler()</span><br><span class="line">            : new Handler(callbackLooper);</span><br><span class="line">&#x2F;&#x2F; 省略其他代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AsyncTask 中有两个线程池，SerialExecutor 和 THREAD_POOL_EXECUTOR ，其中线程池 SerialExecutor 用于任务排队，而线程池 THREAD_POOL_EXECUTOR 用于真正的执行。还有一个 InternalHandler 用于将执行环境从线程池切换到主线程。</p>
+<p>看一下 SerialExecutor 的实现：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private static class SerialExecutor implements Executor &#123;</span><br><span class="line">        final ArrayDeque&lt;Runnable&gt; mTasks &#x3D; new ArrayDeque&lt;Runnable&gt;();</span><br><span class="line">        Runnable mActive;</span><br><span class="line"></span><br><span class="line">        public synchronized void execute(final Runnable r) &#123;</span><br><span class="line">            mTasks.offer(new Runnable() &#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        r.run();</span><br><span class="line">                    &#125; finally &#123;</span><br><span class="line">                        scheduleNext();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            if (mActive &#x3D;&#x3D; null) &#123;</span><br><span class="line">                scheduleNext();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        protected synchronized void scheduleNext() &#123;</span><br><span class="line">            if ((mActive &#x3D; mTasks.poll()) !&#x3D; null) &#123;</span><br><span class="line">                THREAD_POOL_EXECUTOR.execute(mActive);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面代码可以分析 AsyncTask 的排队过程。首先系统会把 AsyncTask 的 params 参数封装成 FutureTask 对象，FutureTask 是个并发类，在这里他充当了 Runnable 的作用。接着这个 FutureTask 会交给 SerialExecutor 的 execut 方法去处理， SerialExecutor 的 execut 方法首先会把 FutureTask 对象插入到任务队列 mTasks 中，如果这个时候没有正在活动的 AsyncTask 任务，那么就会调用 SerialExecutor 的 scheduleNext 方法来执行下一个任务，同时 AsyncTask 执行完任务后，AsyncTask 会继续执行其他任务直到所有的任务都被执行完毕为止。</p>
+<h5 id="HandlerThread"><a href="#HandlerThread" class="headerlink" title="HandlerThread"></a>HandlerThread</h5><p>HandlerThread 继承自 Thread ,它是一种可以使用 handler 的 Thread 就是 在run 方法中通过 Looper.prepare 来创建消息队列，并通过 Looper.loop() 来开启消息循环。</p>
+<p>普通 Thread 主要用于在 run 方法中执行一个耗时任务，而 HandlerThread 内部创建了消息队列，外界需要通过 Handler 的消息方式来通知 HandlerThread 执行具体任务。HandlerThread 的具体使用场景是 IntentService 。<br>由于 HandlerThread 的 run 是一个无线循环，因此当明确不需要 HandlerThread 时可以通过 quit 或 quitSafely 来终止线程的执行。</p>
+<h5 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h5><p>IntentService 是一种特殊的 Service，它继承自 Service 并且是个抽象类，必须创建自己的子类才能使用。IntentService 可用于执行后台的耗时任务，当任务执行后自动停止，由于是服务，所以优先级比单纯的线程高，所以 IntentService 适合高优先级的后台任务。IntentService 封装了 HandlerThread 和 Handler.</p>
+<p>每执行一个后台任务，就必须启动一次 IntentService, 而 IntentService 内部则通过消息的方式向 HandlerThread 请求执行任务，Handler 中的 Looper 是顺序处理消息的，这就意味着 IntentService 也是顺序后台执行任务的，多个任务同时存在时，后台任务会按照外界发起的顺序排队执行。</p>
+<p>onHandleIntent 可以对不同的任务做处理，当onHandleIntent 执行结束后 IntentService 会通过 stopSelf 尝试停止服务，当 IntentService onDestory 时会停止 looper，防止出现线程无法释放的问题。</p>
+<h5 id="Android-中的线程池"><a href="#Android-中的线程池" class="headerlink" title="Android 中的线程池"></a>Android 中的线程池</h5><p>线程池的优点：</p>
+<ol>
+<li>重用线程池中的线程，避免因为线程的创建和销毁带来的性能开销。</li>
+<li>有效控制线程池的最大并发数，避免大量的线程间因互相抢占资源而导致的阻塞的现象。</li>
+<li>能够对线程进行简单的管理，并提供定时执行以及间隔循环执行等功能。</li>
+</ol>
+<p>ThreadPoolExecutor 是线程池的真正实现，他的构造方法提供了一系列参数来配置线程池，个参数的意义如下：</p>
 <ul>
-<li><p>首先删除布局中无用的控件和层级，其次有选择的使用 ViewGroup, 比如 LinearLayout 和 RelativeLayout 都可以实现，那么就选用 LinearLayout, 因为 RelativeLayout 功能复杂，他的布局过程花费更过的 CPU 时间。另外，减少嵌套是经常用也是最直观的方式。</p>
+<li><p>corePoolSize<br>线程池的核心线程数，默认情况下，核心线程会在线程池中一直存活，即使他们处于闲置状态。如果将 ThreadPoolExecutor 的 allowCoreThreadTimeOut 设为 true，那么闲置的核心线程在等待新任务到来时会有超时策略，这个时间间隔由 keepAliveTime 所指定，等待时间超过 keepAliveTime 时间，核心线程就会被终止。</p>
 </li>
-<li><p>采用 <code>&lt;include&gt;</code> 标签， <code>&lt;merge&gt;</code> 标签和<code>ViewStub</code>。<code>&lt;include&gt;</code> 标签主要用于布局重用，<code>&lt;merge&gt;</code> 标签用于减少嵌套，可以配合<code>&lt;include&gt;</code> 标签一块使用或者在自定义 View 时使用。<code>ViewStub</code> 则提供了按需加载的功能，它非常轻量级，宽高都是 0，因此本身不参与布局和绘制，很多布局在正常情况下不会显示，在特定场景下显示，因此只需要到该显示的时候再加载就好，可以提高初始化的性能。</p>
+<li><p>maximumPoolSize<br>线程池所能容纳的最大线程数，当活动线程数达到这个数值后，后续的新任务会被阻塞。</p>
 </li>
-</ul>
-<h3 id="2-绘制优化"><a href="#2-绘制优化" class="headerlink" title="2. 绘制优化"></a>2. 绘制优化</h3><p>绘制优化是指 View 的 onDraw 方法避免执行大量的操作，主要体现在两个方面。</p>
-<ul>
-<li><p>首先，onDraw 不要创建新的局部对象，因为 onDraw 会频繁的调用，这样会瞬间产生大量的临时对象，这不仅占用过多的内存，而且会导致频繁的 GC，降低了程序执行的效率。</p>
+<li><p>keepAliveTime<br>非核心线程闲置的超时时长，超过这个时长非核心线程会被回收，当 ThreadPoolExecutor 的 allowCoreThreadTimeOut 为 true 时，keepAliveTime 同样作用于核心线程。</p>
 </li>
-<li><p>其次，onDraw 方法中不要做耗时任务，也不能执行大量的循环操作，尽管每次循环都很轻量级，但大量的循环仍然十分抢占 CPU 的时间片，这会造成 View 绘制过程不流畅。谷歌官方性能优化标准，View 的绘制帧率保持在 60fps 是最佳的，这就要求每帧的绘制时间不超过 16ms(16ms = 1000/60)。</p>
+<li><p>unit<br>用于指定 keepAliveTime 参数的时间单位，是个枚举</p>
 </li>
-</ul>
-<h3 id="3-内存泄漏优化"><a href="#3-内存泄漏优化" class="headerlink" title="3. 内存泄漏优化"></a>3. 内存泄漏优化</h3><p>内存泄漏对开发人员的经验和开发意识要求较高，因此也是最容易犯的错误之一。内存泄漏的优化主要有两个方面，一方面就是开发中避免写出有内存泄露的代码，另一方面是通过一些分析工具找出潜在的内存泄漏而解决。列举一些容易出现内存泄漏的编码情况：</p>
-<ul>
-<li><p>静态变量导致内存泄漏</p>
-<p>  比如 <code>Context</code>, <code>View</code> 为静态变量，它内部持有了 Activity，所以当 Activity 关闭后仍然无法释放。</p>
+<li><p>workQueue<br>线程池中的任务队列，通过线程池的 execute 方法提交 Runnable 对象会存储在这个参数中。</p>
 </li>
-<li><p>单例模式导致内存泄漏</p>
-<p>  比较明显的是同上，直接引用对象持有了 Activity，导致无法释放。另一种不太明显的是注册监听方式，只注册，而缺少取消注册的情况也会引起内存泄漏。因为单例的特点是其生命周期和 Applation 保持一致，因此会导致内存泄漏。</p>
-</li>
-<li><p>属性动画导致内存泄漏</p>
-<p>  属性动画是一类无限循环的动画，如果在 Activity 中播放此类动画且没有在 onDestory 中停止，那么动画就会一直播放下去，因为 Activity 会被动画 View 持有，最终 Activity 无法释放。解决方法就是及时停止动画。</p>
+<li><p>threadFactory<br>线程工厂，为线程池提供创建新线程的功能，ThreadFactory 是个接口，它只有一个方法：new Thread(Runnable r)</p>
 </li>
 </ul>
-<p>至于分析内存泄漏的工具有很多，比如：</p>
-<ul>
-<li><p>Android Studio自带的 Profiler</p>
-<p>  可以直观的看到 CPU，内存，网络变化，也可以做很多模拟操作，但是不太容易看出内存泄漏，需要配合 MTA 使用。</p>
+<p>ThreadPoolExecutor 执行任务时大致遵循如下原则：</p>
+<ol>
+<li>如果线程池中的线程数量未达到核心线程数的数量，那么会启动一个核心线程来执行任务。</li>
+<li>如果线程池的线程数量已经达到或者超过核心线程的数量，那么任务会被插入到任务队列中排队等待执行。</li>
+<li>如果在步骤2中，无法插入到任务队列中，往往是由于任务队列已满，这个时候如果线程数量未达到线程池规定的最大值，那么立即启动一个非核心线程来执行任务。</li>
+<li>如果步骤3 中的线程数量已经达到线程池规定的最大值，那么就拒绝此任务，ThreadPoolExecutor 会调用 RejectedExecutionHandler 的 rejectExcecution 来通知调用者。</li>
+</ol>
+<h5 id="线程池的分类"><a href="#线程池的分类" class="headerlink" title="线程池的分类"></a>线程池的分类</h5><ol>
+<li><p>FixedThreadPool<br>通过 Executors 的 newFixedThreadPool 方法来创建，它是一种线程数量固定的线程池，只有核心线程，并且核心线程不会被回收，可以快速响应外界的确请求。</p>
 </li>
-<li><p>MAT</p>
-<p>  MAT 全称 Eclipse Memory Analyzer，是一款强大的内存泄漏分析工具。</p>
+<li><p>CachedThreadPool<br>通过 Executors 的 newCachedThreadPool 方法来创建，是一种线程数量不定的线程池，只有非核心线程，线程最大数为 Integer.MAX_VALUE ，超过60 秒闲置线程会被回收，适合执行大量耗时较少的任务。</p>
 </li>
-<li><p>Android LeakCanary</p>
-<p> Android LeakCanary 易于集成，自动检测出内存泄漏，十分好用。目前我们项目中也是用的 LeakCanary。使用方法可以去参考文档。</p>
+<li><p>ScheduledThreadPool<br>通过 Executors 的 newScheduledThreadPool 方法来创建，它的核心线程数量是固定的，，非核心线程没有限制，当非核心线程闲置会被立即回收，只要适用于，执行定时任务和具有周期的重复任务。</p>
 </li>
-</ul>
-<p>上面这些工具只是帮助我们分析和定位内存泄漏的位置，等知道问题出在哪了，才能去解决问题。</p>
-<h3 id="4-响应速度优化"><a href="#4-响应速度优化" class="headerlink" title="4. 响应速度优化"></a>4. 响应速度优化</h3><p>核心思想就是避免在主线程中做耗时操作，当有耗时操作时应当放在子线程中去操作。响应速度过慢一般体现在 Activity 启动速度上面，主线程做太多事情，会导致黑屏甚至出现 ANR。</p>
-<ul>
-<li>耗时操作放在子线程</li>
-<li>业务优化，比如采用新算法，代码重构，偿还历史债务等</li>
-<li>通过分析 trace.txt 文件定位 ANR 的原因</li>
-<li>主线程和子线程抢占同步锁，子线程持有了主线程所需的锁</li>
-</ul>
-<h3 id="5-RecyclerView-和-Bitmap-优化"><a href="#5-RecyclerView-和-Bitmap-优化" class="headerlink" title="5. RecyclerView 和 Bitmap 优化"></a>5. RecyclerView 和 Bitmap 优化</h3><ul>
-<li>避免再 onBindView 中执行耗时操作</li>
-<li>根据列表的滑动状态来控制任务的执行频率，比如当列表快速滑动时不适合开启大量的异步任务</li>
-<li>对于 Bitmap 主要通过 BitmapFactory.Options 来根据需要对图片进行采样，加载合适大小的图片，降低 Bitmap 的大小</li>
-</ul>
-<h3 id="6-线程优化"><a href="#6-线程优化" class="headerlink" title="6.线程优化"></a>6.线程优化</h3><p>线程优化主要是采用线程池，避免程序中存在大量的 Thread，线程池可以重用内部的线程，从而避免了线程的创建和销毁代码的性能开销，同时线程池还能有效的控制线程中的最大并发数，避免大量的线程因互相抢占资源而导致阻塞现象的发生。因此开发过程中尽量使用线程池，而不是每次都要创建一个 Thread。</p>
-<h3 id="7-优化建议"><a href="#7-优化建议" class="headerlink" title="7. 优化建议"></a>7. 优化建议</h3><ul>
-<li>尽量避免创建过多对象</li>
-<li>不要过多使用枚举，枚举占用的内存空间比整型大</li>
-<li>常量使用 static final 来修饰</li>
-<li>使用一些 Android 特有的数据结构，他们有更好的性能</li>
-<li>适当使用软引用，弱引用</li>
-<li>采用内存缓存和磁盘缓存</li>
-<li>尽量采用静态内部类，这样避免潜在的由于内部类导致内存泄漏</li>
-</ul>
+<li><p>SingleThreadExecutor<br>通过 Executors 的 newSingleThreadExecutor 方法来创建，线程池中只有一个核心线程，确保所有的任务都在同一个线程中按顺序执行，意义也在于此，使得任务之间不需要处理线程同步的问题。</p>
+</li>
+</ol>
+<p>出了上面的四种还可以根据需要灵活配置线程池。</p>
 ]]></content>
       <categories>
         <category>Android</category>
+        <category>笔记</category>
       </categories>
       <tags>
         <tag>Android</tag>
-        <tag>性能优化</tag>
+        <tag>笔记</tag>
+        <tag>线程</tag>
+        <tag>线程池</tag>
       </tags>
   </entry>
   <entry>
@@ -465,82 +468,6 @@
       </tags>
   </entry>
   <entry>
-    <title>《Android开发艺术探索》笔记-第11章-线程和线程池</title>
-    <url>/2018/05/25/android-art-explore-11/</url>
-    <content><![CDATA[<p>AsyncTask 封装了线程池和 handler，主要hi为了方便开发者在子线程中更新UI。<br>HandlerThread 是一种具有消息循环的线程，他的内部可以使用 Handler。<br>IntentService 是一个服务，系统对其进行了封装，以便执行后台任务，IntentService 内部采用 HanderThread 来执行任务，当任务完成后会自动退出 IntentService，他是一种服务，不容易被系统杀死从而尽量保证任务的执行。</p>
-<a id="more"></a>
-
-<p>在操作系统中，线程是操作系统调度的最小单元，同时线程也是一种受限的系统资源，即线程不能无限的产生，线程的创建都有相应的开销，线程不能做到绝对的并行，除非线程数量小于等于 CPU 核心数。正确的做法是采用线程池，一个线程池会缓存一定数量的线程，通过线程池可以避免因为频繁的创建线程带来的系统开销。Android 的线程来源于 Java，主要是通过 Executor 来派生特定类型的线程池。</p>
-<h5 id="AysncTask"><a href="#AysncTask" class="headerlink" title="AysncTask"></a>AysncTask</h5><p>AysncTask 是一种轻量级的异步任务，他可以在线程池中执行后台任务，然后把执行进度和最终结果传递给主线程。<br>AysncTask 封装了 Thread 和 Handler。AysncTask 并不适合进行特别耗时的任务，对于特别耗时的任务来说建议使用线程池。</p>
-<p>AysncTask 使用过程中的一些限制：</p>
-<ol>
-<li>一个 AysncTask 对象只能调用一次 execute 方法，否则会报运行异常。</li>
-<li>AysncTask 默认采用一个串行执行任务，我们可以通过 <code>executeOnExecutor</code> 方法来并行执行任务。</li>
-</ol>
-<p>通过查看源码后发现：<br>26 版本之后已经可以在子线程中创建 AysncTask，因为默认构造函数使用的是通过 MainLooper 创建的handler。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> public AsyncTask() &#123;</span><br><span class="line">     this((Looper) null);</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> public AsyncTask(@Nullable Looper callbackLooper) &#123;</span><br><span class="line">        mHandler &#x3D; callbackLooper &#x3D;&#x3D; null || callbackLooper &#x3D;&#x3D; Looper.getMainLooper()</span><br><span class="line">            ? getMainHandler()</span><br><span class="line">            : new Handler(callbackLooper);</span><br><span class="line">&#x2F;&#x2F; 省略其他代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>AsyncTask 中有两个线程池，SerialExecutor 和 THREAD_POOL_EXECUTOR ，其中线程池 SerialExecutor 用于任务排队，而线程池 THREAD_POOL_EXECUTOR 用于真正的执行。还有一个 InternalHandler 用于将执行环境从线程池切换到主线程。</p>
-<p>看一下 SerialExecutor 的实现：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private static class SerialExecutor implements Executor &#123;</span><br><span class="line">        final ArrayDeque&lt;Runnable&gt; mTasks &#x3D; new ArrayDeque&lt;Runnable&gt;();</span><br><span class="line">        Runnable mActive;</span><br><span class="line"></span><br><span class="line">        public synchronized void execute(final Runnable r) &#123;</span><br><span class="line">            mTasks.offer(new Runnable() &#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        r.run();</span><br><span class="line">                    &#125; finally &#123;</span><br><span class="line">                        scheduleNext();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            if (mActive &#x3D;&#x3D; null) &#123;</span><br><span class="line">                scheduleNext();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        protected synchronized void scheduleNext() &#123;</span><br><span class="line">            if ((mActive &#x3D; mTasks.poll()) !&#x3D; null) &#123;</span><br><span class="line">                THREAD_POOL_EXECUTOR.execute(mActive);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>从上面代码可以分析 AsyncTask 的排队过程。首先系统会把 AsyncTask 的 params 参数封装成 FutureTask 对象，FutureTask 是个并发类，在这里他充当了 Runnable 的作用。接着这个 FutureTask 会交给 SerialExecutor 的 execut 方法去处理， SerialExecutor 的 execut 方法首先会把 FutureTask 对象插入到任务队列 mTasks 中，如果这个时候没有正在活动的 AsyncTask 任务，那么就会调用 SerialExecutor 的 scheduleNext 方法来执行下一个任务，同时 AsyncTask 执行完任务后，AsyncTask 会继续执行其他任务直到所有的任务都被执行完毕为止。</p>
-<h5 id="HandlerThread"><a href="#HandlerThread" class="headerlink" title="HandlerThread"></a>HandlerThread</h5><p>HandlerThread 继承自 Thread ,它是一种可以使用 handler 的 Thread 就是 在run 方法中通过 Looper.prepare 来创建消息队列，并通过 Looper.loop() 来开启消息循环。</p>
-<p>普通 Thread 主要用于在 run 方法中执行一个耗时任务，而 HandlerThread 内部创建了消息队列，外界需要通过 Handler 的消息方式来通知 HandlerThread 执行具体任务。HandlerThread 的具体使用场景是 IntentService 。<br>由于 HandlerThread 的 run 是一个无线循环，因此当明确不需要 HandlerThread 时可以通过 quit 或 quitSafely 来终止线程的执行。</p>
-<h5 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h5><p>IntentService 是一种特殊的 Service，它继承自 Service 并且是个抽象类，必须创建自己的子类才能使用。IntentService 可用于执行后台的耗时任务，当任务执行后自动停止，由于是服务，所以优先级比单纯的线程高，所以 IntentService 适合高优先级的后台任务。IntentService 封装了 HandlerThread 和 Handler .</p>
-<p>onHandleIntent 可以对不同的任务做处理，当onHandleIntent 执行结束后 IntentService 会通过 stopSelf 尝试停止服务。</p>
-<h5 id="Android-中的线程池"><a href="#Android-中的线程池" class="headerlink" title="Android 中的线程池"></a>Android 中的线程池</h5><p>线程池的优点：</p>
-<ol>
-<li>重用线程池中的线程，避免因为线程的创建和销毁带来的性能开销。</li>
-<li>有效控制线程池的最大并发数，避免大量的线程间因互相抢占资源而导致的阻塞的现象。</li>
-<li>能够对线程进行简单的管理，并提供定时执行以及间隔循环执行等功能。</li>
-</ol>
-<p>ThreadPoolExecutor 是线程池的真正实现，他的构造方法提供了一系列参数来配置线程池，个参数的意义如下：</p>
-<ul>
-<li><p>corePoolSize<br>线程池的核心线程数，默认情况下，核心线程会在线程池中一直存活，即使他们处于闲置状态。如果将 ThreadPoolExecutor 的 allowCoreThreadTimeOut 设为 true，那么闲置的核心线程在等待新任务到来时会有超时策略，这个时间间隔由 keepAliveTime 所指定，等待时间超过 keepAliveTime 时间，核心线程就会被终止。</p>
-</li>
-<li><p>maximumPoolSize<br>线程池所能容纳的最大线程数，当活动线程数达到这个数值后，后续的新任务会被阻塞。</p>
-</li>
-<li><p>keepAliveTime<br>非核心线程闲置的超时时长，超过这个时长非核心线程会被回收，当 ThreadPoolExecutor 的 allowCoreThreadTimeOut 为 true 时，keepAliveTime 同样作用于核心线程。</p>
-</li>
-<li><p>unit<br>用于指定 keepAliveTime 参数的时间单位，是个枚举</p>
-</li>
-<li><p>workQueue<br>线程池中的任务队列，通过线程池的 execute 方法提交 Runnable 对象会存储在这个参数中。</p>
-</li>
-<li><p>threadFactory<br>线程工厂，为线程池提供创建新线程的功能，ThreadFactory 是个接口，它只有一个方法：new Thread(Runnable r)</p>
-</li>
-</ul>
-<p>ThreadPoolExecutor 执行任务时大致遵循如下原则：</p>
-<ol>
-<li>如果线程池中的线程数量未达到核心线程数的数量，那么会启动一个核心线程来执行任务。</li>
-<li>如果线程池的线程数量已经达到或者超过核心线程的数量，那么任务会被插入到任务队列中排队等待执行。</li>
-<li>如果在步骤2中，无法插入到任务队列中，往往是由于任务队列已满，这个时候如果线程数量未达到线程池规定的最大值，那么立即启动一个非核心线程来执行任务。</li>
-<li>如果步骤3 中的线程数量已经达到线程池规定的最大值，那么就拒绝此任务，ThreadPoolExecutor 会调用 RejectedExecutionHandler 的 rejectExcecution 来通知调用者。</li>
-</ol>
-<h5 id="线程池的分类"><a href="#线程池的分类" class="headerlink" title="线程池的分类"></a>线程池的分类</h5><ol>
-<li><p>FixedThreadPool<br>通过 Executors 的 newFixedThreadPool 方法来创建，它是一种线程数量固定的线程池，只有核心线程，并且核心线程不会被回收，可以快速响应外界的确请求。</p>
-</li>
-<li><p>CachedThreadPool<br>通过 Executors 的 newCachedThreadPool 方法来创建，是一种线程数量不定的线程池，只有非核心线程，线程最大数为 Integer.MAX_VALUE ，超过60 秒闲置线程会被回收，适合执行大量耗时较少的任务。</p>
-</li>
-<li><p>ScheduledThreadPool<br>通过 Executors 的 newScheduledThreadPool 方法来创建，它的核心线程数量是固定的，，非核心线程没有限制，当非核心线程闲置会被立即回收，只要适用于，执行定时任务和具有周期的重复任务。</p>
-</li>
-<li><p>SingleThreadExecutor<br>通过 Executors 的 newSingleThreadExecutor 方法来创建，线程池中只有一个核心线程，确保所有的任务都在同一个线程中按顺序执行，意义也在于此，使得任务之间不需要处理线程同步的问题。</p>
-</li>
-</ol>
-<p>出了上面的四种还可以根据需要灵活配置线程池。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-        <category>笔记</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>笔记</tag>
-        <tag>线程</tag>
-        <tag>线程池</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>自定义 ViewGroup 实现流式布局</title>
     <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
     <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
@@ -633,6 +560,80 @@
       <tags>
         <tag>python</tag>
         <tag>爬虫</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android 性能优化总结</title>
+    <url>/2017/04/01/performance-optimization/</url>
+    <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<a id="more"></a></p>
+<h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
+<ul>
+<li><p>首先删除布局中无用的控件和层级，其次有选择的使用 ViewGroup, 比如 LinearLayout 和 RelativeLayout 都可以实现，那么就选用 LinearLayout, 因为 RelativeLayout 功能复杂，他的布局过程花费更过的 CPU 时间。另外，减少嵌套是经常用也是最直观的方式。</p>
+</li>
+<li><p>采用 <code>&lt;include&gt;</code> 标签， <code>&lt;merge&gt;</code> 标签和<code>ViewStub</code>。<code>&lt;include&gt;</code> 标签主要用于布局重用，<code>&lt;merge&gt;</code> 标签用于减少嵌套，可以配合<code>&lt;include&gt;</code> 标签一块使用或者在自定义 View 时使用。<code>ViewStub</code> 则提供了按需加载的功能，它非常轻量级，宽高都是 0，因此本身不参与布局和绘制，很多布局在正常情况下不会显示，在特定场景下显示，因此只需要到该显示的时候再加载就好，可以提高初始化的性能。</p>
+</li>
+</ul>
+<h3 id="2-绘制优化"><a href="#2-绘制优化" class="headerlink" title="2. 绘制优化"></a>2. 绘制优化</h3><p>绘制优化是指 View 的 onDraw 方法避免执行大量的操作，主要体现在两个方面。</p>
+<ul>
+<li><p>首先，onDraw 不要创建新的局部对象，因为 onDraw 会频繁的调用，这样会瞬间产生大量的临时对象，这不仅占用过多的内存，而且会导致频繁的 GC，降低了程序执行的效率。</p>
+</li>
+<li><p>其次，onDraw 方法中不要做耗时任务，也不能执行大量的循环操作，尽管每次循环都很轻量级，但大量的循环仍然十分抢占 CPU 的时间片，这会造成 View 绘制过程不流畅。谷歌官方性能优化标准，View 的绘制帧率保持在 60fps 是最佳的，这就要求每帧的绘制时间不超过 16ms(16ms = 1000/60)。</p>
+</li>
+</ul>
+<h3 id="3-内存泄漏优化"><a href="#3-内存泄漏优化" class="headerlink" title="3. 内存泄漏优化"></a>3. 内存泄漏优化</h3><p>内存泄漏对开发人员的经验和开发意识要求较高，因此也是最容易犯的错误之一。内存泄漏的优化主要有两个方面，一方面就是开发中避免写出有内存泄露的代码，另一方面是通过一些分析工具找出潜在的内存泄漏而解决。列举一些容易出现内存泄漏的编码情况：</p>
+<ul>
+<li><p>静态变量导致内存泄漏</p>
+<p>  比如 <code>Context</code>, <code>View</code> 为静态变量，它内部持有了 Activity，所以当 Activity 关闭后仍然无法释放。</p>
+</li>
+<li><p>单例模式导致内存泄漏</p>
+<p>  比较明显的是同上，直接引用对象持有了 Activity，导致无法释放。另一种不太明显的是注册监听方式，只注册，而缺少取消注册的情况也会引起内存泄漏。因为单例的特点是其生命周期和 Applation 保持一致，因此会导致内存泄漏。</p>
+</li>
+<li><p>属性动画导致内存泄漏</p>
+<p>  属性动画是一类无限循环的动画，如果在 Activity 中播放此类动画且没有在 onDestory 中停止，那么动画就会一直播放下去，因为 Activity 会被动画 View 持有，最终 Activity 无法释放。解决方法就是及时停止动画。</p>
+</li>
+</ul>
+<p>至于分析内存泄漏的工具有很多，比如：</p>
+<ul>
+<li><p>Android Studio自带的 Profiler</p>
+<p>  可以直观的看到 CPU，内存，网络变化，也可以做很多模拟操作，但是不太容易看出内存泄漏，需要配合 MTA 使用。</p>
+</li>
+<li><p>MAT</p>
+<p>  MAT 全称 Eclipse Memory Analyzer，是一款强大的内存泄漏分析工具。</p>
+</li>
+<li><p>Android LeakCanary</p>
+<p> Android LeakCanary 易于集成，自动检测出内存泄漏，十分好用。目前我们项目中也是用的 LeakCanary。使用方法可以去参考文档。</p>
+</li>
+</ul>
+<p>上面这些工具只是帮助我们分析和定位内存泄漏的位置，等知道问题出在哪了，才能去解决问题。</p>
+<h3 id="4-响应速度优化"><a href="#4-响应速度优化" class="headerlink" title="4. 响应速度优化"></a>4. 响应速度优化</h3><p>核心思想就是避免在主线程中做耗时操作，当有耗时操作时应当放在子线程中去操作。响应速度过慢一般体现在 Activity 启动速度上面，主线程做太多事情，会导致黑屏甚至出现 ANR。</p>
+<ul>
+<li>耗时操作放在子线程</li>
+<li>业务优化，比如采用新算法，代码重构，偿还历史债务等</li>
+<li>通过分析 trace.txt 文件定位 ANR 的原因</li>
+<li>主线程和子线程抢占同步锁，子线程持有了主线程所需的锁</li>
+</ul>
+<h3 id="5-RecyclerView-和-Bitmap-优化"><a href="#5-RecyclerView-和-Bitmap-优化" class="headerlink" title="5. RecyclerView 和 Bitmap 优化"></a>5. RecyclerView 和 Bitmap 优化</h3><ul>
+<li>避免再 onBindView 中执行耗时操作</li>
+<li>根据列表的滑动状态来控制任务的执行频率，比如当列表快速滑动时不适合开启大量的异步任务</li>
+<li>对于 Bitmap 主要通过 BitmapFactory.Options 来根据需要对图片进行采样，加载合适大小的图片，降低 Bitmap 的大小</li>
+</ul>
+<h3 id="6-线程优化"><a href="#6-线程优化" class="headerlink" title="6.线程优化"></a>6.线程优化</h3><p>线程优化主要是采用线程池，避免程序中存在大量的 Thread，线程池可以重用内部的线程，从而避免了线程的创建和销毁代码的性能开销，同时线程池还能有效的控制线程中的最大并发数，避免大量的线程因互相抢占资源而导致阻塞现象的发生。因此开发过程中尽量使用线程池，而不是每次都要创建一个 Thread。</p>
+<h3 id="7-优化建议"><a href="#7-优化建议" class="headerlink" title="7. 优化建议"></a>7. 优化建议</h3><ul>
+<li>尽量避免创建过多对象</li>
+<li>不要过多使用枚举，枚举占用的内存空间比整型大</li>
+<li>常量使用 static final 来修饰</li>
+<li>使用一些 Android 特有的数据结构，他们有更好的性能</li>
+<li>适当使用软引用，弱引用</li>
+<li>采用内存缓存和磁盘缓存</li>
+<li>尽量采用静态内部类，这样避免潜在的由于内部类导致内存泄漏</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>性能优化</tag>
       </tags>
   </entry>
   <entry>

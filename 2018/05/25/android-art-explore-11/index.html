@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="华子dev">
 <meta property="og:description" content="AsyncTask 封装了线程池和 handler，主要hi为了方便开发者在子线程中更新UI。HandlerThread 是一种具有消息循环的线程，他的内部可以使用 Handler。IntentService 是一个服务，系统对其进行了封装，以便执行后台任务，IntentService 内部采用 HanderThread 来执行任务，当任务完成后会自动退出 IntentService，他是一种服务">
 <meta property="article:published_time" content="2018-05-25T08:51:21.000Z">
-<meta property="article:modified_time" content="2020-05-26T17:58:21.822Z">
+<meta property="article:modified_time" content="2020-05-27T09:21:07.097Z">
 <meta property="article:author" content="华子dev">
 <meta property="article:tag" content="Android">
 <meta property="article:tag" content="笔记">
@@ -440,8 +440,9 @@
 <p>从上面代码可以分析 AsyncTask 的排队过程。首先系统会把 AsyncTask 的 params 参数封装成 FutureTask 对象，FutureTask 是个并发类，在这里他充当了 Runnable 的作用。接着这个 FutureTask 会交给 SerialExecutor 的 execut 方法去处理， SerialExecutor 的 execut 方法首先会把 FutureTask 对象插入到任务队列 mTasks 中，如果这个时候没有正在活动的 AsyncTask 任务，那么就会调用 SerialExecutor 的 scheduleNext 方法来执行下一个任务，同时 AsyncTask 执行完任务后，AsyncTask 会继续执行其他任务直到所有的任务都被执行完毕为止。</p>
 <h5 id="HandlerThread"><a href="#HandlerThread" class="headerlink" title="HandlerThread"></a>HandlerThread</h5><p>HandlerThread 继承自 Thread ,它是一种可以使用 handler 的 Thread 就是 在run 方法中通过 Looper.prepare 来创建消息队列，并通过 Looper.loop() 来开启消息循环。</p>
 <p>普通 Thread 主要用于在 run 方法中执行一个耗时任务，而 HandlerThread 内部创建了消息队列，外界需要通过 Handler 的消息方式来通知 HandlerThread 执行具体任务。HandlerThread 的具体使用场景是 IntentService 。<br>由于 HandlerThread 的 run 是一个无线循环，因此当明确不需要 HandlerThread 时可以通过 quit 或 quitSafely 来终止线程的执行。</p>
-<h5 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h5><p>IntentService 是一种特殊的 Service，它继承自 Service 并且是个抽象类，必须创建自己的子类才能使用。IntentService 可用于执行后台的耗时任务，当任务执行后自动停止，由于是服务，所以优先级比单纯的线程高，所以 IntentService 适合高优先级的后台任务。IntentService 封装了 HandlerThread 和 Handler .</p>
-<p>onHandleIntent 可以对不同的任务做处理，当onHandleIntent 执行结束后 IntentService 会通过 stopSelf 尝试停止服务。</p>
+<h5 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h5><p>IntentService 是一种特殊的 Service，它继承自 Service 并且是个抽象类，必须创建自己的子类才能使用。IntentService 可用于执行后台的耗时任务，当任务执行后自动停止，由于是服务，所以优先级比单纯的线程高，所以 IntentService 适合高优先级的后台任务。IntentService 封装了 HandlerThread 和 Handler.</p>
+<p>每执行一个后台任务，就必须启动一次 IntentService, 而 IntentService 内部则通过消息的方式向 HandlerThread 请求执行任务，Handler 中的 Looper 是顺序处理消息的，这就意味着 IntentService 也是顺序后台执行任务的，多个任务同时存在时，后台任务会按照外界发起的顺序排队执行。</p>
+<p>onHandleIntent 可以对不同的任务做处理，当onHandleIntent 执行结束后 IntentService 会通过 stopSelf 尝试停止服务，当 IntentService onDestory 时会停止 looper，防止出现线程无法释放的问题。</p>
 <h5 id="Android-中的线程池"><a href="#Android-中的线程池" class="headerlink" title="Android 中的线程池"></a>Android 中的线程池</h5><p>线程池的优点：</p>
 <ol>
 <li>重用线程池中的线程，避免因为线程的创建和销毁带来的性能开销。</li>
