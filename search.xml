@@ -1,6 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>《Android开发艺术探索》笔记-第1章</title>
+    <url>/2017/05/15/android-art-explore-1/</url>
+    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+<ul>
+<li>onCreate: 表示 Activity 正在被创建</li>
+<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
+<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
+<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
+<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
+<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
+<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+</ul>
+<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
+<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
+<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
+<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
+<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
+<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
+<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
+<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
+<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
+<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
+<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
+<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
+</ul>
+<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
+<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
+<p>问题：分享到第三方应用，使用什么启动方式？</p>
+<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
+<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
+<p>IntentFliter 过滤信息有 action, category, data</p>
+<ul>
+<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
+<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
+<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>启动模式</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Git-分支合并后回退的几种情况分析</title>
     <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<a id="more"></a><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html" target="_blank" rel="noopener">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
@@ -83,51 +131,145 @@
       </tags>
   </entry>
   <entry>
-    <title>《Android开发艺术探索》笔记-第1章</title>
-    <url>/2017/05/15/android-art-explore-1/</url>
-    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+    <title>浅谈 Flutter 的 Android 混合开发</title>
+    <url>/2019/04/18/flutter-android-mix-dev/</url>
+    <content><![CDATA[<p>本篇文章为公司内部分享时所写，基于的 flutter 版本也已过时，所以可能有不对的地方，还请指出。现在放到博客上，以后有机会再完善。</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Flutter是谷歌的移动UI框架，可以快速在iOS和Android上构建高质量的原生用户界面。 Flutter可以与现有的代码一起工作。<br>Flutter 具有以下特点：<br>快速开发，毫秒级的热重载，修改后，您的应用界面会立即更新。<br>统一的应用开发体验<br>原生性能<br>目前已经有不少大公司开始将flutter应用在项目中，比如，闲鱼、美团等，也得到了不错的反馈。<br><a href="https://github.com/alibaba/flutter-go" target="_blank" rel="noopener">https://github.com/alibaba/flutter-go</a><br>文章暂时比较简单，之后各个模块可以细化</p>
+<a id="more"></a>
+
+<h2 id="flutter介绍及安装"><a href="#flutter介绍及安装" class="headerlink" title="flutter介绍及安装"></a>flutter介绍及安装</h2><p>对于构建Flutter类型应用，因其开发语言Dart、虚拟机、构建工具与平时我们开发Native应用不同且平台虚拟机也不支持，所以需要flutter sdk来支持。<br>flutter有点类似gradle，不同的开发人员可能安装不同版本的flutter，flutter sdk版本不一致，往往会出现Dart层Api兼容性或Flutter虚拟机不一致等问题。（这个问题可以参照Android gradle管理，将gradle版本跟项目绑定来处理）</p>
+<p>具体flutter sdk安装可以按照官方文档来操作：<a href="https://flutter.dev/docs/get-started/install/macos" target="_blank" rel="noopener">https://flutter.dev/docs/get-started/install/macos</a><br>或者flutter中文文档：<a href="https://flutterchina.club/setup-macos/" target="_blank" rel="noopener">https://flutterchina.club/setup-macos/</a></p>
+<blockquote>
+<p>安装基本没有什么坑，有墙的问题可以参考中文文档使用Flutter官方为中国开发者搭建了临时镜像。</p>
+</blockquote>
+<p>配置好就可以使用flutter的一些命令，比如 <code>flutter doctor</code>。</p>
+<h2 id="Flutter四种工程类型"><a href="#Flutter四种工程类型" class="headerlink" title="Flutter四种工程类型"></a>Flutter四种工程类型</h2><p>Flutter工程中，通常有以下几种工程类型，下面分别简单概述下：</p>
+<ol>
+<li><p>Flutter Application<br>标准的Flutter App工程，包含标准的Dart层与Native平台层</p>
+</li>
+<li><p>Flutter Module<br>Flutter组件工程，仅包含Dart层实现，Native平台层子工程为通过Flutter自动生成的隐藏工程</p>
+</li>
+<li><p>Flutter Plugin<br>Flutter平台插件工程，包含Dart层与Native平台层的实现</p>
+</li>
+<li><p>Flutter Package<br>Flutter纯Dart插件工程，仅包含Dart层的实现，往往定义一些公共Widget</p>
+</li>
+</ol>
+<h2 id="已有项目使用flutter"><a href="#已有项目使用flutter" class="headerlink" title="已有项目使用flutter"></a>已有项目使用flutter</h2><p>已有的项目想改成纯flutter项目基本不可能，目前只能是开发部分模块功能使用，比如现在磁场项目中的体现功能。因此flutter 官方出了向原生项目中添加flutter的项目：<br><a href="https://github.com/flutter/flutter/wiki/Add-Flutter-to-existing-apps" target="_blank" rel="noopener">https://github.com/flutter/flutter/wiki/Add-Flutter-to-existing-apps</a></p>
+<p>目前想要的效果是：</p>
 <ul>
-<li>onCreate: 表示 Activity 正在被创建</li>
-<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<a id="more"></a></li>
-<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
-<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
-<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
-<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
-<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+<li>非flutter开发人员无感知</li>
+<li>对现有项目无侵入</li>
+<li>不需要对现有的持续集成和编译发布进行修改</li>
+<li>方便flutter开发人员开发</li>
 </ul>
-<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
-<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
-<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
-<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
-<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
-<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
-<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
-<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
-<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
-<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
-<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
-<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
-</ul>
-<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
-<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
-<p>问题：分享到第三方应用，使用什么启动方式？</p>
-<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent=”true”</p>
-<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
-<p>IntentFliter 过滤信息有 action, category, data</p>
+<p>官方的项目是将flutter项目作为module来依赖，但是这对项目修改太大，只适用于开发人员。因此我们需要考虑其他的方式。在文档中我们知道，通过<code>./gradlew flutter:assemble</code> 是可以打包出aar，这个aar其实是flutter生成的产物打包成aar，来供项目使用的。我们可以利用这个，来只使用aar，这样基本满足了上面的部分条件。但是如果是每次生成一个aar再拷贝到主项目libs下，这样每次处理太麻烦了，如果能将aar进行远程依赖就更好了，上面的要求基本就都满足了，对原生项目来说只是一个远程依赖而已，需要更新时则修改版本号即可。</p>
+<p>至此，我们梳理出流程：</p>
 <ul>
-<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
-<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
-<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+<li>flutter aar作为远端依赖</li>
+<li>本地有配置是否是flutter开发环境<ul>
+<li>开启开发环境，则使用本地依赖方式</li>
+<li>关闭开发环境，使用远端依赖</li>
+<li>默认关闭</li>
+</ul>
+</li>
+<li>flutter项目可自动打包上传aar至远端仓库</li>
+</ul>
+<p>flutter module 的项目结构如下图：</p>
+<p><img src="https://i.loli.net/2020/06/22/m3782GveKyfYVFr.jpg" alt="flutter_android_img.jpeg"></p>
+<p>.android 和 .ios 都是自动生成的，可以随时删除，通过<code>flutter packages get</code> 获取， flutter代码主要在 lib下。注意在.android和.ios目录下都有一个Flutter目录，这个是我们flutter的库项目了。也就是Android用来生成aar，iOS用来生产framework的库。如果我们用flutter create xxx 生成的纯flutter项目是没有这个Flutter目录的。</p>
+<h2 id="开发遇到的坑"><a href="#开发遇到的坑" class="headerlink" title="开发遇到的坑"></a>开发遇到的坑</h2><ol>
+<li>项目配置 productFlavor，导致无法将 flutter_assets 打包进apk</li>
+</ol>
+<blockquote>
+<p>其实这个是flutter的新版的bug，flutter的构建都是通过 <code>flutter.gradle</code> 来进行的，新的版本中做了一些改变，以为其中硬编码的原因，导致配置了productFlavor后无法执行某些task，也就没有无法将 flutter_assets 打包进apk。从而引起崩溃。</p>
+</blockquote>
+<p>做了个临时解决方案：</p>
+<ul>
+<li>创建代理 flutter 构建的 gradle 文件，即 <code>flutter_proxy.gradle</code>，从 <code>flutter.gradle</code> 复制而来</li>
+<li>修改其关于配置了 productFlavor 后的执行 task 的逻辑，确保执行相关 productFlavor 的打包 task</li>
+<li>在 <code>build.gradle</code> 中替换  <code>flutter.gradle</code> 为 <code>flutter_proxy.gradle</code></li>
+</ul>
+<p>这样就可以正常使用 gradle 打包了，缺点就是每次 <code>flutter package get</code> 需要重新改</p>
+<blockquote>
+<p>注：该 Bug 在新版 flutter sdk 中已修复</p>
+</blockquote>
+<ol start="2">
+<li><p>还有个疑问就是 <code>./gradlew flutter:assemble</code> 打出的aar 安装后，原生页面打开flutter页面时崩溃，但是打包命令去掉flutter 却可以，即 <code>./gradlew assemble</code>，猜测跟打包流程有关系，暂时没有深入去研究</p>
+</li>
+<li><p>appbar 设置属性时默认设置了状态栏<br>解决办法：单独调整状态栏属性，或修改主题</p>
+</li>
+<li><p>flutter项目中默认生成的build.gradle 中依赖的是 support 27.1.1，目前项目中使用的是 26.1.0，导致包依赖冲突</p>
+</li>
+</ol>
+<p>对于远端依赖时可以移除他的support依赖，如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">implementation(&#39;com.huazidev:test-futter-aar:0.0.2@aar&#39;, &#123;</span><br><span class="line">     exclude group: &#39;com.android.support&#39;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>对于本地开发环境可以做如下配置：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">implementation(project(&#39;:flutter&#39;))&#123;</span><br><span class="line">      exclude group: &#39;com.android.support&#39;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，也可以在 gradle 中统一修改所有的support依赖版本，</p>
+<hr>
+<h2 id="下一章，待完善"><a href="#下一章，待完善" class="headerlink" title="下一章，待完善"></a>下一章，待完善</h2><ul>
+<li>编写脚本，自动打包发布 aar</li>
+<li>发布到jcenter 、maven等开源仓库</li>
+<li>发布到自建的私有maven仓库</li>
+<li>使用jitpack发布 （私有仓库收费）</li>
+<li>使用github提供的功能作为包管理仓库（支持私有仓库）</li>
 </ul>
 ]]></content>
       <categories>
-        <category>Android</category>
-        <category>笔记</category>
+        <category>flutter</category>
       </categories>
       <tags>
-        <tag>Android</tag>
-        <tag>启动模式</tag>
-        <tag>笔记</tag>
+        <tag>flutter</tag>
+        <tag>aar</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>音视频相关知识总结</title>
+    <url>/2018/09/19/audio-video-summary/</url>
+    <content><![CDATA[<h3 id="封装格式"><a href="#封装格式" class="headerlink" title="封装格式"></a>封装格式</h3><p>我们经常看到有不同后缀表示的视频：avi，rmvb，mp4，flv，mkv等等。这些格式代表的是封装格式。何为封装格式？就是把视频数据和音频数据打包成一个文件的规范。仅仅靠看文件的后缀，很难能看出具体使用了什么视音频编码标准。</p>
+<p>我们可以通过视频的属性查看该视频文件采用的视音频技术。或者MediaInfo软件查看。</p>
+<p>封装格式的主要作用是把视频码流和音频码流按照一定的格式存储在一个文件中。<br>主要的封装格式：</p>
+<p><img src="https://i.loli.net/2020/06/22/DnYNHmFTvcwpQxI.png" alt="audio_video_table.png"></p>
+<a id="more"></a>
+
+<h3 id="视频播放器原理"><a href="#视频播放器原理" class="headerlink" title="视频播放器原理"></a>视频播放器原理</h3><p>视音频技术主要包含以下几点：封装技术，视频压缩编码技术以及音频压缩编码技术。如果考虑到网络传输的话，还包括流媒体协议技术。</p>
+<p>视频播放器播放一个互联网上的视频文件，需要经过以下几个步骤：<br>解协议，解封装，解码视音频，视音频同步。<br>如果播放本地文件则不需要解协议，为以下几个步骤：<br>解封装，解码视音频，视音频同步。</p>
+<p><img src="https://i.loli.net/2020/06/22/ZHToNguJWwjPCaQ.jpg" alt="audio_video_play_1.jpeg"></p>
+<p>解协议的作用，就是将流媒体协议的数据，解析为标准的相应的封装格式数据。视音频在网络上传播的时候，常常采用各种流媒体协议，例如HTTP，RTMP，HLS, 或是MMS等等。这些协议在传输视音频数据的同时，也会传输一些信令数据。这些信令数据包括对播放的控制（播放，暂停，停止），或者对网络状态的描述等。解协议的过程中会去除掉信令数据而只保留视音频数据。例如，采用RTMP协议传输的数据，经过解协议操作后，输出FLV格式的数据。</p>
+<p>解封装的作用，就是将输入的封装格式的数据，分离成为音频流压缩编码数据和视频流压缩编码数据。封装格式种类很多，例如MP4，MKV，RMVB，TS，FLV，AVI等等，它的作用就是将已经压缩编码的视频数据和音频数据按照一定的格式放到一起。例如，FLV格式的数据，经过解封装操作后，输出H.264编码的视频码流和AAC编码的音频码流。</p>
+<p>解码的作用，就是将视频/音频压缩编码数据，解码成为非压缩的视频/音频原始数据。音频的压缩编码标准包含AAC，MP3，AC-3等等，视频的压缩编码标准则包含H.264，MPEG2，VC-1等等。解码是整个系统中最重要也是最复杂的一个环节。通过解码，压缩编码的视频数据输出成为非压缩的颜色数据，例如YUV420P，RGB等等；压缩编码的音频数据输出成为非压缩的音频抽样数据，例如PCM数据。</p>
+<p>视音频同步的作用，就是根据解封装模块处理过程中获取到的参数信息，同步解码出来的视频和音频数据，并将视频音频数据送至系统的显卡和声卡播放出来。</p>
+<h3 id="视频编码"><a href="#视频编码" class="headerlink" title="视频编码"></a>视频编码</h3><p>视频编码的主要作用是将视频像素数据（RGB，YUV等）压缩成为视频码流，从而降低视频的数据量。如果视频不经过压缩编码的话，体积通常是非常大的，一部电影可能就要上百G的空间。视频编码是视音频技术中最重要的技术之一。视频码流的数据量占了视音频总数据量的绝大部分。高效率的视频编码在同等的码率下，可以获得更高的视频质量。</p>
+<p>主要的视频编码有：HEVC(H.265)，H.264，MPEG4，MPEG2，VP9，VP8等。<br>目前的主流编码标准：H.264<br>H.264仅仅是一个编码标准，而不是一个具体的编码器，H.264只是给编码器的实现提供参照用的。</p>
+<p>目前支持 H.265 的及其也越来越多。</p>
+<h3 id="音频编码"><a href="#音频编码" class="headerlink" title="音频编码"></a>音频编码</h3><p>音频编码的主要作用是将音频采样数据（PCM等）压缩成为音频码流，从而降低音频的数据量。音频编码也是互联网视音频技术中一个重要的技术。但是一般情况下音频的数据量要远小于视频的数据量，因而即使使用稍微落后的音频编码标准，而导致音频数据量有所增加，也不会对视音频的总数据量产生太大的影响。</p>
+<p>主要的音频编码：AAC，MP3，WMA等</p>
+<p>Android平台提供的媒体编解码器，容器和网络协议支持：<br><a href="https://developer.android.com/guide/topics/media/media-formats" target="_blank" rel="noopener">https://developer.android.com/guide/topics/media/media-formats</a></p>
+<p>比如，Android机把AudioRecord 采集的到的PCM音频数据编码压缩为AAC格式的音频数据，然后解码为PCM通过AudioTrack来播放</p>
+<h3 id="视频转码-压缩"><a href="#视频转码-压缩" class="headerlink" title="视频转码/压缩"></a>视频转码/压缩</h3><p>视频转码其实可以理解为，一个视频先解码，然后再按一定格式编码。<br>压缩视频其实就是在转码，重新编码，获取相对较小的，视频质量可接受的视频。</p>
+<p>音视频压缩的基本原理：<a href="https://blog.csdn.net/leixiaohua1020/article/details/28114081" target="_blank" rel="noopener">https://blog.csdn.net/leixiaohua1020/article/details/28114081</a></p>
+<p>那视频的大小跟什么有关呢？</p>
+<p>决定因素是码率（常用单位 kbps ），即“每秒有多少数据”，码率越大视频越大，不管你是1080p还是720p还是什么其他尺寸，同样码率的720p视频和1080p视频文件大小是一样的，只是画质不一样。</p>
+<p>而影响码率的因素有很多：</p>
+<p>1、其他条件不变，画面尺寸（1080p、720p、480p…）越大码率越大；<br>2、其他条件不变，帧率（25帧/秒、30 帧/秒 、60帧/秒……）越高码率也越大；<br>3、还有一个是编码算法，优秀的算法能在画质损失较小的情况下降低码率从而减小视频文件的体积。</p>
+<p>一个简单的计算视频大小的公式：</p>
+<p>码率（kbps）x视频时间（秒）÷8=视频文件大小（kb）</p>
+<p>目前我们项目中视频压缩使用的库：<a href="https://github.com/ypresto/android-transcoder" target="_blank" rel="noopener">https://github.com/ypresto/android-transcoder</a></p>
+<p>Android MediaCodec：<a href="https://developer.android.com/reference/android/media/MediaCodec" target="_blank" rel="noopener">https://developer.android.com/reference/android/media/MediaCodec</a></p>
+<p>MediaCodec是API 16之后Google推出的用于音视频编解码的一套偏底层的API，可以直接利用硬件加速进行视频的编解码。调用的时候需要先初始化MediaCodec作为视频的编码器，然后只需要不停传入原始的YUV数据进入编码器就可以直接输出编码好的h264流，整个API设计模型来看，就是同时包含了输入端和输出端的两条队列：</p>
+<p><img src="https://i.loli.net/2020/06/22/tMTb68JZaSmq7L9.png" alt="audio_video_image2.png"></p>
+<p>作为编码器，输入端队列存放的就是原始YUV数据，输出端队列输出的就是编码好的h264流，作为解码器则对应相反。</p>
+<p><img src="https://i.loli.net/2020/06/22/YA2o3KgnaTRlSmw.png" alt="transcode_img.png"></p>
+<p>参考：<a href="https://me.csdn.net/leixiaohua1020" target="_blank" rel="noopener">https://me.csdn.net/leixiaohua1020</a></p>
+]]></content>
+      <categories>
+        <category>音视频</category>
+      </categories>
+      <tags>
+        <tag>音视频</tag>
+        <tag>视频压缩</tag>
       </tags>
   </entry>
   <entry>
@@ -193,6 +335,80 @@
       <tags>
         <tag>hexo</tag>
         <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android 性能优化总结</title>
+    <url>/2017/04/01/performance-optimization/</url>
+    <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<a id="more"></a></p>
+<h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
+<ul>
+<li><p>首先删除布局中无用的控件和层级，其次有选择的使用 ViewGroup, 比如 LinearLayout 和 RelativeLayout 都可以实现，那么就选用 LinearLayout, 因为 RelativeLayout 功能复杂，他的布局过程花费更过的 CPU 时间。另外，减少嵌套是经常用也是最直观的方式。</p>
+</li>
+<li><p>采用 <code>&lt;include&gt;</code> 标签， <code>&lt;merge&gt;</code> 标签和<code>ViewStub</code>。<code>&lt;include&gt;</code> 标签主要用于布局重用，<code>&lt;merge&gt;</code> 标签用于减少嵌套，可以配合<code>&lt;include&gt;</code> 标签一块使用或者在自定义 View 时使用。<code>ViewStub</code> 则提供了按需加载的功能，它非常轻量级，宽高都是 0，因此本身不参与布局和绘制，很多布局在正常情况下不会显示，在特定场景下显示，因此只需要到该显示的时候再加载就好，可以提高初始化的性能。</p>
+</li>
+</ul>
+<h3 id="2-绘制优化"><a href="#2-绘制优化" class="headerlink" title="2. 绘制优化"></a>2. 绘制优化</h3><p>绘制优化是指 View 的 onDraw 方法避免执行大量的操作，主要体现在两个方面。</p>
+<ul>
+<li><p>首先，onDraw 不要创建新的局部对象，因为 onDraw 会频繁的调用，这样会瞬间产生大量的临时对象，这不仅占用过多的内存，而且会导致频繁的 GC，降低了程序执行的效率。</p>
+</li>
+<li><p>其次，onDraw 方法中不要做耗时任务，也不能执行大量的循环操作，尽管每次循环都很轻量级，但大量的循环仍然十分抢占 CPU 的时间片，这会造成 View 绘制过程不流畅。谷歌官方性能优化标准，View 的绘制帧率保持在 60fps 是最佳的，这就要求每帧的绘制时间不超过 16ms(16ms = 1000/60)。</p>
+</li>
+</ul>
+<h3 id="3-内存泄漏优化"><a href="#3-内存泄漏优化" class="headerlink" title="3. 内存泄漏优化"></a>3. 内存泄漏优化</h3><p>内存泄漏对开发人员的经验和开发意识要求较高，因此也是最容易犯的错误之一。内存泄漏的优化主要有两个方面，一方面就是开发中避免写出有内存泄露的代码，另一方面是通过一些分析工具找出潜在的内存泄漏而解决。列举一些容易出现内存泄漏的编码情况：</p>
+<ul>
+<li><p>静态变量导致内存泄漏</p>
+<p>  比如 <code>Context</code>, <code>View</code> 为静态变量，它内部持有了 Activity，所以当 Activity 关闭后仍然无法释放。</p>
+</li>
+<li><p>单例模式导致内存泄漏</p>
+<p>  比较明显的是同上，直接引用对象持有了 Activity，导致无法释放。另一种不太明显的是注册监听方式，只注册，而缺少取消注册的情况也会引起内存泄漏。因为单例的特点是其生命周期和 Applation 保持一致，因此会导致内存泄漏。</p>
+</li>
+<li><p>属性动画导致内存泄漏</p>
+<p>  属性动画是一类无限循环的动画，如果在 Activity 中播放此类动画且没有在 onDestory 中停止，那么动画就会一直播放下去，因为 Activity 会被动画 View 持有，最终 Activity 无法释放。解决方法就是及时停止动画。</p>
+</li>
+</ul>
+<p>至于分析内存泄漏的工具有很多，比如：</p>
+<ul>
+<li><p>Android Studio自带的 Profiler</p>
+<p>  可以直观的看到 CPU，内存，网络变化，也可以做很多模拟操作，但是不太容易看出内存泄漏，需要配合 MTA 使用。</p>
+</li>
+<li><p>MAT</p>
+<p>  MAT 全称 Eclipse Memory Analyzer，是一款强大的内存泄漏分析工具。</p>
+</li>
+<li><p>Android LeakCanary</p>
+<p> Android LeakCanary 易于集成，自动检测出内存泄漏，十分好用。目前我们项目中也是用的 LeakCanary。使用方法可以去参考文档。</p>
+</li>
+</ul>
+<p>上面这些工具只是帮助我们分析和定位内存泄漏的位置，等知道问题出在哪了，才能去解决问题。</p>
+<h3 id="4-响应速度优化"><a href="#4-响应速度优化" class="headerlink" title="4. 响应速度优化"></a>4. 响应速度优化</h3><p>核心思想就是避免在主线程中做耗时操作，当有耗时操作时应当放在子线程中去操作。响应速度过慢一般体现在 Activity 启动速度上面，主线程做太多事情，会导致黑屏甚至出现 ANR。</p>
+<ul>
+<li>耗时操作放在子线程</li>
+<li>业务优化，比如采用新算法，代码重构，偿还历史债务等</li>
+<li>通过分析 trace.txt 文件定位 ANR 的原因</li>
+<li>主线程和子线程抢占同步锁，子线程持有了主线程所需的锁</li>
+</ul>
+<h3 id="5-RecyclerView-和-Bitmap-优化"><a href="#5-RecyclerView-和-Bitmap-优化" class="headerlink" title="5. RecyclerView 和 Bitmap 优化"></a>5. RecyclerView 和 Bitmap 优化</h3><ul>
+<li>避免再 onBindView 中执行耗时操作</li>
+<li>根据列表的滑动状态来控制任务的执行频率，比如当列表快速滑动时不适合开启大量的异步任务</li>
+<li>对于 Bitmap 主要通过 BitmapFactory.Options 来根据需要对图片进行采样，加载合适大小的图片，降低 Bitmap 的大小</li>
+</ul>
+<h3 id="6-线程优化"><a href="#6-线程优化" class="headerlink" title="6.线程优化"></a>6.线程优化</h3><p>线程优化主要是采用线程池，避免程序中存在大量的 Thread，线程池可以重用内部的线程，从而避免了线程的创建和销毁代码的性能开销，同时线程池还能有效的控制线程中的最大并发数，避免大量的线程因互相抢占资源而导致阻塞现象的发生。因此开发过程中尽量使用线程池，而不是每次都要创建一个 Thread。</p>
+<h3 id="7-优化建议"><a href="#7-优化建议" class="headerlink" title="7. 优化建议"></a>7. 优化建议</h3><ul>
+<li>尽量避免创建过多对象</li>
+<li>不要过多使用枚举，枚举占用的内存空间比整型大</li>
+<li>常量使用 static final 来修饰</li>
+<li>使用一些 Android 特有的数据结构，他们有更好的性能</li>
+<li>适当使用软引用，弱引用</li>
+<li>采用内存缓存和磁盘缓存</li>
+<li>尽量采用静态内部类，这样避免潜在的由于内部类导致内存泄漏</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>性能优化</tag>
       </tags>
   </entry>
   <entry>
@@ -560,80 +776,6 @@
       <tags>
         <tag>python</tag>
         <tag>爬虫</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Android 性能优化总结</title>
-    <url>/2017/04/01/performance-optimization/</url>
-    <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<a id="more"></a></p>
-<h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
-<ul>
-<li><p>首先删除布局中无用的控件和层级，其次有选择的使用 ViewGroup, 比如 LinearLayout 和 RelativeLayout 都可以实现，那么就选用 LinearLayout, 因为 RelativeLayout 功能复杂，他的布局过程花费更过的 CPU 时间。另外，减少嵌套是经常用也是最直观的方式。</p>
-</li>
-<li><p>采用 <code>&lt;include&gt;</code> 标签， <code>&lt;merge&gt;</code> 标签和<code>ViewStub</code>。<code>&lt;include&gt;</code> 标签主要用于布局重用，<code>&lt;merge&gt;</code> 标签用于减少嵌套，可以配合<code>&lt;include&gt;</code> 标签一块使用或者在自定义 View 时使用。<code>ViewStub</code> 则提供了按需加载的功能，它非常轻量级，宽高都是 0，因此本身不参与布局和绘制，很多布局在正常情况下不会显示，在特定场景下显示，因此只需要到该显示的时候再加载就好，可以提高初始化的性能。</p>
-</li>
-</ul>
-<h3 id="2-绘制优化"><a href="#2-绘制优化" class="headerlink" title="2. 绘制优化"></a>2. 绘制优化</h3><p>绘制优化是指 View 的 onDraw 方法避免执行大量的操作，主要体现在两个方面。</p>
-<ul>
-<li><p>首先，onDraw 不要创建新的局部对象，因为 onDraw 会频繁的调用，这样会瞬间产生大量的临时对象，这不仅占用过多的内存，而且会导致频繁的 GC，降低了程序执行的效率。</p>
-</li>
-<li><p>其次，onDraw 方法中不要做耗时任务，也不能执行大量的循环操作，尽管每次循环都很轻量级，但大量的循环仍然十分抢占 CPU 的时间片，这会造成 View 绘制过程不流畅。谷歌官方性能优化标准，View 的绘制帧率保持在 60fps 是最佳的，这就要求每帧的绘制时间不超过 16ms(16ms = 1000/60)。</p>
-</li>
-</ul>
-<h3 id="3-内存泄漏优化"><a href="#3-内存泄漏优化" class="headerlink" title="3. 内存泄漏优化"></a>3. 内存泄漏优化</h3><p>内存泄漏对开发人员的经验和开发意识要求较高，因此也是最容易犯的错误之一。内存泄漏的优化主要有两个方面，一方面就是开发中避免写出有内存泄露的代码，另一方面是通过一些分析工具找出潜在的内存泄漏而解决。列举一些容易出现内存泄漏的编码情况：</p>
-<ul>
-<li><p>静态变量导致内存泄漏</p>
-<p>  比如 <code>Context</code>, <code>View</code> 为静态变量，它内部持有了 Activity，所以当 Activity 关闭后仍然无法释放。</p>
-</li>
-<li><p>单例模式导致内存泄漏</p>
-<p>  比较明显的是同上，直接引用对象持有了 Activity，导致无法释放。另一种不太明显的是注册监听方式，只注册，而缺少取消注册的情况也会引起内存泄漏。因为单例的特点是其生命周期和 Applation 保持一致，因此会导致内存泄漏。</p>
-</li>
-<li><p>属性动画导致内存泄漏</p>
-<p>  属性动画是一类无限循环的动画，如果在 Activity 中播放此类动画且没有在 onDestory 中停止，那么动画就会一直播放下去，因为 Activity 会被动画 View 持有，最终 Activity 无法释放。解决方法就是及时停止动画。</p>
-</li>
-</ul>
-<p>至于分析内存泄漏的工具有很多，比如：</p>
-<ul>
-<li><p>Android Studio自带的 Profiler</p>
-<p>  可以直观的看到 CPU，内存，网络变化，也可以做很多模拟操作，但是不太容易看出内存泄漏，需要配合 MTA 使用。</p>
-</li>
-<li><p>MAT</p>
-<p>  MAT 全称 Eclipse Memory Analyzer，是一款强大的内存泄漏分析工具。</p>
-</li>
-<li><p>Android LeakCanary</p>
-<p> Android LeakCanary 易于集成，自动检测出内存泄漏，十分好用。目前我们项目中也是用的 LeakCanary。使用方法可以去参考文档。</p>
-</li>
-</ul>
-<p>上面这些工具只是帮助我们分析和定位内存泄漏的位置，等知道问题出在哪了，才能去解决问题。</p>
-<h3 id="4-响应速度优化"><a href="#4-响应速度优化" class="headerlink" title="4. 响应速度优化"></a>4. 响应速度优化</h3><p>核心思想就是避免在主线程中做耗时操作，当有耗时操作时应当放在子线程中去操作。响应速度过慢一般体现在 Activity 启动速度上面，主线程做太多事情，会导致黑屏甚至出现 ANR。</p>
-<ul>
-<li>耗时操作放在子线程</li>
-<li>业务优化，比如采用新算法，代码重构，偿还历史债务等</li>
-<li>通过分析 trace.txt 文件定位 ANR 的原因</li>
-<li>主线程和子线程抢占同步锁，子线程持有了主线程所需的锁</li>
-</ul>
-<h3 id="5-RecyclerView-和-Bitmap-优化"><a href="#5-RecyclerView-和-Bitmap-优化" class="headerlink" title="5. RecyclerView 和 Bitmap 优化"></a>5. RecyclerView 和 Bitmap 优化</h3><ul>
-<li>避免再 onBindView 中执行耗时操作</li>
-<li>根据列表的滑动状态来控制任务的执行频率，比如当列表快速滑动时不适合开启大量的异步任务</li>
-<li>对于 Bitmap 主要通过 BitmapFactory.Options 来根据需要对图片进行采样，加载合适大小的图片，降低 Bitmap 的大小</li>
-</ul>
-<h3 id="6-线程优化"><a href="#6-线程优化" class="headerlink" title="6.线程优化"></a>6.线程优化</h3><p>线程优化主要是采用线程池，避免程序中存在大量的 Thread，线程池可以重用内部的线程，从而避免了线程的创建和销毁代码的性能开销，同时线程池还能有效的控制线程中的最大并发数，避免大量的线程因互相抢占资源而导致阻塞现象的发生。因此开发过程中尽量使用线程池，而不是每次都要创建一个 Thread。</p>
-<h3 id="7-优化建议"><a href="#7-优化建议" class="headerlink" title="7. 优化建议"></a>7. 优化建议</h3><ul>
-<li>尽量避免创建过多对象</li>
-<li>不要过多使用枚举，枚举占用的内存空间比整型大</li>
-<li>常量使用 static final 来修饰</li>
-<li>使用一些 Android 特有的数据结构，他们有更好的性能</li>
-<li>适当使用软引用，弱引用</li>
-<li>采用内存缓存和磁盘缓存</li>
-<li>尽量采用静态内部类，这样避免潜在的由于内部类导致内存泄漏</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>性能优化</tag>
       </tags>
   </entry>
   <entry>
