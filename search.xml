@@ -1,0 +1,1019 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Android学习系列之-通知Notification</title>
+    <url>/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/</url>
+    <content><![CDATA[<p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
+<blockquote>
+<p>通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。<span id="more"></span></p>
+</blockquote>
+<p>具体的展示如下：<br><img src="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500" alt="图1 通知区域中的通知。"><br><img src="http://upload-images.jianshu.io/upload_images/859087-4ece81d9c0de1797.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/400" alt="图2 抽屉式通知栏中的通知"><br>相信看完介绍，大家应该也都明白通知的一些使用场景了。现在大部分的应用都有推送功能，而推送都是用通知来展示的。比如简书每天就不定时的给你发推送。下面就介绍一下通知的具体使用方法。</p>
+<h3 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h3><p>要创建通知，我们就需要Notification这个类，我们可以通过 NotificationCompat.Builder 对象中为通知指定 UI 信息和操作，然后通过调用 NotificationCompat.Builder.build()，它将返回包含您的具体规范的 Notification 对象。然后通过 NotificationManager.notify()<br> 将 Notification 对象传递给系统，由系统来帮你完成后续的处理。<br>Notification对象必须包含以下三个元素：</p>
+<ul>
+<li>小图标，由 setSmallIcon() 方法设置</li>
+<li>标题，由 setContentTitle 方法设置</li>
+<li>详细文本，由  setContentText()设置</li>
+</ul>
+<p>也就是说这三个元素是必须的，不然就算创建了Notification对象也是发不出去的。另外就是需要解释一下这个小图标，小图标是指图一通知区域的小图标，也是图二中通知大图右下角的小图片，他是一个特殊的图。5.0后Android官方要求，所有应用程序的通知栏图标，应该只使用alpha图层来进行绘制，而不应该包括RGB图层。即不要为通知的图标添加任何额外的透明度，渐变色，不要用颜色将通知图标与其他应用，比如系统应用，应用的通知图标(即小图标)只能是在透明的背景上有白色的图案。<br>另外具体的设计可以参考materia design 关于Notification的设计规范，地址<a href="https://material.io/guidelines/patterns/notifications.html">https://material.io/guidelines/patterns/notifications.html</a><br>下面贴两张图来让大家更明了各个参数对应的UI显示，<br><img src="http://upload-images.jianshu.io/upload_images/859087-cb9f6450f0afce8e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620" alt="small_icon.png"><br><img src="http://upload-images.jianshu.io/upload_images/859087-f08eca29dfbe33a5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="通知各元素对应的显示"></p>
+<p>上图的NotificationIcon 其实是smallIcon，Title即ContentTitle，Message即ContentText,另外还有时间戳等。所有的通知的其他设置都是可选的。</p>
+<h3 id="通知操作"><a href="#通知操作" class="headerlink" title="通知操作"></a>通知操作</h3><p>我们设置好了通知之后，需要再向通知添加一个操作，以用来相应用户的点击操作。当然你也可以不加这个操作，就让它挂在通知栏，用户点了就是没反应，但是这样用户体验多不好。用户点击通知后可以让用户从通知直接跳转到相应的activity，以执行下一步操作。在 Notification内部，操作本身由 PendingIntent 定义，后者包含在应用中启动 Activity的 Intent。</p>
+<h3 id="创建通知"><a href="#创建通知" class="headerlink" title="创建通知"></a>创建通知</h3><p>我们可以通过以下步骤去创建一个通知</p>
+<ol>
+<li><p>先创建NotificationCompat.Builder，并且可以通过这个builder去设置通知需要的内容，来生成Notification。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NotificationCompat.Builder builder = new NotificationCompat.Builder(context);</span><br><span class="line">Notification notification = builder</span><br><span class="line">.setContentTitle(&quot;这是通知标题&quot;)</span><br><span class="line">.setContentText(&quot;这是通知内容&quot;)</span><br><span class="line">.setSmallIcon(R.mipmap.ic_launcher)</span><br><span class="line">.setLargeIcon(BitmapFactory.decodeResource(</span><br><span class="line">  getResources(), R.mipmap.ic_launcher))</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure></li>
+<li><p>设置优先级<br>通知还有优先级，我们可以通过setPriority() 传入通知的优先级，目前通知的优先级有五个等级，范围从 PRIORITY_MIN (-2) 到 PRIORITY_MAX (2)；如果未设置，则优先级默认为 PRIORITY_DEFAULT (0)。优先级越高，在通知栏就排的越往上。</p>
+</li>
+<li><p>设置一个点击后的动作<br>如之前所说的，我们可以通过pendingIntent来设置一个通知点击后的操作。比如跳转到一个activity。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Intent resultIntent = new Intent(this, ResultActivity.class);</span><br><span class="line">PendingIntent resultPendingIntent = PendingIntent.getActivity(</span><br><span class="line">            this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);</span><br><span class="line">mBuilder.setContentIntent(resultPendingIntent);</span><br></pre></td></tr></table></figure>
+<p>通过这种方式就可以让用户点击通知后跳转到ResultActivity页面了。</p>
+</li>
+<li><p>用NotificationManager 发送通知</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NotificationManager mNotificationManager =</span><br><span class="line">    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">// mId allows you to update the notification later on.</span><br><span class="line">mNotificationManager.notify(mId, mBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>更新通知<br>当我们需要更新通知中的内容的时候就可以依据上面设置的通知的id去更新的通知，只需要通知Id相同就可以更新，具体操作其实和创建差不多，官方的示例代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mNotificationManager =</span><br><span class="line">        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">// Sets an ID for the notification, so it can be updated</span><br><span class="line">int notifyID = 1;</span><br><span class="line">mNotifyBuilder = new NotificationCompat.Builder(this)</span><br><span class="line">    .setContentTitle(&quot;New Message&quot;)</span><br><span class="line">    .setContentText(&quot;You&#x27;ve received new messages.&quot;)</span><br><span class="line">    .setSmallIcon(R.drawable.ic_notify_status)</span><br><span class="line">numMessages = 0;</span><br><span class="line">// Start of a loop that processes data and then notifies the user</span><br><span class="line">...</span><br><span class="line">    mNotifyBuilder.setContentText(currentText)</span><br><span class="line">        .setNumber(++numMessages);</span><br><span class="line">    // Because the ID remains unchanged, the existing notification is</span><br><span class="line">    // updated.</span><br><span class="line">    mNotificationManager.notify(</span><br><span class="line">            notifyID,</span><br><span class="line">            mNotifyBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>删除或取消通知<br>当我们需要手动取消通知的时候，可以调用NotificationManager的 cancel()，具体的删除有以下几种方式：</p>
+</li>
+</ol>
+<ul>
+<li>用户单独或通过使用“全部清除”清除了该通知（如果通知可以清除）。</li>
+<li>用户点击通知，且您在创建通知时调用了 setAutoCancel()</li>
+<li>针对特定的通知 ID 调用了 cancel() 此方法还会删除当前通知。</li>
+<li>调用了cancelAll()方法，该方法将删除之前发出的所有通知。</li>
+</ul>
+<p>好了，到这里已经可以创建基本的Notification了，之后再写一些通知的其他使用方式。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Notification</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git-分支合并后回退的几种情况分析</title>
+    <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<span id="more"></span><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
+<ul>
+<li>Git仓库有三个主要组成——工作目录，缓存区和提交历史。</li>
+<li>reset将一个分支的末端指向另一个提交。</li>
+<li>checkout 分支切换。</li>
+<li>revert撤销一个提交的同时会创建一个新的提交。</li>
+</ul>
+<p><code>git revert</code>是个安全的方法。相比<code>git reset</code>他不会改变现在的提交历史，因此<code>git revert</code>可以用在公共分支上，而<code>git reset</code>最好用在私人分支上。</p>
+<h2 id="下面说一下那篇文章介绍的撤销merge的方法：-Reset-a-Merge：reset-到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。-Reverting-a-Merge-当-merge-以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git-正好也有办法能撤销-merge。你可以使用revert命令。方法如下：这样会创建新的-commit-来抵消对应的-merge-操作-如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。-Reverting-the-Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。"><a href="#下面说一下那篇文章介绍的撤销merge的方法：-Reset-a-Merge：reset-到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。-Reverting-a-Merge-当-merge-以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git-正好也有办法能撤销-merge。你可以使用revert命令。方法如下：这样会创建新的-commit-来抵消对应的-merge-操作-如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。-Reverting-the-Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。" class="headerlink" title="下面说一下那篇文章介绍的撤销merge的方法：#### Reset a Merge：reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。#### Reverting a Merge:当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。#### Reverting the Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。"></a>下面说一下那篇文章介绍的撤销merge的方法：<br>#### Reset a Merge：<br>reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$  git checkout master</span><br><span class="line">git reset --hard [要回退的commit的sha值] </span><br></pre></td></tr></table></figure><br>简单暴力，不过很好用。<br>#### Reverting a Merge:<br>当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$  git resert -m [要撤销的那条merge线的编号] [merge前的版本号，即sha值]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 88edd6d] Revert &quot;Merge branch &#x27;jk/post-checkout&#x27;&quot;</span><br><span class="line"> 1 files changed, 0 insertions(+), 2 deletions(-)</span><br></pre></td></tr></table></figure><br>这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git merge jk/post-checkout</span><br><span class="line">Already up-to-date.</span><br></pre></td></tr></table></figure><br>#### Reverting the Revert<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git revert [方法二撤销merge时提交的commit的版本号，这里是88edd6d]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 268e243] Revert &quot;Revert &quot;Merge branch &#x27;jk/post-checkout&#x27;&quot;&quot; 1 files changed, 2 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure><br>这样就可以正常的merge了，不过这可能会产生更多的冲突。<br>现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git merge jk/post-checkout</span><br><span class="line">Auto-merging test.txt</span><br><span class="line">Merge made by recursive. test.txt | 1 + 1 files changed, 1 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure></h2><h4 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h4><p>大致的看完之后，发现后面的方法太麻烦，简直是没事找事。不过作者可能完全是基于在公共分支改动的比较复杂的情况，总之，感觉还是在本地分支用reset最方便，或者revert也可以，别整的那个麻烦就行了。<br>最后分享一篇<a href="http://gitbook.liuhui998.com/index.html">Git Community Book</a>中关于git rebase 的文章，之前不太了解，感觉写的很好：<a href="http://gitbook.liuhui998.com/4_2.html">http://gitbook.liuhui998.com/4_2.html</a></p>
+]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第1章</title>
+    <url>/2017/05/15/android-art-explore-1/</url>
+    <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+<ul>
+<li>onCreate: 表示 Activity 正在被创建</li>
+<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<span id="more"></span></li>
+<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
+<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
+<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
+<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
+<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+</ul>
+<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
+<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
+<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
+<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
+<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
+<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
+<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
+<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
+<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
+<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
+<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
+<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
+</ul>
+<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
+<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
+<p>问题：分享到第三方应用，使用什么启动方式？</p>
+<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent&#x3D;”true”</p>
+<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
+<p>IntentFliter 过滤信息有 action, category, data</p>
+<ul>
+<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
+<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
+<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>启动模式</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第10章-消息机制</title>
+    <url>/2018/05/20/android-art-explore-10/</url>
+    <content><![CDATA[<p>Android 的消息机制主要是指 Handler 的运行机制，Handler 底层需要 MessageQueue 和 Looper 的支撑。</p>
+<p>主线程，也叫 UI 线程，即 ActivityThread，主线程被创建时就会初始化 Looper。</p>
+<span id="more"></span>
+<p>Handler 主要作用是将一个任务切换到指定的线程去执行，主要是为了在主线程中更新 UI，解决子线程无法访问 UI 的问题。ViewRootImpl 对 UI 操作做了验证，是由 ViewRootImpl 的 checkThread 方法来完成的。</p>
+<p>系统为什么不允许在子线程中访问 UI？</p>
+<blockquote>
+<p>因为 Android 的 UI 控件不是线程安全的，如果在多线程中并发访问有可能导致 UI 控件处于不可预期的状态。</p>
+</blockquote>
+<p>为什么不对 UI 控件加上锁机制？ </p>
+<blockquote>
+<p>首先，加上锁机制会让 UI 访问的逻辑变得复杂；其次，锁机制会降低 UI 的访问效率，因为锁机制会阻塞某些线程的执行，基于这两个缺点，最简单高效的做法就是采用单线程来处理 UI 操作。</p>
+</blockquote>
+<p>Handler 会采用当前线程的 Looper 来构建内部的消息循环系统，如果当前线程没有 Looper，那么就会报错。解决办法就是，为当前线程创建 Looper 即可，子线程的 Looper 不会自动结束，需要手动结束。</p>
+<p>Handler 创建完毕后，其内部的 Looper 以及 MessageQueue 就可以和 Handler 一起工作了，然后通过 Handler 的 post&#x2F;send 方法将一个 Runnable 投递到 Handler 的内部的 Looper 中处理，post 方法最终通过 send 方法完成，send 方法会调用 MessageQueue 的 enqueueMessage 方法将消息放入消息队列，然后 Looper 会发现有新消息，就会处理这个消息，然后这个消息中的 Runnable 或者 Handler 的 handleMessage 方法就会被调用。</p>
+<h5 id="ThreadLocal-的工作原理"><a href="#ThreadLocal-的工作原理" class="headerlink" title="ThreadLocal 的工作原理"></a>ThreadLocal 的工作原理</h5><p>ThreadLocal 是一个线程内部的数据存储类，通过它可以在指定的线程中存储数据，数据存储以后，只能在指定的线程中可以获取到存储的数据，对于其他线程无法获取数据。<br>当某些数据是以线程为作用域，且不同的线程具有不同的数据副本时，可以考虑使用 ThreadLocal。</p>
+<p>不同的线程中可以访问同一个 ThreadLocal 对象，但是他们的值是不一样的。原因是，不同线程访问同一个 ThreadLocal 的 get 方法，ThreadLocal 内部会从各自的线程中取出一个数组，然后再从数组中根据当前 ThreadLocal 的索引去查找对应的 value 值。</p>
+<p>ThreadLocal 的 set 方法如下(Api 版本 28)：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void set(T value) &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ThreadLocalMap getMap(Thread t) &#123;</span><br><span class="line">    return t.threadLocals;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void createMap(Thread t, T firstValue) &#123;</span><br><span class="line">    t.threadLocals = new ThreadLocalMap(this, firstValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>会先获取当前线程的 ThreadLocal.ThreadLocalMap 如果 map 为空就创建并且把 value 存入，不为空直接存入。</p>
+<p>再看下 get 方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(this);</span><br><span class="line">        if (e != null) &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result = (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过 get 和 set 方法可以看出，他们所操作的都是当前线程的 threadLocals 的 Entry 数组，因此不同线程访问同一个 ThreadLocal 的 set ，get 方法的操作权限仅限于各自线程的内部。</p>
+<h5 id="消息队列的工作原理"><a href="#消息队列的工作原理" class="headerlink" title="消息队列的工作原理"></a>消息队列的工作原理</h5><p>MessageQueue 主要包含两个操作，插入和读取，读取本身会带着删除操作，插入和读取对应的方法为 enqueueMessage 和 next。其中 enqueueMessage 往消息队列中插入消息，next 取消息并且从消息队列中移除。<br>MessageQueue 内部是通过单链表来维护消息列表，单链表在插入和删除上比较有优势。</p>
+<p>next 方法是一个无线循环的方法，如果消息队列中没有消息，那么 next 方法就一直阻塞在这里，当有新消息到来时，next 方法会返回这条消息并将其从单链表中移除。</p>
+<h5 id="Looper-工作原理"><a href="#Looper-工作原理" class="headerlink" title="Looper 工作原理"></a>Looper 工作原理</h5><p>Looper 在 Android 的消息机制中扮演着消息循环的角色，它会不停地从 MessageQueue 中查看是否有新消息，如果有新消息就立刻处理，否则就会阻塞在那里。<br>构造方法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private Looper(boolean quitAllowed) &#123;</span><br><span class="line">    mQueue = new MessageQueue(quitAllowed);</span><br><span class="line">    mThread = Thread.currentThread();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 通过构造方法，会创建消息队列，并把当前线程保存起来。<br> 通过 Looper.prepare() 可以为当前线程创建 Looper，通过 Looper.loop() 来开启消息循环。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Looper.prepare();</span><br><span class="line">Handler handler = Handler()</span><br><span class="line">Looper.loop();</span><br></pre></td></tr></table></figure>
+<p> Looper 可以退出，Looper 退出后，Handler 发消息会失败， send 方法会返回 false。子线程，创建了 looper，所有事情处理完成后，就应该调用 quit&#x2F;quitSafely 方法来终止循环，否则子线程会一直处于等待状态，如果退出 Looper 后，这个线程就会立刻终止，因此建议不需要的时候终止 Looper。</p>
+<p>Looper 的 loop 方法是个死循环，唯一跳出循环的方式是 MessageQueue.next 返回了 null。当 Looper quit 后，会通知消息队列退出，当消息队列标记为退出桩体，它的 next 方法就会返回 null。也就是说 Looper 必须退出，否则 loop 方法就会一致循环下去。next 是个阻塞操作，没有消息时会阻塞，导致 loop 一致阻塞，如果返回了消息，Looper 就会处理消息<code>msg.target.dispatchMessage</code>,这里的 msg.target 是发送消息的 handler 对象，这样就保证了不会把消息发送给其他的 handler，最终交给了 dispatchMessage 方法处理，dispatchMessage 方法是在创建 Handler 时所使用的 Looper 中执行的，这样就成功将代码逻辑切换到了指定的线程中执行。</p>
+<h5 id="Handler-工作原理"><a href="#Handler-工作原理" class="headerlink" title="Handler 工作原理"></a>Handler 工作原理</h5><p>Handler 主要工作包括消息的发送和接收过程，可以通过 post&#x2F;send 的一系列方法来实现，post 最终是通过 send 系列方法来实现的。看代码一目了然：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final boolean sendMessage(Message msg)</span><br><span class="line">&#123;</span><br><span class="line">    return sendMessageDelayed(msg, 0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public final boolean sendMessageDelayed(Message msg, long delayMillis)</span><br><span class="line">&#123;</span><br><span class="line">    if (delayMillis &lt; 0) &#123;</span><br><span class="line">        delayMillis = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean sendMessageAtTime(Message msg, long uptimeMillis) &#123;</span><br><span class="line">    MessageQueue queue = mQueue;</span><br><span class="line">    if (queue == null) &#123;</span><br><span class="line">        RuntimeException e = new RuntimeException(</span><br><span class="line">                this + &quot; sendMessageAtTime() called with no mQueue&quot;);</span><br><span class="line">        Log.w(&quot;Looper&quot;, e.getMessage(), e);</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    return enqueueMessage(queue, msg, uptimeMillis);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) &#123;</span><br><span class="line">    msg.target = this;</span><br><span class="line">    if (mAsynchronous) &#123;</span><br><span class="line">        msg.setAsynchronous(true);</span><br><span class="line">    &#125;</span><br><span class="line">    return queue.enqueueMessage(msg, uptimeMillis);</span><br><span class="line">&#125;    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Handler 发送消息的过程仅仅是向消息队列中插入了一条消息，会根据delayMillis 来判断插入位置。然后 MessageQueue.next() 会放回这条消息给 looper，Looper 收到消息后就开始处理，最终交给 handler 处理。再看下处理代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void dispatchMessage(Message msg) &#123;</span><br><span class="line">    if (msg.callback != null) &#123;</span><br><span class="line">        handleCallback(msg);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (mCallback != null) &#123;</span><br><span class="line">            if (mCallback.handleMessage(msg)) &#123;</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        handleMessage(msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>首先，检查 Message 的 callback 是否为空，不为空就通过 handleCallback 处理，message 的 callback 是个 Runnable 对象，实际上就是 post 方法所传递的 Runnable 参数。</p>
+<p>其次，检查 mCallback 是否为空，不为空就调用 mCallback 的 handleMessage 方法处理消息，Callback 是个接口，定义如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Callback interface you can use when instantiating a Handler to avoid</span><br><span class="line"> * having to implement your own subclass of Handler.</span><br><span class="line"> */</span><br><span class="line">public interface Callback &#123;</span><br><span class="line">    /**</span><br><span class="line">     * @param msg A &#123;@link android.os.Message Message&#125; object</span><br><span class="line">     * @return True if no further handling is desired</span><br><span class="line">     */</span><br><span class="line">    public boolean handleMessage(Message msg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Callback 可以通过如下方式创建：<code>Handler handler = new Handler(callback)</code>。他的意义，注释已说明：可以用来创建一个 Handler 实例，但不需要派生出 Handler 子类。日常开发中，创建 Handler 常见的方式就是派生出 Handler 的子类并重写其 handleMessage 方法，而 Callback 给我们提供了另一种方式。</p>
+<p>最后，调用 Handler 的 handlerMessage 方法来处理消息。<br>Handler 还有一个构造方法，可以指定 Looper，方便切换线程。</p>
+<h5 id="主线程的消息循环"><a href="#主线程的消息循环" class="headerlink" title="主线程的消息循环"></a>主线程的消息循环</h5><p>主线程是指 ActivitThread，<strong>严格来说它不是线程</strong>，但可以把它当做主线程。</p>
+<blockquote>
+<p>ActivityThread并没有真正继承Thread类，只是往往运行在主线程，给人以线程的感觉，其实承载ActivityThread的主线程就是由Zygote fork而创建的进程。</p>
+</blockquote>
+<p>ActivitThread 入口方法为 main，在 main 中通过 <code>Looper.prepareMainLooper();</code> 创建主线程的 Looper 和 MessageQueue，并通过 Looper.loop() 开启主线程的消息循环。<br>ActivitThread 中的 Handler 为 ActivitThread.H，它内部定义了一组消息类型，主要包含了组件的启动和停止过程。</p>
+<p>ActivitThread 通过 ApplicationThread 和 AMS 进行进程间通信，AMS 以进程间通信的方式完成 ActivitThread 的请求后会回调，ApplicationThread 中的 Binder 方法，然后 ApplicationThread 会向 H 发送消息，H 收到消息会将 ApplicationThread 的逻辑切换到 ActivitThread 中执行，即切换到主线程中执行。</p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>Android 的消息机制很重要，要充分理解其工作机制，以及 Handler, MessageQueue, Message, Looper 是如何共同工作的。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>Handler</tag>
+        <tag>消息机制</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第11章-线程和线程池</title>
+    <url>/2018/05/25/android-art-explore-11/</url>
+    <content><![CDATA[<p>AsyncTask 封装了线程池和 handler，主要hi为了方便开发者在子线程中更新UI。<br>HandlerThread 是一种具有消息循环的线程，他的内部可以使用 Handler。<br>IntentService 是一个服务，系统对其进行了封装，以便执行后台任务，IntentService 内部采用 HanderThread 来执行任务，当任务完成后会自动退出 IntentService，他是一种服务，不容易被系统杀死从而尽量保证任务的执行。</p>
+<span id="more"></span>
+
+<p>在操作系统中，线程是操作系统调度的最小单元，同时线程也是一种受限的系统资源，即线程不能无限的产生，线程的创建都有相应的开销，线程不能做到绝对的并行，除非线程数量小于等于 CPU 核心数。正确的做法是采用线程池，一个线程池会缓存一定数量的线程，通过线程池可以避免因为频繁的创建线程带来的系统开销。Android 的线程来源于 Java，主要是通过 Executor 来派生特定类型的线程池。</p>
+<h5 id="AysncTask"><a href="#AysncTask" class="headerlink" title="AysncTask"></a>AysncTask</h5><p>AysncTask 是一种轻量级的异步任务，他可以在线程池中执行后台任务，然后把执行进度和最终结果传递给主线程。<br>AysncTask 封装了 Thread 和 Handler。AysncTask 并不适合进行特别耗时的任务，对于特别耗时的任务来说建议使用线程池。</p>
+<p>AysncTask 使用过程中的一些限制：</p>
+<ol>
+<li>一个 AysncTask 对象只能调用一次 execute 方法，否则会报运行异常。</li>
+<li>AysncTask 默认采用一个串行执行任务，我们可以通过 <code>executeOnExecutor</code> 方法来并行执行任务。</li>
+</ol>
+<p>通过查看源码后发现：<br>26 版本之后已经可以在子线程中创建 AysncTask，因为默认构造函数使用的是通过 MainLooper 创建的handler。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> public AsyncTask() &#123;</span><br><span class="line">     this((Looper) null);</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> public AsyncTask(@Nullable Looper callbackLooper) &#123;</span><br><span class="line">        mHandler = callbackLooper == null || callbackLooper == Looper.getMainLooper()</span><br><span class="line">            ? getMainHandler()</span><br><span class="line">            : new Handler(callbackLooper);</span><br><span class="line">// 省略其他代码</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>AsyncTask 中有两个线程池，SerialExecutor 和 THREAD_POOL_EXECUTOR ，其中线程池 SerialExecutor 用于任务排队，而线程池 THREAD_POOL_EXECUTOR 用于真正的执行。还有一个 InternalHandler 用于将执行环境从线程池切换到主线程。</p>
+<p>看一下 SerialExecutor 的实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private static class SerialExecutor implements Executor &#123;</span><br><span class="line">        final ArrayDeque&lt;Runnable&gt; mTasks = new ArrayDeque&lt;Runnable&gt;();</span><br><span class="line">        Runnable mActive;</span><br><span class="line"></span><br><span class="line">        public synchronized void execute(final Runnable r) &#123;</span><br><span class="line">            mTasks.offer(new Runnable() &#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        r.run();</span><br><span class="line">                    &#125; finally &#123;</span><br><span class="line">                        scheduleNext();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            if (mActive == null) &#123;</span><br><span class="line">                scheduleNext();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        protected synchronized void scheduleNext() &#123;</span><br><span class="line">            if ((mActive = mTasks.poll()) != null) &#123;</span><br><span class="line">                THREAD_POOL_EXECUTOR.execute(mActive);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>从上面代码可以分析 AsyncTask 的排队过程。首先系统会把 AsyncTask 的 params 参数封装成 FutureTask 对象，FutureTask 是个并发类，在这里他充当了 Runnable 的作用。接着这个 FutureTask 会交给 SerialExecutor 的 execut 方法去处理， SerialExecutor 的 execut 方法首先会把 FutureTask 对象插入到任务队列 mTasks 中，如果这个时候没有正在活动的 AsyncTask 任务，那么就会调用 SerialExecutor 的 scheduleNext 方法来执行下一个任务，同时 AsyncTask 执行完任务后，AsyncTask 会继续执行其他任务直到所有的任务都被执行完毕为止。</p>
+<h5 id="HandlerThread"><a href="#HandlerThread" class="headerlink" title="HandlerThread"></a>HandlerThread</h5><p>HandlerThread 继承自 Thread ,它是一种可以使用 handler 的 Thread 就是 在run 方法中通过 Looper.prepare 来创建消息队列，并通过 Looper.loop() 来开启消息循环。</p>
+<p>普通 Thread 主要用于在 run 方法中执行一个耗时任务，而 HandlerThread 内部创建了消息队列，外界需要通过 Handler 的消息方式来通知 HandlerThread 执行具体任务。HandlerThread 的具体使用场景是 IntentService 。<br>由于 HandlerThread 的 run 是一个无线循环，因此当明确不需要 HandlerThread 时可以通过 quit 或 quitSafely 来终止线程的执行。</p>
+<h5 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h5><p>IntentService 是一种特殊的 Service，它继承自 Service 并且是个抽象类，必须创建自己的子类才能使用。IntentService 可用于执行后台的耗时任务，当任务执行后自动停止，由于是服务，所以优先级比单纯的线程高，所以 IntentService 适合高优先级的后台任务。IntentService 封装了 HandlerThread 和 Handler.</p>
+<p>每执行一个后台任务，就必须启动一次 IntentService, 而 IntentService 内部则通过消息的方式向 HandlerThread 请求执行任务，Handler 中的 Looper 是顺序处理消息的，这就意味着 IntentService 也是顺序后台执行任务的，多个任务同时存在时，后台任务会按照外界发起的顺序排队执行。</p>
+<p>onHandleIntent 可以对不同的任务做处理，当onHandleIntent 执行结束后 IntentService 会通过 stopSelf 尝试停止服务，当 IntentService onDestory 时会停止 looper，防止出现线程无法释放的问题。</p>
+<h5 id="Android-中的线程池"><a href="#Android-中的线程池" class="headerlink" title="Android 中的线程池"></a>Android 中的线程池</h5><p>线程池的优点：</p>
+<ol>
+<li>重用线程池中的线程，避免因为线程的创建和销毁带来的性能开销。</li>
+<li>有效控制线程池的最大并发数，避免大量的线程间因互相抢占资源而导致的阻塞的现象。</li>
+<li>能够对线程进行简单的管理，并提供定时执行以及间隔循环执行等功能。</li>
+</ol>
+<p>ThreadPoolExecutor 是线程池的真正实现，他的构造方法提供了一系列参数来配置线程池，个参数的意义如下：</p>
+<ul>
+<li><p>corePoolSize<br>线程池的核心线程数，默认情况下，核心线程会在线程池中一直存活，即使他们处于闲置状态。如果将 ThreadPoolExecutor 的 allowCoreThreadTimeOut 设为 true，那么闲置的核心线程在等待新任务到来时会有超时策略，这个时间间隔由 keepAliveTime 所指定，等待时间超过 keepAliveTime 时间，核心线程就会被终止。</p>
+</li>
+<li><p>maximumPoolSize<br>线程池所能容纳的最大线程数，当活动线程数达到这个数值后，后续的新任务会被阻塞。</p>
+</li>
+<li><p>keepAliveTime<br>非核心线程闲置的超时时长，超过这个时长非核心线程会被回收，当 ThreadPoolExecutor 的 allowCoreThreadTimeOut 为 true 时，keepAliveTime 同样作用于核心线程。</p>
+</li>
+<li><p>unit<br>用于指定 keepAliveTime 参数的时间单位，是个枚举</p>
+</li>
+<li><p>workQueue<br>线程池中的任务队列，通过线程池的 execute 方法提交 Runnable 对象会存储在这个参数中。</p>
+</li>
+<li><p>threadFactory<br>线程工厂，为线程池提供创建新线程的功能，ThreadFactory 是个接口，它只有一个方法：new Thread(Runnable r)</p>
+</li>
+</ul>
+<p>ThreadPoolExecutor 执行任务时大致遵循如下原则：</p>
+<ol>
+<li>如果线程池中的线程数量未达到核心线程数的数量，那么会启动一个核心线程来执行任务。</li>
+<li>如果线程池的线程数量已经达到或者超过核心线程的数量，那么任务会被插入到任务队列中排队等待执行。</li>
+<li>如果在步骤2中，无法插入到任务队列中，往往是由于任务队列已满，这个时候如果线程数量未达到线程池规定的最大值，那么立即启动一个非核心线程来执行任务。</li>
+<li>如果步骤3 中的线程数量已经达到线程池规定的最大值，那么就拒绝此任务，ThreadPoolExecutor 会调用 RejectedExecutionHandler 的 rejectExcecution 来通知调用者。</li>
+</ol>
+<h5 id="线程池的分类"><a href="#线程池的分类" class="headerlink" title="线程池的分类"></a>线程池的分类</h5><ol>
+<li><p>FixedThreadPool<br>通过 Executors 的 newFixedThreadPool 方法来创建，它是一种线程数量固定的线程池，只有核心线程，并且核心线程不会被回收，可以快速响应外界的确请求。</p>
+</li>
+<li><p>CachedThreadPool<br>通过 Executors 的 newCachedThreadPool 方法来创建，是一种线程数量不定的线程池，只有非核心线程，线程最大数为 Integer.MAX_VALUE ，超过60 秒闲置线程会被回收，适合执行大量耗时较少的任务。</p>
+</li>
+<li><p>ScheduledThreadPool<br>通过 Executors 的 newScheduledThreadPool 方法来创建，它的核心线程数量是固定的，，非核心线程没有限制，当非核心线程闲置会被立即回收，只要适用于，执行定时任务和具有周期的重复任务。</p>
+</li>
+<li><p>SingleThreadExecutor<br>通过 Executors 的 newSingleThreadExecutor 方法来创建，线程池中只有一个核心线程，确保所有的任务都在同一个线程中按顺序执行，意义也在于此，使得任务之间不需要处理线程同步的问题。</p>
+</li>
+</ol>
+<p>出了上面的四种还可以根据需要灵活配置线程池。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>线程</tag>
+        <tag>线程池</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《Android开发艺术探索》笔记-第2章</title>
+    <url>/2017/05/21/android-art-explore-2/</url>
+    <content><![CDATA[<p>IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。</p>
+<p>线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。<br>多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应用获取数据。</p>
+<span id="more"></span>
+<p>Android 中使用多进程只有一种方法，就是给四大组件在 AndroidMenifest 中指定 android:process 属性，除此之外别无他法。<code>adb shell ps</code> 命令可以查看进程信息。</p>
+<p>进程名以 <code>:</code> 开头的进程属于当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程；<br>进程名不以 <code>:</code> 开头的进程属于全局进程，其他应用通过 ShareUID 方式可以和它跑在同一个进程中。系统会为每个应用配备唯一的 UID, 具有相同 UID 的应用才能共享数据。<br>Android 中每个进程分配了独立的虚拟机，每个虚拟机分配不同的地址空间。运行在不在进程中的四大组件，他们之间想通过内存共享数据，都会共享失败。</p>
+<p>多进程会造成如下几个问题：</p>
+<ol>
+<li>静态成员和单例模式完全失效。</li>
+<li>线程同步机制完全失效。</li>
+<li>SharePreferences 的可靠性下降。</li>
+<li>Application 会多次创建。</li>
+</ol>
+<p>对于1，2是同一个问题，不管是锁对象还是锁全局类都无法保证线程同步，因为不同进程锁的不是同一个对象。</p>
+<p>SharePreferences 不支持两个进程同时进行写操作，因为SharePreferences 底层是通过读写 xml 文件实现的，并发读写都有可能出现问题。</p>
+<p>运行在不同进程中的组件属于两个不同的虚拟机和 Application。每启动一个进程就会走一遍 Application onCreate。</p>
+<h3 id="IPC-基础概念"><a href="#IPC-基础概念" class="headerlink" title="IPC 基础概念"></a>IPC 基础概念</h3><p>IPC 基本概念主要包括三方面，Serializable 接口，Parcelable 接口，以及 Binder，Serializable 和 Parcelable 可以完成对象的序列化过程，Intent 和 Binder 传输数据时就需要使用 Serializable 和 Parcelable。</p>
+<h4 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h4><p>Serializable 是 Java 中提供的序列化接口，为对象提供标准的序列化和反序列化操作。<br><code>serialVersionUID</code> 是用来辅助序列化和反序列化过程的，原则上序列化后的数据中的 <code>serialVersionUID</code> 只有和当前类的 <code>serialVersionUID</code> 相同才能够正常的被反序列化。序列化的时候，系统会把当前类的 <code>serialVersionUID</code> 写入序列化的文件中，当反序列化的时候系统去检测文件中的 <code>serialVersionUID</code> 是否和当前类的 <code>serialVersionUID</code> 相同，一致则正常反序列化，否则无法正常发序列化。一般来说需要手动指定 <code>serialVersionUID</code>。如果不指定，当前类有所改变会重新计算当前类的 hash 值并把它赋值给 <code>serialVersionUID</code>。</p>
+<ol>
+<li>静态成员变量属于类，不属于对象，所以不会参与序列化过程。</li>
+<li><code>transient</code> 标记的变量不参与序列化的过程。</li>
+</ol>
+<h4 id="Parcelable"><a href="#Parcelable" class="headerlink" title="Parcelable"></a>Parcelable</h4><p>Android 提供的新的序列化方式：<code>Parcelable</code>，也是一个接口。序列化功能由 <code>writeToParcel</code> 完成。Intent，Bundle，Bitmap 都实现了此接口，可以直接序列化。</p>
+<p>Serializable 是 Java 接口，使用起来简单但开销很大，序列化和反序列化需要大量 I&#x2F;O 操作。</p>
+<p>Parcelable 使用麻烦，效率高，推荐使用。</p>
+<p>将序列化对象存储到设备中或将对象序列化后通过网络传输，推荐使用 Serialzalble。</p>
+<h4 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h4><p>Android 开发中 Binder 主要用在 Service，AIDL 和 Messenger 中，普通的 Service 中的 Binder 不涉及进程间通信。Messenger 底层是 AIDL。Binder 的唯一标识，一般用当前的 Binder 类名表示。</p>
+<p>Binder 是 ServiceManager 连接各种 Manager (ActivityManager, WindowManager,等)和相应 ManagerService 的桥梁。</p>
+<p>系统生成的 Binder 类参数解析：</p>
+<ul>
+<li>DESCRIPTOR, Binder 的唯一表示，一般用当前 Binder 的类名表示</li>
+<li>asInterface(android.os.IBinder obj), 用于将服务端的 Binder 对象转成客户端所需的 AIDL 接口类型的对象，这种转换是分进程的，如果客户端，服务端位于同一进程，那么此方法返回的就是服务端的Stub 对象本身，否则返回系统封装后的 Stub.proxy 对象。</li>
+<li>adBinder， 返回当前 Binder 对象</li>
+<li>onTransact, 运行在服务端的 Binder 线程池中，当客户端发起请求时，远程请求会通过底层封装后交由此方法来处理。</li>
+</ul>
+<p>Binder 工作机制还需注意两点：</p>
+<ol>
+<li>当客户端发起远程请求时，当前线程会被挂起直到服务端进程返回数据，是个耗时操作。</li>
+<li>服务端 Binder 方法运行在 Binder 线程池中所以 Binder 方法不管是否耗时都应该采用同步方式去实现。</li>
+</ol>
+<p>Binder 的工作机制图：<br><img src="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png" alt="Binder工作流程.png"></p>
+<p>Binder 运行在服务端，如果服务端由于某中原因导致进程终止，会导致远程调用失败，Binder 提供了两个方法 <code>linkToDeath</code> 和 <code>unLinkToDeath</code> 可以设置 Binder 的死亡代理。</p>
+<p>通过 Binder 的方法 isBinderAlive 也可以判断 Binder 是否死亡。</p>
+<h3 id="Android-中的-IPC-方式"><a href="#Android-中的-IPC-方式" class="headerlink" title="Android 中的 IPC 方式"></a>Android 中的 IPC 方式</h3><ol>
+<li><p>Bundle<br>Bundle 实现了 Parcelable 接口，所以方便的在进程中传输。</p>
+</li>
+<li><p>使用文件共享<br>两个进程通过读写同一个文件交换数据。并发读写会有问题，尽量避免并发写的情况，考虑使用线程同步来限制多个线程的写操作。<br>SharePrefrences 也属于文件的一种，系统对他的读写有缓存策略，多进程模式下，读写不可靠。</p>
+</li>
+<li><p>使用 Messenger<br>Messenger 是一种轻量级的 IPC，底层实现是 AIDL。Messenger 以串行的方式处理客户端的消息。主要是为了传递消息。<br>工作原理图：<br><img src="https://i.loli.net/2020/05/21/WnT2w671ikfchzp.png" alt="messenger工作原理.png"></p>
+</li>
+<li><p>使用 AIDL<br>使用 AIDL 进行进程间通信分为服务端和客户端两方面，大致流程：服务端首先创建 Service 用来监听客户端请求，然后创建AIDL文件将暴露给客户端的接口在这个 AIDL 中声明，随后在 Service 中实现这个 AIDL 接口。客户端绑定服务端的 Service，绑定成功后，将服务端返回的 Binder 对象转成 AIDL 接口所属的类型，接着调用 AIDL 方法。</p>
+</li>
+<li><p>使用 ContentProvider<br>Android 中专门为不同应用间进行数据共享的方式，底层实现是 Binder。ContentProvider 对底层数据存储没有要求。</p>
+</li>
+</ol>
+<p>首先需要注册 Provider，其中 <code>android:authorities</code> 是 Provider 的唯一标识，通过这个就可以访问 Provider。</p>
+<p>Provider 的 onCreate 运行在主线程，其他方法运行在 Binder 线程池中。query，update，insert，delete是存在多线程并发，因此方法内部做好线程同步。</p>
+<ol start="6">
+<li>使用 Socket</li>
+</ol>
+<p>Socket 是网络通信的概念。</p>
+<ul>
+<li>TCP 面向连接协议，提供稳定的双向通信功能。</li>
+<li>UDP 无连接协议，提供不稳定的单向通信功能，也可以提供双向通信，有更好的效率，缺点是不能保证正确传输。</li>
+</ul>
+<h4 id="Binder-连接池"><a href="#Binder-连接池" class="headerlink" title="Binder 连接池"></a>Binder 连接池</h4><p>使用 AIDL 大致流程：首先创建一个 Service 和 AIDL 接口，接着创建一个继承自 AIDL 接口中的 Stub 类并实现 Stub 中的抽象方法，在 Service 的 onBinder 方法中返回这个类的对象，然后再客户端就可以绑定服务端的 Service，建立连接后就可以远程访问服务端的方法了。</p>
+<p>当项目规模很大的时候，创建很多个 Service 是不对的做法，因Service 是系统资源，太多的 Service 会使得应用看起来很重，所以最好是将所有的 AIDL 放在同一个 Service中去管理。</p>
+<p>Binder 连接池的作用是将每个业务模块的 Binder 请求统一转发的远程 Service 中去执行，避免了重复创建 Service 的过程。</p>
+<p>BinderPool 极大的提高 AIDL 的开发效率，避免大量创建 Service，建议在 AIDL 中引入 BinderPool。</p>
+<h4 id="选择合适的-IPC-方式"><a href="#选择合适的-IPC-方式" class="headerlink" title="选择合适的 IPC 方式"></a>选择合适的 IPC 方式</h4><table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+<th align="center">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Bundle</td>
+<td align="center">简单易用</td>
+<td align="center">只能传输 Bundle 支持的数据类型</td>
+<td align="center">自大组件间的进程通信</td>
+</tr>
+<tr>
+<td align="center">文件共享</td>
+<td align="center">简单易用</td>
+<td align="center">不适合高并发场景，无法做到进程间及时通信</td>
+<td align="center">无并发访问情形，交换简单的数据实时性不高的场景</td>
+</tr>
+<tr>
+<td align="center">AIDL</td>
+<td align="center">功能强大，支持一对多并发通信，支持实时通信</td>
+<td align="center">使用稍复杂，需要处理好线程同步</td>
+<td align="center">一对多通信有RPC需求</td>
+</tr>
+<tr>
+<td align="center">Messenger</td>
+<td align="center">功能一般，支持一对多串行通信，支持实时通信</td>
+<td align="center">不能很好的处理高并发情形，不支持 RPC，数据通过message传输，只能传输 Bundle 支持的数据类型</td>
+<td align="center">低并发的一对多即时通信，无RPC需求，或者无需发挥结果的RPC 需求</td>
+</tr>
+<tr>
+<td align="center">ContentProvider</td>
+<td align="center">在数据源访问方面功能强大，支持一对多并发数据共享，可以通过 Call 方法扩展</td>
+<td align="center">可以理解为受约束的 AIDL，主要提供数据源的 CRUD</td>
+<td align="center">一对多的进程间数据共享</td>
+</tr>
+<tr>
+<td align="center">Socket</td>
+<td align="center">功能强大，可以通过网络传输字节流，支持一对多并发实时通信</td>
+<td align="center">实现细节稍微繁琐，不支持直接 RPC</td>
+<td align="center">网络数据交换</td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>Android</category>
+        <category>笔记</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>笔记</tag>
+        <tag>Binder</tag>
+        <tag>IPC</tag>
+        <tag>进程通信</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>音视频相关知识总结</title>
+    <url>/2018/09/19/audio-video-summary/</url>
+    <content><![CDATA[<h3 id="封装格式"><a href="#封装格式" class="headerlink" title="封装格式"></a>封装格式</h3><p>我们经常看到有不同后缀表示的视频：avi，rmvb，mp4，flv，mkv等等。这些格式代表的是封装格式。何为封装格式？就是把视频数据和音频数据打包成一个文件的规范。仅仅靠看文件的后缀，很难能看出具体使用了什么视音频编码标准。</p>
+<p>我们可以通过视频的属性查看该视频文件采用的视音频技术。或者MediaInfo软件查看。</p>
+<p>封装格式的主要作用是把视频码流和音频码流按照一定的格式存储在一个文件中。<br>主要的封装格式：</p>
+<p><img src="https://i.loli.net/2020/06/22/DnYNHmFTvcwpQxI.png" alt="audio_video_table.png"></p>
+<span id="more"></span>
+
+<h3 id="视频播放器原理"><a href="#视频播放器原理" class="headerlink" title="视频播放器原理"></a>视频播放器原理</h3><p>视音频技术主要包含以下几点：封装技术，视频压缩编码技术以及音频压缩编码技术。如果考虑到网络传输的话，还包括流媒体协议技术。</p>
+<p>视频播放器播放一个互联网上的视频文件，需要经过以下几个步骤：<br>解协议，解封装，解码视音频，视音频同步。<br>如果播放本地文件则不需要解协议，为以下几个步骤：<br>解封装，解码视音频，视音频同步。</p>
+<p><img src="https://i.loli.net/2020/06/22/ZHToNguJWwjPCaQ.jpg" alt="audio_video_play_1.jpeg"></p>
+<p>解协议的作用，就是将流媒体协议的数据，解析为标准的相应的封装格式数据。视音频在网络上传播的时候，常常采用各种流媒体协议，例如HTTP，RTMP，HLS, 或是MMS等等。这些协议在传输视音频数据的同时，也会传输一些信令数据。这些信令数据包括对播放的控制（播放，暂停，停止），或者对网络状态的描述等。解协议的过程中会去除掉信令数据而只保留视音频数据。例如，采用RTMP协议传输的数据，经过解协议操作后，输出FLV格式的数据。</p>
+<p>解封装的作用，就是将输入的封装格式的数据，分离成为音频流压缩编码数据和视频流压缩编码数据。封装格式种类很多，例如MP4，MKV，RMVB，TS，FLV，AVI等等，它的作用就是将已经压缩编码的视频数据和音频数据按照一定的格式放到一起。例如，FLV格式的数据，经过解封装操作后，输出H.264编码的视频码流和AAC编码的音频码流。</p>
+<p>解码的作用，就是将视频&#x2F;音频压缩编码数据，解码成为非压缩的视频&#x2F;音频原始数据。音频的压缩编码标准包含AAC，MP3，AC-3等等，视频的压缩编码标准则包含H.264，MPEG2，VC-1等等。解码是整个系统中最重要也是最复杂的一个环节。通过解码，压缩编码的视频数据输出成为非压缩的颜色数据，例如YUV420P，RGB等等；压缩编码的音频数据输出成为非压缩的音频抽样数据，例如PCM数据。</p>
+<p>视音频同步的作用，就是根据解封装模块处理过程中获取到的参数信息，同步解码出来的视频和音频数据，并将视频音频数据送至系统的显卡和声卡播放出来。</p>
+<h3 id="视频编码"><a href="#视频编码" class="headerlink" title="视频编码"></a>视频编码</h3><p>视频编码的主要作用是将视频像素数据（RGB，YUV等）压缩成为视频码流，从而降低视频的数据量。如果视频不经过压缩编码的话，体积通常是非常大的，一部电影可能就要上百G的空间。视频编码是视音频技术中最重要的技术之一。视频码流的数据量占了视音频总数据量的绝大部分。高效率的视频编码在同等的码率下，可以获得更高的视频质量。</p>
+<p>主要的视频编码有：HEVC(H.265)，H.264，MPEG4，MPEG2，VP9，VP8等。<br>目前的主流编码标准：H.264<br>H.264仅仅是一个编码标准，而不是一个具体的编码器，H.264只是给编码器的实现提供参照用的。</p>
+<p>目前支持 H.265 的及其也越来越多。</p>
+<h3 id="音频编码"><a href="#音频编码" class="headerlink" title="音频编码"></a>音频编码</h3><p>音频编码的主要作用是将音频采样数据（PCM等）压缩成为音频码流，从而降低音频的数据量。音频编码也是互联网视音频技术中一个重要的技术。但是一般情况下音频的数据量要远小于视频的数据量，因而即使使用稍微落后的音频编码标准，而导致音频数据量有所增加，也不会对视音频的总数据量产生太大的影响。</p>
+<p>主要的音频编码：AAC，MP3，WMA等</p>
+<p>Android平台提供的媒体编解码器，容器和网络协议支持：<br><a href="https://developer.android.com/guide/topics/media/media-formats">https://developer.android.com/guide/topics/media/media-formats</a></p>
+<p>比如，Android机把AudioRecord 采集的到的PCM音频数据编码压缩为AAC格式的音频数据，然后解码为PCM通过AudioTrack来播放</p>
+<h3 id="视频转码-压缩"><a href="#视频转码-压缩" class="headerlink" title="视频转码&#x2F;压缩"></a>视频转码&#x2F;压缩</h3><p>视频转码其实可以理解为，一个视频先解码，然后再按一定格式编码。<br>压缩视频其实就是在转码，重新编码，获取相对较小的，视频质量可接受的视频。</p>
+<p>音视频压缩的基本原理：<a href="https://blog.csdn.net/leixiaohua1020/article/details/28114081">https://blog.csdn.net/leixiaohua1020/article/details/28114081</a></p>
+<p>那视频的大小跟什么有关呢？</p>
+<p>决定因素是码率（常用单位 kbps ），即“每秒有多少数据”，码率越大视频越大，不管你是1080p还是720p还是什么其他尺寸，同样码率的720p视频和1080p视频文件大小是一样的，只是画质不一样。</p>
+<p>而影响码率的因素有很多：</p>
+<p>1、其他条件不变，画面尺寸（1080p、720p、480p…）越大码率越大；<br>2、其他条件不变，帧率（25帧&#x2F;秒、30 帧&#x2F;秒 、60帧&#x2F;秒……）越高码率也越大；<br>3、还有一个是编码算法，优秀的算法能在画质损失较小的情况下降低码率从而减小视频文件的体积。</p>
+<p>一个简单的计算视频大小的公式：</p>
+<p>码率（kbps）x视频时间（秒）÷8&#x3D;视频文件大小（kb）</p>
+<p>目前我们项目中视频压缩使用的库：<a href="https://github.com/ypresto/android-transcoder">https://github.com/ypresto/android-transcoder</a></p>
+<p>Android MediaCodec：<a href="https://developer.android.com/reference/android/media/MediaCodec">https://developer.android.com/reference/android/media/MediaCodec</a></p>
+<p>MediaCodec是API 16之后Google推出的用于音视频编解码的一套偏底层的API，可以直接利用硬件加速进行视频的编解码。调用的时候需要先初始化MediaCodec作为视频的编码器，然后只需要不停传入原始的YUV数据进入编码器就可以直接输出编码好的h264流，整个API设计模型来看，就是同时包含了输入端和输出端的两条队列：</p>
+<p><img src="https://i.loli.net/2020/06/22/tMTb68JZaSmq7L9.png" alt="audio_video_image2.png"></p>
+<p>作为编码器，输入端队列存放的就是原始YUV数据，输出端队列输出的就是编码好的h264流，作为解码器则对应相反。</p>
+<p><img src="https://i.loli.net/2020/06/22/YA2o3KgnaTRlSmw.png" alt="transcode_img.png"></p>
+<p>参考：<a href="https://me.csdn.net/leixiaohua1020">https://me.csdn.net/leixiaohua1020</a></p>
+]]></content>
+      <categories>
+        <category>音视频</category>
+      </categories>
+      <tags>
+        <tag>音视频</tag>
+        <tag>视频压缩</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自定义 ViewGroup 实现流式布局</title>
+    <url>/2018/01/22/custom-viewgroup-to-flowlayout/</url>
+    <content><![CDATA[<p>在 web 开发中用的，网页布局有个流式布局的概念，自动换行，并且可以自适应，使用起来很方便。但是一开始 Android 系统中是没有这种布局的，之所以说一开始是因为后来谷歌出了个库实现了这个功能，它就是 <code>FlexboxLayout</code>。这个库功能比较强大，支持多种布局方式，并且还有 <code>FlexboxLayoutManager</code> 可以搭配 RecyclerView 使用。</p>
+<span id="more"></span>
+
+<p>但是我们今天说的并不是它，而是怎么自定义一个流式布局，通过这个自定义布局来复习和实战一下《Android 开发艺术探索》一书中的第四章的内容。另外说明下，本文代码使用 Kotlin 编写。 </p>
+<p>首先分析下流式布局的特点：</p>
+<ul>
+<li>自动从左向右排列</li>
+<li>剩余空间不能显示则自动换行</li>
+</ul>
+<p>既然我们把它定位为布局，那么肯定是要自定义 ViewGroup，这里选择了直接继承 ViewGroup 来实现。我们看源码会知道 ViewGroup 是个抽象类，他的子类必须实现 <code>onLayout()</code> 方法来处理布局，当然还得自己处理测量，同时还要处理子元素的测量和布局。</p>
+<h4 id="测量尺寸"><a href="#测量尺寸" class="headerlink" title="测量尺寸"></a>测量尺寸</h4><p>自定义 View 需要测量，布局，绘制三个流程。我个人感觉最复杂是测量这一过程。想理解测量就必须先理解 <code>MeasureSpec</code>，关于 <code>MeasureSpec</code> 这里需要说一下。</p>
+<h5 id="MeasureSpec"><a href="#MeasureSpec" class="headerlink" title="MeasureSpec"></a>MeasureSpec</h5><p>MeasureSpec 直译就是测量规格，它参与了 View 的绘制过程。<br>MeasureSpecc 代表了一个 32 位的 int 值，高 2 位代表 SpecMode，低 30 位代表 SpecSize，SpecMode 是指测量模式，SpecSize 是指在某种测量模式下的规格大小。<br>测量模式主要有三种，每种的含义如下：</p>
+<ul>
+<li>UNSOECIFIED<br>  父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部测量</li>
+<li>EXACTLY<br>  父容器已经检测出 View 所需的精确大小，这时候 View 的最终大小就是 SpecSize 的值，它对应与 LayoutParams 中的 match_parent 和具体的数值两种模式。</li>
+<li>AT_MOST<br>  父容器指定了一个可用大小 SpecSize，View 的大小不能超过这个值，具体是什么值要看不同 View 的具体实现，它对应与 LayoutParams 中的 wrap_content。</li>
+</ul>
+<p>因此，我们知道 MeasureSpec 就能知道 SpecMode 和 SpecSize 了，然后我们可以根据这两个值去处理 View 的大小。</p>
+<p>自定义 View 只要考虑 <code>MeasureSpec.EXACTLY</code> 和 <code>MeasureSpec.AT_MOST</code> 即可。</p>
+<p>好了，了解了 MeasureSpec，我们继续说测量的事，分析下流失布局的特点，我们先看一下 FlexboxLayout 在 <code>app:flexWrap=&quot;wrap&quot;</code>模式下的显示情况，然后我们来实现这种效果，（布局中每个View 的 margin&#x3D;5dp）<br><img src="https://i.loli.net/2020/05/21/XS9wnOhobfeWAId.png"></p>
+<p>根据上图分析下测量的实现思路：</p>
+<ol>
+<li>首先测量就是测 View 尺寸，需要确定 View 的宽高。</li>
+<li>根据布局的特点，测量最小的宽高尺寸，并且这个数值不能大于 parent 给出的建议 size。</li>
+<li>对于宽度，子 View 有多行，每行长度不一致，最长的那一行就是 View 的宽度。</li>
+<li>对于高度，子 View 的高度不一致，每一行的最大高度的和就是 View 的高度。</li>
+<li>要考虑Layout自身的 pading 和子 view 的 margin。</li>
+</ol>
+<p>相关代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;</span><br><span class="line">        Log.d(TAG, &quot;onMeasure&quot;)</span><br><span class="line"></span><br><span class="line">        val widthSpecMode = MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">        val widthSpecSize = MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">        val heightSpecMode = MeasureSpec.getMode(heightMeasureSpec)</span><br><span class="line">        val heightSpecSize = MeasureSpec.getSize(heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        val childCount = childCount</span><br><span class="line"></span><br><span class="line">        // 测量子 View 尺寸</span><br><span class="line">        measureChildren(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line"></span><br><span class="line">        var lineWidth = 0</span><br><span class="line">        var lineHeight = 0</span><br><span class="line"></span><br><span class="line">        var maxWidthSize = 0</span><br><span class="line">        var height = 0</span><br><span class="line"></span><br><span class="line">        for (i in 0 until childCount) &#123;</span><br><span class="line">            val child = getChildAt(i)</span><br><span class="line">            if (child.visibility == View.GONE) &#123;</span><br><span class="line">                // 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">                if (i == childCount - 1) &#123;</span><br><span class="line">                    maxWidthSize = max(lineWidth, maxWidthSize)</span><br><span class="line">                    height += lineHeight</span><br><span class="line">                &#125;</span><br><span class="line">                continue</span><br><span class="line">            &#125;</span><br><span class="line">            val childParams = child.layoutParams as MarginLayoutParams</span><br><span class="line">            // 子 View 的宽高包含他们的 margin</span><br><span class="line">            val childWidth = child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">            val childHeight = child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">            if (lineWidth + childWidth &gt; widthSpecSize - paddingLeft - paddingRight) &#123; // 换行</span><br><span class="line">                // 记录最大宽度</span><br><span class="line">                maxWidthSize = max(lineWidth, maxWidthSize)</span><br><span class="line">                // 重置 lineWidth</span><br><span class="line">                lineWidth = childWidth</span><br><span class="line">                height += lineHeight</span><br><span class="line">                lineHeight = childHeight</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lineWidth += childWidth</span><br><span class="line">                lineHeight = max(childHeight, lineHeight)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            // 处理最后一个 View 出现的情况,上面 maxWidthSize 和 height只处理到了倒数第二行</span><br><span class="line">            if (i == childCount - 1) &#123;</span><br><span class="line">                maxWidthSize = max(lineWidth, maxWidthSize)</span><br><span class="line">                height += lineHeight</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultWidth = if (widthSpecMode == MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            widthSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(maxWidthSize + paddingLeft + paddingRight, widthSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        val resultHeight = if (heightSpecMode == MeasureSpec.EXACTLY) &#123;</span><br><span class="line">            heightSpecSize</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            min(height + paddingTop + paddingBottom, heightSpecSize)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setMeasuredDimension(resultWidth, resultHeight)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h4><p>还是看上图，布局比较简单，就是从左向右排列，如果子 View 的显示超出了 Layout 的最大宽度就换行。所以思路就是依次遍历所有的子 View，然后从左向右依次排列，确定子 View 的位置，每次对子 View 进行 layout 之前，要预算它的显示范围，如果超出了 parent 的宽度，那么它就需要换行。</p>
+<p>定位 View 主要是确定 View 的四个顶点的位置。再简化一下，只需要知道左上角顶点的位置加上 View 的宽高就能定位一个 View，而左上角顶点就是 left, top。对于同一行，left 依次向右移动，如果定位的 View 的长度超出了 ViewGroup 最大宽大度就换行，然后更新 left，top，每换一行 top 向下移动。</p>
+<p>相关代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) &#123;</span><br><span class="line">    Log.d(TAG, &quot;onLayout&quot;)</span><br><span class="line"></span><br><span class="line">    var childLeft = paddingLeft</span><br><span class="line">    var childTop = paddingTop</span><br><span class="line">    var lineHeight = 0</span><br><span class="line"></span><br><span class="line">    var childParams: MarginLayoutParams</span><br><span class="line"></span><br><span class="line">    val childCount = childCount</span><br><span class="line"></span><br><span class="line">    for (i in 0 until childCount) &#123;</span><br><span class="line">        val child = get(i)</span><br><span class="line">        if (child.visibility == View.GONE) &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childParams = child.layoutParams as MarginLayoutParams</span><br><span class="line"></span><br><span class="line">        val childWidth = child.measuredWidth + childParams.leftMargin + childParams.rightMargin</span><br><span class="line">        val childHeight = child.measuredHeight + childParams.topMargin + childParams.bottomMargin</span><br><span class="line"></span><br><span class="line">        if (childLeft + childWidth &gt; width - paddingRight) &#123;</span><br><span class="line">            // 换行, 更新 childLeft，childTop，lineHeight</span><br><span class="line">            childLeft = paddingLeft</span><br><span class="line">            childTop += lineHeight</span><br><span class="line">            lineHeight = childHeight</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            lineHeight = max(lineHeight, childHeight)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setChildFrame(child, childLeft + childParams.leftMargin, childTop + childParams.topMargin, child.measuredWidth, child.measuredHeight)</span><br><span class="line">        childLeft += childWidth</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>到了这里我们的流式布局基本就完成了，但是还有个问题，测量的时候最大宽度是给定的 parentSize，那如果单个 View 的宽度为一个很大的值，超过了这个 parentSize，我们再布局的时候该怎么处理呢？</p>
+<p>看了一下 LinearLayout 的情况，是直接将按 View 的宽高来布局的，就是 View 会延伸到屏幕外面，然后看一下 RelativeLayout 则是限制了最大宽度，如果超过 parentSize 则最大为 parentSize</p>
+<p>具体情况看下图：<br><img src="https://i.loli.net/2020/05/22/1yG8UYd3zwMp2H4.png" alt="linearlayout-RelativeLayout.png"></p>
+<p>又看了下 FlexboxLayout 也是和 RelativeLayout 一样， 所以怎么处理看自己情况吧。这边给出我自己的处理情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">private fun setChildFrame(child: View, left: Int, top: Int, width: Int, height: Int) &#123;</span><br><span class="line">        // 可有可无，仿照 FlexboxLayout 做了此操作</span><br><span class="line">        val right = if (left + width &gt; getWidth()) &#123;</span><br><span class="line">            getWidth() - (child.layoutParams as MarginLayoutParams).rightMargin</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            left + width</span><br><span class="line">        &#125;</span><br><span class="line">        Log.d(TAG, &quot;left=$left,right=$right,top=$top,bottom=$&#123;top + height&#125;&quot;)</span><br><span class="line">        child.layout(left, top, right, top + height)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h4><p>View 绘制相关的方法是 <code>onDraw()</code>, 这个需求中并不需要特殊的绘制，所以可以不用管它。</p>
+<p>到这里基本上都处理完了，下面看一下效果图，上面是 tag 标签，下面纯 View 组合：<br><img src="https://i.loli.net/2020/05/22/AJFehr81dDRx5K2.png" alt="hflowlayout-sceenshot.png"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>自定义 ViewGroup 的基础是清楚 View 的工作原理以及工作流程。其中工作流程主要是指 measure，layout，draw 三大流程，即测量，布局，绘制，其中 measure 确定 View 的测量宽高，layout 确定 View 的最终宽高和四个顶点的位置，而 draw 则将 View 绘制到屏幕上。只有做到对于每个流程都能了然于心才能在自定义 View 时游刃有余。当有了这些基础之后，实现一个自定义 View 主要放在了功能实现上。另外一个体会就是编码之前重要的是要学会分析需求，考虑到各个方面，这个情况个人觉得跟算法比较像，多做算法题有利于提高自己的逻辑思维能力和分析问题解决问题的能力。又给自己找到一个学习算法的的理由，哈哈哈哈哈哈，加油吧，骚年。。。</p>
+<h5 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h5><p>重新整理了代码，放在了github：<br><a href="https://github.com/huazidev/HFlowLayout">https://github.com/huazidev/HFlowLayout</a></p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>自定义ViewGroup</tag>
+        <tag>流式布局</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>浅谈 Flutter 的 Android 混合开发</title>
+    <url>/2019/04/18/flutter-android-mix-dev/</url>
+    <content><![CDATA[<p>本篇文章为公司内部分享时所写，基于的 flutter 版本也已过时，所以可能有不对的地方，还请指出。现在放到博客上，以后有机会再完善。</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Flutter是谷歌的移动UI框架，可以快速在iOS和Android上构建高质量的原生用户界面。 Flutter可以与现有的代码一起工作。<br>Flutter 具有以下特点：<br>快速开发，毫秒级的热重载，修改后，您的应用界面会立即更新。<br>统一的应用开发体验<br>原生性能<br>目前已经有不少大公司开始将flutter应用在项目中，比如，闲鱼、美团等，也得到了不错的反馈。<br><a href="https://github.com/alibaba/flutter-go">https://github.com/alibaba/flutter-go</a><br>文章暂时比较简单，之后各个模块可以细化</p>
+<span id="more"></span>
+
+<h2 id="flutter介绍及安装"><a href="#flutter介绍及安装" class="headerlink" title="flutter介绍及安装"></a>flutter介绍及安装</h2><p>对于构建Flutter类型应用，因其开发语言Dart、虚拟机、构建工具与平时我们开发Native应用不同且平台虚拟机也不支持，所以需要flutter sdk来支持。<br>flutter有点类似gradle，不同的开发人员可能安装不同版本的flutter，flutter sdk版本不一致，往往会出现Dart层Api兼容性或Flutter虚拟机不一致等问题。（这个问题可以参照Android gradle管理，将gradle版本跟项目绑定来处理）</p>
+<p>具体flutter sdk安装可以按照官方文档来操作：<a href="https://flutter.dev/docs/get-started/install/macos">https://flutter.dev/docs/get-started/install/macos</a><br>或者flutter中文文档：<a href="https://flutterchina.club/setup-macos/">https://flutterchina.club/setup-macos/</a></p>
+<blockquote>
+<p>安装基本没有什么坑，有墙的问题可以参考中文文档使用Flutter官方为中国开发者搭建了临时镜像。</p>
+</blockquote>
+<p>配置好就可以使用flutter的一些命令，比如 <code>flutter doctor</code>。</p>
+<h2 id="Flutter四种工程类型"><a href="#Flutter四种工程类型" class="headerlink" title="Flutter四种工程类型"></a>Flutter四种工程类型</h2><p>Flutter工程中，通常有以下几种工程类型，下面分别简单概述下：</p>
+<ol>
+<li><p>Flutter Application<br>标准的Flutter App工程，包含标准的Dart层与Native平台层</p>
+</li>
+<li><p>Flutter Module<br>Flutter组件工程，仅包含Dart层实现，Native平台层子工程为通过Flutter自动生成的隐藏工程</p>
+</li>
+<li><p>Flutter Plugin<br>Flutter平台插件工程，包含Dart层与Native平台层的实现</p>
+</li>
+<li><p>Flutter Package<br>Flutter纯Dart插件工程，仅包含Dart层的实现，往往定义一些公共Widget</p>
+</li>
+</ol>
+<h2 id="已有项目使用flutter"><a href="#已有项目使用flutter" class="headerlink" title="已有项目使用flutter"></a>已有项目使用flutter</h2><p>已有的项目想改成纯flutter项目基本不可能，目前只能是开发部分模块功能使用，比如现在磁场项目中的体现功能。因此flutter 官方出了向原生项目中添加flutter的项目：<br><a href="https://github.com/flutter/flutter/wiki/Add-Flutter-to-existing-apps">https://github.com/flutter/flutter/wiki/Add-Flutter-to-existing-apps</a></p>
+<p>目前想要的效果是：</p>
+<ul>
+<li>非flutter开发人员无感知</li>
+<li>对现有项目无侵入</li>
+<li>不需要对现有的持续集成和编译发布进行修改</li>
+<li>方便flutter开发人员开发</li>
+</ul>
+<p>官方的项目是将flutter项目作为module来依赖，但是这对项目修改太大，只适用于开发人员。因此我们需要考虑其他的方式。在文档中我们知道，通过<code>./gradlew flutter:assemble</code> 是可以打包出aar，这个aar其实是flutter生成的产物打包成aar，来供项目使用的。我们可以利用这个，来只使用aar，这样基本满足了上面的部分条件。但是如果是每次生成一个aar再拷贝到主项目libs下，这样每次处理太麻烦了，如果能将aar进行远程依赖就更好了，上面的要求基本就都满足了，对原生项目来说只是一个远程依赖而已，需要更新时则修改版本号即可。</p>
+<p>至此，我们梳理出流程：</p>
+<ul>
+<li>flutter aar作为远端依赖</li>
+<li>本地有配置是否是flutter开发环境<ul>
+<li>开启开发环境，则使用本地依赖方式</li>
+<li>关闭开发环境，使用远端依赖</li>
+<li>默认关闭</li>
+</ul>
+</li>
+<li>flutter项目可自动打包上传aar至远端仓库</li>
+</ul>
+<p>flutter module 的项目结构如下图：</p>
+<p><img src="https://i.loli.net/2020/06/22/m3782GveKyfYVFr.jpg" alt="flutter_android_img.jpeg"></p>
+<p>.android 和 .ios 都是自动生成的，可以随时删除，通过<code>flutter packages get</code> 获取， flutter代码主要在 lib下。注意在.android和.ios目录下都有一个Flutter目录，这个是我们flutter的库项目了。也就是Android用来生成aar，iOS用来生产framework的库。如果我们用flutter create xxx 生成的纯flutter项目是没有这个Flutter目录的。</p>
+<h2 id="开发遇到的坑"><a href="#开发遇到的坑" class="headerlink" title="开发遇到的坑"></a>开发遇到的坑</h2><ol>
+<li>项目配置 productFlavor，导致无法将 flutter_assets 打包进apk</li>
+</ol>
+<blockquote>
+<p>其实这个是flutter的新版的bug，flutter的构建都是通过 <code>flutter.gradle</code> 来进行的，新的版本中做了一些改变，以为其中硬编码的原因，导致配置了productFlavor后无法执行某些task，也就没有无法将 flutter_assets 打包进apk。从而引起崩溃。</p>
+</blockquote>
+<p>做了个临时解决方案：</p>
+<ul>
+<li>创建代理 flutter 构建的 gradle 文件，即 <code>flutter_proxy.gradle</code>，从 <code>flutter.gradle</code> 复制而来</li>
+<li>修改其关于配置了 productFlavor 后的执行 task 的逻辑，确保执行相关 productFlavor 的打包 task</li>
+<li>在 <code>build.gradle</code> 中替换  <code>flutter.gradle</code> 为 <code>flutter_proxy.gradle</code></li>
+</ul>
+<p>这样就可以正常使用 gradle 打包了，缺点就是每次 <code>flutter package get</code> 需要重新改</p>
+<blockquote>
+<p>注：该 Bug 在新版 flutter sdk 中已修复</p>
+</blockquote>
+<ol start="2">
+<li><p>还有个疑问就是 <code>./gradlew flutter:assemble</code> 打出的aar 安装后，原生页面打开flutter页面时崩溃，但是打包命令去掉flutter 却可以，即 <code>./gradlew assemble</code>，猜测跟打包流程有关系，暂时没有深入去研究</p>
+</li>
+<li><p>appbar 设置属性时默认设置了状态栏<br>解决办法：单独调整状态栏属性，或修改主题</p>
+</li>
+<li><p>flutter项目中默认生成的build.gradle 中依赖的是 support 27.1.1，目前项目中使用的是 26.1.0，导致包依赖冲突</p>
+</li>
+</ol>
+<p>对于远端依赖时可以移除他的support依赖，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">implementation(&#x27;com.huazidev:test-futter-aar:0.0.2@aar&#x27;, &#123;</span><br><span class="line">     exclude group: &#x27;com.android.support&#x27;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>对于本地开发环境可以做如下配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">implementation(project(&#x27;:flutter&#x27;))&#123;</span><br><span class="line">      exclude group: &#x27;com.android.support&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，也可以在 gradle 中统一修改所有的support依赖版本，</p>
+<hr>
+<h2 id="下一章，待完善"><a href="#下一章，待完善" class="headerlink" title="下一章，待完善"></a>下一章，待完善</h2><ul>
+<li>编写脚本，自动打包发布 aar</li>
+<li>发布到jcenter 、maven等开源仓库</li>
+<li>发布到自建的私有maven仓库</li>
+<li>使用jitpack发布 （私有仓库收费）</li>
+<li>使用github提供的功能作为包管理仓库（支持私有仓库）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>flutter</category>
+      </categories>
+      <tags>
+        <tag>flutter</tag>
+        <tag>aar</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Handler相关知识总结</title>
+    <url>/2018/06/25/handler/</url>
+    <content><![CDATA[<p>直接放总结的脑图吧，简单明了：</p>
+<p><img src="https://i.loli.net/2020/06/04/a4U7LyxW1vpPlhZ.png" alt="handler.png"></p>
+<span id="more"></span>]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Handler</tag>
+        <tag>MessageQueue</tag>
+        <tag>Looper</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用hexo+github建个人博客</title>
+    <url>/2016/09/17/hexo-nxet-blog/</url>
+    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>准备开一个博客，记录一下自己平时碰到的一些问题，也可以供以后进行翻阅，查找定位。<br>既然是这样那就需要考虑怎么建博客了，之前大学的时候CSDN和博客园都有账号，可是只是零零星星写过一点东西，就放在那了。也自己买域名和vps用wordpress搭过一个博客，这个运行了接近两年，直到我工作一年后才停了。<span id="more"></span>前期的目的是写点技术博客，可是当时学生党为了盈利，慢慢运营成了电影资源下载网站，收益还可以。期间为了改网站模板也自己学了点php，也算有点收获。工作之后就没怎么管过了，考虑到版权问题以及对个人成长的没有多少帮助就给关了。当时关还是有点小不舍的，毕竟自己一手建的站，运营了那么久。啰里吧嗦那么多就是想说其实是对技术博客还是有点情怀的，于是才有了现在想自己开博客，写点技术文章的想法。<br>好了废话不多说，步入正题。<br>** 本片文章配置是在Mac完成的，其他系统版本应该也差不多 **</p>
+<h3 id="用Github-pages创建个人站"><a href="#用Github-pages创建个人站" class="headerlink" title="用Github pages创建个人站"></a>用Github pages创建个人站</h3><p>我想作为程序员你应该对GitHub不陌生。GitHub提供了Github Pages功能，我们可以用GitHub pages创建自己的个人站。</p>
+<blockquote>
+<p>Github Pages 是面向用户、组织和项目开放的公共静态页面搭建托管服务，站点可以被免费托管在Github 上，你可以选择使用Github Pages 默认提供的域名github.io 或者自定义域名来发布站点。</p>
+</blockquote>
+<ol>
+<li>登录GitHub账户，点击右上角+号，选择New repository,创建一个新的仓库，用于存放你的网站代码。</li>
+<li>按照要求填写仓库名，要使用默认的域名github.io的话仓库名就要以你的用户名命名，命名规则如下<strong>username.github.io</strong>,然后选择公开，点击Create Repository,创建仓库完成。<br>至此我们在GitHub上有了一个代码仓库，等我们在本地写好代码就可以部署上去了。</li>
+</ol>
+<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><p>最简单的方法，去<a href="https://git-scm.com/downloads">Git官网</a>下载安装，也可以通过以下途径安装</p>
+<h4 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h4><p>Debian或Ubuntu Linux，通过一条<code>sudo apt-get install git</code>就可以直接完成Git的安装。</p>
+<h4 id="Mac-OS安装"><a href="#Mac-OS安装" class="headerlink" title="Mac OS安装"></a>Mac OS安装</h4><blockquote>
+<p>安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：<a href="http://brew.sh/">http://brew.sh/</a></p>
+</blockquote>
+<h4 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h4><p>推荐去官网下载，安装完后在命令行下输入<code>git version</code>检查是否安装成功。</p>
+<h3 id="使用Hexo搭建博客"><a href="#使用Hexo搭建博客" class="headerlink" title="使用Hexo搭建博客"></a>使用Hexo搭建博客</h3><ol>
+<li>安装Node<br>hexo是一款基于Node.js的静态博客框架，所以我们先要安装node。<ul>
+<li>去node<a href="https://nodejs.org/en/download/">官网</a>下载安装包安装。</li>
+<li>有个国内墙的原因，可能上不去官网就算上去了也很慢，推荐使用homebrew安装node</li>
+<li>在bash命令下输入 node -v 如果显示版本号说明安装成功。</li>
+</ul>
+</li>
+<li>安装hexo<br>安装完node就可以用npm去安装hexo了，<a href="https://hexo.io/">hexo官网</a><blockquote>
+<p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题,由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。</p>
+</blockquote>
+</li>
+</ol>
+<p>执行以下命令安装hexo：<br><code>npm install hexo-cli -g    #-g表示全局安装, npm默认为当前项目安装</code><br>然后执行：<br><code>hexo version</code><br>如果出现版本号说明安装成功。如果报错，尝试用下面的命令安装<br><code>npm install hexo --no-optional</code><br>然后使用以下命令：<br><code>hexo init blog   //执行初始化命令到指定的目录,这里的目录是hexo文件夹</code><br><code>cd blog</code><br><code>npm install</code><br><code>hexo generate   //在当前目录下生成静态网页</code><br><code>hexo server     // 启动本地服务</code><br>在浏览器输入 <a href="http://localhost:4000/">http://localhost:4000</a> 就可以看到效果，到此hexo生成静态网站就已经完成。</p>
+<h3 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h3><p>进入你的博客目录，找到配置文件_config.yml修改如下信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:username/username.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p>这里的username是之前注册的github的用户名<br>现在可以执行：<code>hexo d</code>部署到github了，不过有时候会出现问题，如果报如下错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br></pre></td></tr></table></figure>
+<p>说明连接不到远程仓库。一般是需要配置你电脑的SSH Key</p>
+<blockquote>
+<p>为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。<br>当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
+</blockquote>
+<p>关于SSH的原理可以通过阮一峰老师的一篇文章了解一下：<br><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html">http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html</a><br>配置SSH Key 的方法可以参考GitHub官网的教程：<br><a href="https://help.github.com/articles/generating-an-ssh-key/">https://help.github.com/articles/generating-an-ssh-key/</a><br>按步骤测试好之后就可以使用<code>hexo d</code>部署了.部署完之后在浏览器输入：<a href="http://username.github.io/">http://username.github.io/</a> 就可以看到效果了。</p>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【转】Android 复杂的列表视图新写法 MultiType</title>
+    <url>/2017/05/06/fork-effect-multitype/</url>
+    <content><![CDATA[<p><strong>本文来自 <code>MultiType</code> 作者 Drakeet。</strong> 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 <code>Github</code> 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。<span id="more"></span></p>
+<p>以下是原文：</p>
+<hr>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在开发我的 <strong><a href="https://github.com/drakeet/TimeMachine">TimeMachine</a></strong> 时，我有一个复杂的聊天页面，于是我设计了我的类型池系统，它是完全解耦的，因此我能够轻松将它抽离出来分享，并给它取名为 <strong>MultiType</strong>.</p>
+<p>从前，<strong>比如我们写一个类似微博列表页面</strong>，这样的列表是十分复杂的：有纯文本的、带转发原文的、带图片的、带视频的、带文章的等等，甚至穿插一条可以横向滑动的好友推荐条目。不同的 Item 类型众多，而且随着业务发展，还会更多。如果我们使用传统的开发方式，经常要做一些繁琐的工作，代码可能都堆积在一个 <code>Adapter</code> 中：我们需要覆写 <code>RecyclerView.Adapter</code> 的 <code>getItemViewType</code> 方法，罗列一些 <code>type</code> 整型常量，并且 <code>ViewHolder</code> 转型、绑定数据也比较麻烦。一旦产品需求有变，或者产品设计说需要增加一种新的 Item 类型，我们需要去代码堆里找到我们原来的逻辑去修改，或者找到正确的位置去增加代码。这些过程都比较繁琐，侵入较强，需要小心翼翼，以免改错影响到其他地方。</p>
+<p>现在好了，我们有了 <strong>MultiType</strong>，简单来说，<strong>MultiType 就是一个多类型列表视图的中间分发框架，它能帮助你快速并且清晰地开发一些复杂的列表页面。</strong>它本是为聊天页面开发的，聊天页面的消息类型也是有大量不同种类，并且新增频繁，而 <strong>MultiType</strong> 能够轻松胜任，代码模块化，随时可拓展新的类型进入列表当中。它内建了 <code>类型</code> - <code>View</code> 的复用池系统，支持 <code>RecyclerView</code>，使用简单灵活，令代码清晰、拥抱变化。</p>
+<p>因此，我写了这篇文章，目的有几个：一是以作者的角度对 <strong>MultiType</strong> 进行入门和进阶详解。二是传递我开发过程中的思想、设计理念，这些偏细腻的内容，即使不使用 <strong>MultiType</strong>，想必也能带来很多启发。最后就是把我自觉得不错的东西分享给大家，试想如果你制造的东西很多人在用，即使没有带来任何收益，也是一件很自豪的事情。</p>
+<h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><ul>
+<li><a href="#multitype-%E7%9A%84%E7%89%B9%E6%80%A7">MultiType 的特性</a></li>
+<li><a href="#%E6%80%BB%E8%A7%88">总览</a></li>
+<li><a href="#multitype-%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95">MultiType 基础用法</a></li>
+<li><a href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3">设计思想</a></li>
+<li><a href="#%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95">高级用法</a><ul>
+<li><a href="#%E4%BD%BF%E7%94%A8-multitypetemplates-%E6%8F%92%E4%BB%B6%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81">使用 MultiTypeTemplates 插件自动生成代码</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-%E5%85%A8%E5%B1%80%E7%B1%BB%E5%9E%8B%E6%B1%A0">使用 全局类型池</a></li>
+<li><a href="#%E4%B8%80%E4%B8%AA%E7%B1%BB%E5%9E%8B%E5%AF%B9%E5%BA%94%E5%A4%9A%E4%B8%AA-viewprovider">一个类型对应多个 ViewProvider</a></li>
+<li><a href="#%E4%B8%8E-viewprovider-%E9%80%9A%E8%AE%AF">与 ViewProvider 通讯</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E6%96%AD%E8%A8%80%E6%AF%94%E4%BC%A0%E7%BB%9F-adapter-%E6%9B%B4%E5%8A%A0%E6%98%93%E4%BA%8E%E8%B0%83%E8%AF%95">使用断言，比传统 Adapter 更加易于调试</a></li>
+<li><a href="#%E6%94%AF%E6%8C%81-google-autovalue">支持 Google AutoValue</a></li>
+<li><a href="#%E5%AF%B9-class-%E8%BF%9B%E8%A1%8C%E4%BA%8C%E7%BA%A7%E5%88%86%E5%8F%91">对 class 进行二级分发</a></li>
+<li><a href="#multitype-%E4%B8%8E%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9Aheaderviewfooterviewdiff">MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0-recyclerview-%E5%B5%8C%E5%A5%97%E6%A8%AA%E5%90%91-recyclerview">实现 RecyclerView 嵌套横向 RecyclerView</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80%E5%92%8C%E7%BD%91%E6%A0%BC%E5%B8%83%E5%B1%80%E6%B7%B7%E6%8E%92%E5%88%97%E8%A1%A8">实现线性布局和网格布局混排列表</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E6%89%81%E5%B9%B3%E5%8C%96%E5%A4%84%E7%90%86">数据扁平化处理</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9B%B4%E5%A4%9A%E7%A4%BA%E4%BE%8B">更多示例</a><ul>
+<li><strong>仿造微博的数据结构和二级 ViewProvider</strong></li>
+<li>drakeet&#x2F;about-page</li>
+<li>线性和网格布局混排</li>
+<li>drakeet&#x2F;TimeMachine</li>
+<li>类似 Bilibili iOS 端首页</li>
+</ul>
+</li>
+<li><a href="#q--a">Q &amp; A</a><ul>
+<li>Q: 全局类型池的主要作用是什么，能取消全局的使用吗？</li>
+<li>Q: 使用全局类型的话，只能是在 Application 中进行注册吗？</li>
+<li>Q: 为什么不全然使用全局类型池？</li>
+<li>Q: 觉得 MultiType 不够精简，应该怎么做？</li>
+<li>Q: 在 <code>ItemViewProvider</code> 中如何拿到 <code>Context</code> 对象？</li>
+</ul>
+</li>
+<li><a href="#%E6%84%9F%E8%B0%A2">感谢</a></li>
+<li><a href="#%E5%BC%95%E7%94%A8%E6%96%87%E7%8C%AE">引用文献</a></li>
+</ul>
+<h1 id="MultiType-的特性"><a href="#MultiType-的特性" class="headerlink" title="MultiType 的特性"></a>MultiType 的特性</h1><ul>
+<li>轻盈，整个类库只有 10 个类文件，<code>aar</code> 或 <code>jar</code> 包大小只有 10KB</li>
+<li>周到，支持 局部类型池 和 全局类型池，并支持二者共用，当出现冲突时，以局部的为准</li>
+<li>灵活，几乎所有的部件(类)都可被替换、可继承定制，面向接口&#x2F;抽象编程</li>
+<li>纯粹，只负责本分工作，专注多类型的列表视图 类型分发</li>
+<li>高效，没有性能损失，内存友好，最大限度发挥 <code>RecyclerView</code> 的复用性</li>
+<li>可读，代码清晰干净、设计精巧，极力避免复杂化，可读性很好，为拓展和自行解决问题提供了基础</li>
+</ul>
+<h1 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h1><p>MultiType 能轻松实现如下页面，它们将在示例篇章具体提供: </p>
+<p><img src="http://ww4.sinaimg.cn/large/86e2ff85gw1f9mqd8lwzkj21hc0f8n4k.jpg"></p>
+<p>MultiType 的源码关系：</p>
+<p><a href="http://ww2.sinaimg.cn/large/86e2ff85gw1f9bekb34xfj21kw0y3av4.jpg"><img src="http://ww4.sinaimg.cn/large/86e2ff85gw1f9bf092eraj21kw0xr1el.jpg"></a></p>
+<h1 id="MultiType-基础用法"><a href="#MultiType-基础用法" class="headerlink" title="MultiType 基础用法"></a>MultiType 基础用法</h1><p>可能有的新手看到以上特性介绍说什么 “冲突”、抽象编程的，还有那看不懂的总览图，都是一脸懵逼，完全不要紧，不懂可以回过头来再看，我们先从基础用法入手，其实 <strong>MultiType</strong> 使用起来特别简单。使用 <strong>MultiType</strong> 一般情况下只要 maven 引入 + 三个小步骤。之后还会介绍使用插件生成代码方式，步骤将更加简化：</p>
+<h3 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h3><p>在你的 <code>build.gradle</code>:</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    compile <span class="string">&#x27;me.drakeet.multitype:multitype:2.2.1&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：<strong>MultiType</strong> 内部引用了 <code>recyclerview-v7:24.2.1</code>，如果你不想使用这个版本，可以使用 <code>exclude</code> 将它排除掉，再自行引入你选择的版本。示例如下：</p>
+</blockquote>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    compile(<span class="string">&#x27;me.drakeet.multitype:multitype:2.2.1&#x27;</span>, &#123;</span><br><span class="line">       exclude <span class="attr">group:</span> <span class="string">&#x27;com.android.support&#x27;</span></span><br><span class="line">    &#125;)</span><br><span class="line">    compile <span class="string">&#x27;com.android.support:recyclerview-v7:你选择的版本&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><strong>Step 1</strong>. 创建一个 <code>class implements Item</code>，它将是你的数据类型或 Java bean&#x2F;model. </p>
+<p> 这是一个类似 Java <code>Serializable</code> 接口，只要显式 <code>implements</code> 即可，除此之外什么都不用做。它的作用是让 MultiType 把你的所有实体类都视为 <code>Item</code> 接口，而且由于它仅是个接口，你仍然可以随意安排你的继承关系。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Category</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="keyword">public</span> String text;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Category</span><span class="params">(<span class="meta">@NonNull</span> <span class="keyword">final</span> String text)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.text = text;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 2</strong>. 创建一个 <code>class</code> 继承 <code>ItemViewProvider</code>. </p>
+<p> <code>ItemViewProvider</code> 是个抽象类，其中 <code>onCreateViewHolder</code> 方法用于生产你的 Item View Holder, <code>onBindViewHolder</code> 用于绑定数据到 <code>View</code>s. 一般一个 <code>ItemViewProvider</code> 类在内存中只会有一个实例对象，MultiType 内部将复用这个 provider 对象来生产所有相关的 Item Views 和绑定数据。示例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CategoryViewProvider</span></span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;Category, CategoryViewProvider.ViewHolder&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> ViewHolder <span class="title function_">onCreateViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@NonNull</span> ViewGroup parent)</span> &#123;</span><br><span class="line">        <span class="type">View</span> <span class="variable">root</span> <span class="operator">=</span> inflater.inflate(R.layout.item_category, parent, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ViewHolder</span>(root);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> ViewHolder holder, <span class="meta">@NonNull</span> Category category)</span> &#123;</span><br><span class="line">        holder.category.setText(category.text);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ViewHolder</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@NonNull</span> <span class="keyword">private</span> <span class="keyword">final</span> TextView category;</span><br><span class="line"></span><br><span class="line">        ViewHolder(<span class="meta">@NonNull</span> View itemView) &#123;</span><br><span class="line">            <span class="built_in">super</span>(itemView);</span><br><span class="line">            <span class="built_in">this</span>.category = (TextView) itemView.findViewById(R.id.category);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 3</strong>. 好了，你不必再创建新的类文件了，在 <code>Activity</code> 中加入 <code>RecyclerView</code> 和 <code>List</code> 并注册你的类型就完事了，示例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Items 等价于 ArrayList&lt;Item&gt; */</span></span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line"></span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 注册类型和 View 的对应关系 */</span></span><br><span class="line">        adapter.register(Category.class, <span class="keyword">new</span> <span class="title class_">CategoryViewProvider</span>());</span><br><span class="line">        adapter.register(Song.class, <span class="keyword">new</span> <span class="title class_">SongViewProvider</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 模拟加载数据，也可以稍后再加载，然后使用</span></span><br><span class="line"><span class="comment">         * adapter.notifyDataSetChanged() 刷新列表 */</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">Category</span>(<span class="string">&quot;Songs&quot;</span>));</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">Song</span>(<span class="string">&quot;小艾大人&quot;</span>, R.drawable.avatar_dakeet));</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">Song</span>(<span class="string">&quot;许岑&quot;</span>, R.drawable.avatar_cen));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大功告成！这就是 <strong>MultiType</strong> 的基础用法了，简单、符合直觉。其中 <code>onCreateViewHolder</code> 和 <code>onBindViewHolder</code> 方法名沿袭了使用 <code>RecyclerView</code> 的习惯，令人一目了然，减少了新人的学习成本。</p>
+<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p><strong>MultiType</strong> 设计伊始，我给它定了几个原则：</p>
+<ul>
+<li><p>要简单，便于他人阅读代码。</p>
+<p>因此我极力去避免将它复杂化，比如引入显性 item id 机制（MultiType 内部有隐性 id），比如加入许多不相干的内容，比如使用 apt + 注解完成类型和 View 自动绑定、自动注册，再比如，使用反射。这些我都是拒绝的。我想写人人可读的代码，使用简单的方式，去实现复杂的需求。过多不相干、没必要的代码，将会使项目变得令人晕头转向，难以阅读，遇到需要定制、解决问题的时候，无从下手。</p>
+</li>
+<li><p>要灵活，便于拓展和适应各种需求</p>
+<p>很多人会得意地告诉我，他们把 <strong>MultiType</strong> 源码精简成三四个类，甚至一个类，以为代码越少就是越好，这我也是不能赞同的。<strong>MultiType</strong> 考虑得比他们更远，这是一个提供给大众使用的类库，过度的精简只会使得灵活性大幅失去。<strong>它或许不是使用起来最简单的，但很可能是使用起来最灵活的。</strong> 在我看来，灵活性的优先级大于简单性。因此，<strong>MultiType</strong> 各个组件都是以接口或抽象进行连接，这意味着它所有的角色、组件都可以被替换，或者被拓展和继承。如果你觉得它使用起来还不够简单，完全可以通过继承来封装出更具体符合你使用需求的方法。它已经暴露了足够丰富、周到的接口以供自行实现，我们不应该直接去修改源码，这会导致一旦后续发现你的精简版满足不了你的需求时，已经没有回头路了。</p>
+</li>
+<li><p>要直观，使用起来能令项目代码更清晰、模块化</p>
+<p><strong>MultiType</strong> 提供的 <code>ItemViewProvider</code> 沿袭了 <code>RecyclerView Adapter</code> 的接口命名，使用起来更加舒适，符合习惯。另外，手动写一个新的 <code>ItemViewProvider</code> 需要提供了 类型 泛型，虽然略微有点儿麻烦，但能带来一些好处，指定泛型之后，我们不再需要自己做强制转型，而且代码能够显式表明 <code>ItemViewProvider</code> 和 <code>Item class</code> 的对应关系，简单直观。另外，现在我们有 <strong>MultiTypeTemplates</strong> 插件来自动生成代码，这个过程变得更加顺滑简单。</p>
+</li>
+</ul>
+<h1 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h1><p>介绍了基础用法和设计思想后，我们可以来介绍一下 MultiType 的高级用法。这是一些典型需求和案例，它们是基础用法的延伸，也是设计思想的体现。也许一开始并不会使用到，但如若了解，能够拓宽使用 MultiType 的思路，并且其中也分享了许多有意思的内容和考虑问题的角度。</p>
+<h2 id="使用-MultiTypeTemplates-插件自动生成代码"><a href="#使用-MultiTypeTemplates-插件自动生成代码" class="headerlink" title="使用 MultiTypeTemplates 插件自动生成代码"></a>使用 MultiTypeTemplates 插件自动生成代码</h2><p>在基础用法中，我们了通过 3 个步骤完成 <strong>MultiType</strong> 的初次接入使用，实际上这个过程可以更加简化，<strong>MultiType</strong> 提供了 Android Studio 插件来自动生成代码：<strong>MultiTypeTemplates</strong>，源码也是开源的，<a href="https://github.com/drakeet/MultiTypeTemplates">https://github.com/drakeet/MultiTypeTemplates</a>，不仅提供了一键生成 <code>Item</code> 和 <code>ItemViewProvider</code>，而且<strong>是一个很好的利用代码模版自动生成代码的示例。</strong>其中使用到了官方提供的代码模版 API，也用到了我自己发明的更灵活修改模版内容的方法，有兴趣做这方面插件的可以看看。</p>
+<p>话说回来，安装和使用 <strong>MultiTypeTemplates</strong> 非常简单：</p>
+<p><strong>Step 1.</strong> 打开 Android Studio 的<code>设置</code> -&gt; <code>Plugin</code> -&gt; <code>Browse repositories</code>，搜索 <code>MultiTypeTemplates</code> 即可获得下载安装：</p>
+<p><img src="http://ww4.sinaimg.cn/large/86e2ff85gw1f935l0kwilj21kw0t3akm.jpg"></p>
+<p><strong>Step 2.</strong> 安装完成后，重启 Android Studio. 右键点击你的 package，选择 <code>New</code> -&gt; <code>MultiType Item</code>，然后输入你的 <code>Item</code> 名字，它就会自动生成 <code>Item</code> and <code>ItemViewProvider</code> 文件和代码。</p>
+<p>比如你输入的是 “Category”，它就会自动生成 <code>Category.java</code> 和 <code>CategoryViewProvider.java</code>.</p>
+<p>特别方便，相信你会很喜欢它。未来这个插件也将会支持自动生成布局文件，这是目前欠缺的，但不要紧，其实 AS 在这方面已经很方便了，对布局 <code>R.layout.item_category</code> 使用 <code>alt + enter</code> 快捷键即可自动生成布局文件。</p>
+<h2 id="使用-全局类型池"><a href="#使用-全局类型池" class="headerlink" title="使用 全局类型池"></a>使用 全局类型池</h2><p>在基础用法中，我们并没有提到 全局类型池，实际上，<strong>MultiType</strong> 支持 局部类型池 和 全局类型池，并支持二者共用，当出现冲突时，以局部的为准。使用局部类型池就如上面的示例，调用 <code>adapter.register()</code> 即可。而使用全局类型池也是很容易的，<strong>MultiType</strong> 提供了一个内置的 <code>GlobalMultiTypePool</code> 作为全局类型池来存储类型和 view 关系，使用如下：</p>
+<p>只要在使用你的全局类型之前任意位置注册类型，通过调用 <code>GlobalMultiTypePool.register(...)</code> 静态方法完成注册。推荐统一在 <code>Application</code> 初始便进行注册，这样代码便于寻找和阅读。</p>
+<p>之后回到你的 <code>Activity</code>，调用 <code>adapter.applyGlobalMultiTypePool()</code> 方法应用你注册过的全局类型即可。</p>
+<p><code>GlobalMultiTypePool</code> 让一些普适性的类型能够全局共用，但使用全局类型池不当也会带来问题，这是没有全然采用全局类型池的原因。问题在于全局类型池是静态的，如果你在 <code>Activity</code> 中注册<strong>全局</strong>类型（虽然并不推荐。因为全局类型最好统一在一个地方注册，便于管理），并传入带 <code>Activity</code> 引用的变量进去，就可能造成内存泄露。举个例子，如下是一个很常见的场景，我们把一个点击回调传递给 <code>provider</code>，并注册到全局类型池：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LeakActivity</span> <span class="keyword">extends</span> <span class="title class_">Activity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_leak);</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line"></span><br><span class="line">        <span class="type">OnClickListener</span> <span class="variable">listener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OnClickListener</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 在 applyGlobalMultiTypePool 之前注册全局 */</span></span><br><span class="line">        GlobalMultiTypePool.register(Post.class, <span class="keyword">new</span> <span class="title class_">PostViewProvider</span>(listener));</span><br><span class="line">        </span><br><span class="line">        adapter.applyGlobalMultiTypePool(); <span class="comment">// &lt;- 使全局的类型加入到局部中来</span></span><br><span class="line"></span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于 Java 匿名内部类 或 非静态内部类，都会默认持有 外部类 的引用，比如这里的 <code>OnClickListener</code> 匿名类对象会持有 <code>LeakActivity.this</code>，当 <code>listener</code> 传递给 <code>new PostViewProvider()</code> 构造函数的时候，<code>GlobalMultiTypePool</code> 内置的静态类型池将长久持有 <code>provider -&gt; listener -&gt; LeakActivity.this</code> 引用链，若没有及时释放，就会引起内存泄露。</p>
+<p>因此，<strong>在使用全局类型池时，最好不要给 <code>provider</code> 传递回调对象或者外部引用，否则就应手动释放或使用弱引用(<code>WeakReference</code>)。</strong>除此之外，全局类型池没有什么其他问题，类型池都只会持有 <code>class</code> 和非常轻薄的 <code>provider</code> 对象。我做过一个试验，就算拥有上万个类型和 <code>provider</code>，内存占用也是很少的，索引速度也很快，在主线程连续注册一万个类型花费不过 10 毫秒的时间，何况一般一个应用根本不可能有这么多类型，完全不必担心这方面的问题。</p>
+<p>另外一个特性是，不管是全局类型池还是局部类型池，都支持重复注册类型。当发现重复时，之后注册的会把之前注册的类型覆盖掉，因此对于全局类型池，需要谨慎进行重复注册，以免影响到其他地方。</p>
+<h2 id="一个类型对应多个-ViewProvider"><a href="#一个类型对应多个-ViewProvider" class="headerlink" title="一个类型对应多个 ViewProvider"></a>一个类型对应多个 <code>ViewProvider</code></h2><blockquote>
+<p>注：本文所有的 <code>ViewProvider</code> 都指的是 <code>ItemViewProvider</code>.</p>
+</blockquote>
+<p><strong>MultiType</strong> 天然支持一个类型对应多个 <code>ViewProvider</code>，但仅限于在不同的列表中。比如你在 <code>adapter1</code> 中注册了 <code>Post.class</code> 对应 <code>SinglePostViewProvider</code>，在另一个 <code>adapter2</code> 中注册了 <code>Post.class</code> 对应 <code>PostDetailViewProvider</code>，这便是一对多的场景。只要是在不同的局部类型池中，无论如何都不会相互干扰，都是允许的。</p>
+<p>而对于在 同一个列表中 一对多的问题，首先这种场景非常少见，再者不管支不支持一对多，开发者都要去判断哪个时候运用哪个 <code>ViewProvider</code>，这是逃不掉的，否则程序就无所适从了。因此，<strong>MultiType</strong> 不去特别解决这个问题，<strong>如果要实现同一个列表中一对多，只要空继承你的类型，然后把它视为新的类型，注册到你的类型池中即可</strong>。</p>
+<h2 id="与-ViewProvider-通讯"><a href="#与-ViewProvider-通讯" class="headerlink" title="与 ViewProvider 通讯"></a>与 <code>ViewProvider</code> 通讯</h2><p><code>ItemViewProvider</code> 对象可以接受外部类型、回调函数，只要在使用之前，传递进去即可，例如：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">OnClickListener</span> <span class="variable">listener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OnClickListener</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">adapter.register(Post.class, <span class="keyword">new</span> <span class="title class_">PostViewProvider</span>(xxx, listener));</span><br></pre></td></tr></table></figure>
+
+<p>但话说回来，对于点击事件，能不依赖 <code>provider</code> 外部内容的话，最好就在 <code>provider</code> 内部完成。<code>provider</code> 内部能够接收到 Views 和 数据，大部分情况下，完全有能力不依赖外部 独立完成逻辑。这样能使代码更加模块化，便于解耦，例如下面便是一个完全自包含的例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SquareViewProvider</span> <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;Square, SquareViewProvider.ViewHolder&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> ViewHolder <span class="title function_">onCreateViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@NonNull</span> ViewGroup parent)</span> &#123;</span><br><span class="line">        <span class="type">View</span> <span class="variable">root</span> <span class="operator">=</span> inflater.inflate(R.layout.item_square, parent, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ViewHolder</span>(root);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> ViewHolder holder, <span class="meta">@NonNull</span> Square square)</span> &#123;</span><br><span class="line">        holder.square = square;</span><br><span class="line">        holder.squareView.setText(valueOf(square.number));</span><br><span class="line">        holder.squareView.setSelected(square.isSelected);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ViewHolder</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> TextView squareView;</span><br><span class="line">        <span class="keyword">private</span> Square square;</span><br><span class="line"></span><br><span class="line">        ViewHolder(<span class="keyword">final</span> View itemView) &#123;</span><br><span class="line">            <span class="built_in">super</span>(itemView);</span><br><span class="line">            squareView = (TextView) itemView.findViewById(R.id.square);</span><br><span class="line">            itemView.setOnClickListener(<span class="keyword">new</span> <span class="title class_">View</span>.OnClickListener() &#123;</span><br><span class="line">                <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">                    itemView.setSelected(square.isSelected = !square.isSelected);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用断言，比传统-Adapter-更加易于调试"><a href="#使用断言，比传统-Adapter-更加易于调试" class="headerlink" title="使用断言，比传统 Adapter 更加易于调试"></a>使用断言，比传统 Adapter 更加易于调试</h2><p><strong>众所周知，如果一个传统的 <code>RecyclerView</code> <code>Adapter</code> 内部有异常导致崩溃，它的异常栈是不会指向到你的 <code>Activity</code><strong>，这给我们开发调试过程中带来了麻烦。如果我们的 <code>Adapter</code> 是复用的，就不知道是哪一个页面崩溃。而对于 <code>MultiTypeAdapter</code>，我们显然要用于多个地方，而且可能出现开发者忘记注册类型等等问题。为了便于调试，开发期快速失败，</strong>MultiType</strong> 提供了很方便的断言 API: <code>MultiTypeAsserts</code>，使用方式如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> me.drakeet.multitype.MultiTypeAsserts.assertAllRegistered;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> me.drakeet.multitype.MultiTypeAsserts.assertHasTheSameAdapter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleActivity</span> <span class="keyword">extends</span> <span class="title class_">MenuBaseActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line"></span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line">        adapter.register(TextItem.class, <span class="keyword">new</span> <span class="title class_">TextItemViewProvider</span>());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">TextItem</span>(valueOf(i)));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 断言所有使用的类型都已注册 */</span></span><br><span class="line">        assertAllRegistered(adapter, items);</span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">        <span class="comment">/* 断言 recyclerView 使用的是正确的 adapter */</span></span><br><span class="line">        assertHasTheSameAdapter(recyclerView, adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>assertAllRegistered</code> 和 <code>assertHasTheSameAdapter</code> 都是可选择性使用，<code>assertAllRegistered</code> 需要在加载或更新数据之后， <code>assertHasTheSameAdapter</code> 必须在 <code>recyclerView.setAdapter(adapter)</code> 之后。</p>
+<p>这样做以后，<code>MultiTypeAdapter</code> 相关的异常都会报到你的 <code>Activity</code>，并且会详细注明出错的原因，而如果符合断言，断言代码不会有任何副作用或影响你的代码逻辑，这时你可以把它当作废话。关于这个类的源代码也是很简单，有兴趣可以直接看看源码：<a href="https://github.com/drakeet/MultiType/blob/master/library/src/main/java/me/drakeet/multitype/MultiTypeAsserts.java">drakeet&#x2F;multitype&#x2F;MultiTypeAsserts.java</a></p>
+<h2 id="支持-Google-AutoValue"><a href="#支持-Google-AutoValue" class="headerlink" title="支持 Google AutoValue"></a>支持 Google AutoValue</h2><p><a href="https://github.com/google/auto/tree/master/value">AutoValue</a> 是 Google 提供的一个在 Java 实体类中自动生成代码的类库，使你更专注于处理项目的其他逻辑，它可使代码更少，更干净，以及更少的 bug. </p>
+<p>当我们使用传统方式创建一个 Java 模型类的时候，经常需要写一堆 <code>toString()</code>、<code>hashCode()</code>、getter、setter 等等方法，而且对于 Android 开发，大多情况下需要实现 <code>Parcelable</code> 接口。这样的结果是，我本来想要一个只有几个属性的小模型类，但出于各种原因，这个模型类方法数变得十分繁复，阅读起来很不清爽，并且难免会写错内容。AutoValue 的出现解决了这个问题，我们只需定义一些抽象类交给 AutoValue，AutoValue 会<strong>自动</strong>生成该抽象类的具体实现子类，并携带各种样板代码。</p>
+<p>更详细的介绍内容和使用教程，我会在文章末尾会给出 AutoValue 的相关链接，不熟悉 AutoValue 可以借此机会看一下，在这里就不做过多介绍了。新手暂时看不懂也不必纠结，了解之后都是十分容易的。</p>
+<p><strong>MultiType</strong> 支持了 Google AutoValue，支持自动映射某个已经注册的类型的<strong>子类</strong>到同一 View Provider，规则是：如果子类<strong>有</strong>注册，就用注册的映射关系；如果子类<strong>没</strong>注册，则该子类对象使用注册过的父类映射关系。</p>
+<h2 id="对-class-进行二级分发"><a href="#对-class-进行二级分发" class="headerlink" title="对 class 进行二级分发"></a>对 class 进行二级分发</h2><p>我的另外一个项目，即一开始提到的 <strong>TimeMachine</strong>，它是一个看起来特别像聊天软件的 SDK，但还处于非常初期阶段，大家可以不必太关心它。话说回来，在我的 <strong>TimeMachine</strong> 中，我的消息数据结构是 <code>Message</code> - <code>MessageContent</code>，<code>Message</code> 包含了 <code>MessageContent</code>. 因此产生了一个问题，我的 <code>message</code> 对象们都是一样的 <code>Message</code> 类型，但 <code>message</code> 包含的 <code>content</code> 对象不一样，我需要根据 <code>content</code> 来分发数据到 <code>ItemViewProvider</code>，但我加入 <code>Items</code> 中的数据都是 <code>Message</code> 对象，因此，如果什么也不做，它们会被视为同一类型。对于这种场景，我们可以继承 <code>MultiTypeAdapter</code> 并覆写 <code>onFlattenClass(@NonNull Item message)</code> 方法进行二级分发，以我的 <code>MessageAdapter</code> 为例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MessageAdapter</span> <span class="keyword">extends</span> <span class="title class_">MultiTypeAdapter</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MessageAdapter</span><span class="params">(<span class="meta">@NonNull</span> List&lt;Message&gt; messages)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(messages);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span> <span class="keyword">public</span> Class <span class="title function_">onFlattenClass</span><span class="params">(<span class="meta">@NonNull</span> Item message)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ((Message) message).content.getClass();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是不是十分简单？这样以后，我就可以直接将 <code>MessageContent.class</code> 注册进类型池，而将包含不同 <code>content</code> 的 <code>Message</code> 对象 add 进 <code>Items</code> List，<code>MessageAdapter</code> 会自动取出 <code>message</code> 的 <code>content</code> 对象，并以它为基准定位 <code>ItemViewProvider</code> 同时会把整个 <code>Message </code>对象发给 <code>provider</code>，<code>provider</code> 可进行分层，如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">MessageViewProvider</span>&lt;C <span class="keyword">extends</span> <span class="title class_">Content</span>, V <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder&gt;</span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;Message, V&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> V holder, <span class="meta">@NonNull</span> Message message)</span> &#123;</span><br><span class="line">        onBindViewHolder(holder, (C) message.content, message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 留给子类的抽象方法 */</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> V holder, <span class="meta">@NonNull</span> C content, <span class="meta">@NonNull</span> Message message)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总的来说，对 class 进行二级分发往往要伴随着对 <code>ItemViewProvider</code> 进行二级处理，对此我给出了一个详细的示例，到本文到 “示例” 章节中我们会再详细介绍 <code>ItemViewProvider</code> 二级分发的场景和更具体运用。</p>
+<h2 id="MultiType-与下拉刷新、加载更多、HeaderView、FooterView、Diff"><a href="#MultiType-与下拉刷新、加载更多、HeaderView、FooterView、Diff" class="headerlink" title="MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff"></a>MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff</h2><p><strong>MultiType</strong> 设计从始至终，都极力避免往复杂化方向发展，一开始我的设计宗旨就是它应该是一个非常纯粹的、专一的项目，而非各种乱七八糟的功能都要囊括进来的多合一大型库，因此它很克制，期间有许多人给我发过一些无关特性的 Pull Request，表示感谢，但全被拒绝了。</p>
+<p>对于很多人关心的 下拉刷新、加载更多、HeaderView、FooterView、Diff 这些功能特性，其实都不应该是 <strong>MultiType</strong> 的范畴，<strong>MultiType</strong> 的分内之事是做类型、事件与 View 的分发、连接工作，其余无关的需求，都是可以在 <strong>MultiType</strong> 外部完成，或者通过继承 进行自行封装和拓展，而作为一个基础、公共类库，我想它是不应该包含这些内容。</p>
+<p>但很多新手可能并不习惯代码分工、模块化，因此在此我有必要对这几个点简单示范下如何在 <strong>MultiType</strong> 之外去实现：</p>
+<ul>
+<li><p><strong>下拉刷新：</strong></p>
+<p>对于下拉刷新，<code>Android</code> 官方提供了 <code>support.v4</code> <code>SwipeRefreshLayout</code>，在 <code>Activity</code> 层面，可以拿到 <code>SwipeRefreshLayout</code> 并 <code>setOnRefreshListener</code>.</p>
+</li>
+<li><p><strong>加载更多：</strong></p>
+<p><code>RecyclerView</code> 提供了 <code>addOnScrollListener</code> 滚动位置变化监听，要实现加载更多，只要监听并检测列表是否滚动到底部即可，有多种方式，鉴于 <code>LayoutManager</code> 本应该只做布局相关的事务，因此我们推荐直接在 <code>OnScrollListener</code> 层面进行判断。提供一个简单版 <code>OnScrollListener</code> 继承类：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">OnLoadMoreListener</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.OnScrollListener &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LinearLayoutManager layoutManager;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> itemCount, lastPosition, lastItemCount;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">onLoadMore</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onScrolled</span><span class="params">(RecyclerView recyclerView, <span class="type">int</span> dx, <span class="type">int</span> dy)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (recyclerView.getLayoutManager() <span class="keyword">instanceof</span> LinearLayoutManager) &#123;</span><br><span class="line">            layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();</span><br><span class="line"></span><br><span class="line">            itemCount = layoutManager.getItemCount();</span><br><span class="line">            lastPosition = layoutManager.findLastCompletelyVisibleItemPosition();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            Log.e(<span class="string">&quot;OnLoadMoreListener&quot;</span>, <span class="string">&quot;The OnLoadMoreListener only support LinearLayoutManager&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (lastItemCount != itemCount &amp;&amp; lastPosition == itemCount - <span class="number">1</span>) &#123;</span><br><span class="line">            lastItemCount = itemCount;</span><br><span class="line">            <span class="built_in">this</span>.onLoadMore();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取数据后做 Diff 更新：</strong></p>
+<p>可以在 <code>Activity</code> 中进行 Diff，或者继承 <code>MultiTypeAdapter</code> 提供接收数据方法，在方法中进行 Diff. <strong>MultiType</strong> 不提供内置 Diff 方案，不然需要依赖 v4 包，并且这也不应该属于它的范畴。</p>
+</li>
+<li><p><strong>HeaderView、FooterView</strong></p>
+<p><strong>MultiType</strong> 其实本身就支持 <code>HeaderView</code>、<code>FooterView</code>，只要创建一个 <code>Header.class</code> - <code>HeaderViewProvider</code> 和 <code>Footer.class</code> - <code>FooterViewProvider</code> 即可，然后把 <code>new Header()</code> 添加到 <code>items</code> 第一个位置，把 <code>new Footer()</code> 添加到 <code>items</code> 最后一个位置。需要注意的是，如果使用了 Footer View，在底部插入数据的时候，需要添加到 <code>最后位置 - 1</code>，即倒二个位置，或者把 <code>Footer</code> remove 掉，再添加数据，最后再插入一个新的 <code>Footer</code>.</p>
+</li>
+</ul>
+<h2 id="实现-RecyclerView-嵌套横向-RecyclerView"><a href="#实现-RecyclerView-嵌套横向-RecyclerView" class="headerlink" title="实现 RecyclerView 嵌套横向 RecyclerView"></a>实现 RecyclerView 嵌套横向 RecyclerView</h2><p><strong>MultiType</strong> 天生就适合实现类似 Google Play 或 iOS App Store 那样复杂的首页列表，这种页面通常会在垂直列表中嵌套横向列表，其实横向列表我们完全可以把它视为一种 <code>Item</code> 类型，这个 item 持有一个列表数据和当前横向列表滑动到的位置，类似这样：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PostList</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> List&lt;Post&gt; posts;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> currentPosition;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">PostList</span><span class="params">(<span class="meta">@NonNull</span> List&lt;Post&gt; posts)</span> &#123;<span class="built_in">this</span>.posts = posts;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的 <code>HorizontalItemViewProvider</code> 类似这样：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HorizontalItemViewProvider</span></span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;PostList, HorizontalItemViewProvider.ViewHolder&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> ViewHolder <span class="title function_">onCreateViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@NonNull</span> ViewGroup parent)</span> &#123;</span><br><span class="line">        <span class="comment">/* item_horizontal_list 就是一个只有 RecyclerView 的布局 */</span></span><br><span class="line">        <span class="type">View</span> <span class="variable">view</span> <span class="operator">=</span> inflater.inflate(R.layout.item_horizontal_list, parent, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ViewHolder</span>(view);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> ViewHolder holder, <span class="meta">@NonNull</span> PostList postList)</span> &#123;</span><br><span class="line">        holder.setPosts(postList.posts);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ViewHolder</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> RecyclerView recyclerView;</span><br><span class="line">        <span class="keyword">private</span> PostsAdapter adapter;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="title function_">ViewHolder</span><span class="params">(<span class="meta">@NonNull</span> View itemView)</span> &#123;</span><br><span class="line">            <span class="built_in">super</span>(itemView);</span><br><span class="line">            recyclerView = (RecyclerView) itemView.findViewById(R.id.post_list);</span><br><span class="line">            <span class="type">LinearLayoutManager</span> <span class="variable">layoutManager</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">LinearLayoutManager</span>(itemView.getContext());</span><br><span class="line">            layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);</span><br><span class="line">            recyclerView.setLayoutManager(layoutManager);</span><br><span class="line">            <span class="comment">/* adapter 只负责灌输、适配数据，布局交给 LayoutManager，可复用 */</span></span><br><span class="line">            adapter = <span class="keyword">new</span> <span class="title class_">PostsAdapter</span>();</span><br><span class="line">            recyclerView.setAdapter(adapter);</span><br><span class="line">            <span class="comment">/* 在此设置横向滑动监听器，用于记录和恢复当前滑动到的位置，略 */</span></span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">setPosts</span><span class="params">(List&lt;Post&gt; posts)</span> &#123;</span><br><span class="line">            adapter.setPosts(posts);</span><br><span class="line">            adapter.notifyDataSetChanged();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现线性布局和网格布局混排列表"><a href="#实现线性布局和网格布局混排列表" class="headerlink" title="实现线性布局和网格布局混排列表"></a>实现线性布局和网格布局混排列表</h2><p>这个课题其实也不属于 <strong>MultiType</strong> 的范畴，<strong>MultiType</strong> 的职责是做数据类型分发，而不是布局，但鉴于很多复杂页面都会需要线性布局和网格布局混排，我就简单讲一讲，关键在于 <code>RecyclerView</code> 的 <code>LayoutManager</code>. 虽然是线性和网格混合，但实现起来其实只要一个网格布局 <code>GridLayoutManager</code>，如果你查看 <code>GridLayoutManager</code> 的官方源码，你会发现它其实继承自 <code>LinearLayoutManager</code>. 以下是示例和解释：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MultiGridActivity</span> <span class="keyword">extends</span> <span class="title class_">MenuBaseActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">SPAN_COUNT</span> <span class="operator">=</span> <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_multi_grid);</span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">final</span> <span class="type">GridLayoutManager</span> <span class="variable">layoutManager</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GridLayoutManager</span>(<span class="built_in">this</span>, SPAN_COUNT);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">/* 关键内容：通过 setSpanSizeLookup 来告诉布局，你的 item 占几个横向单位，</span></span><br><span class="line"><span class="comment">           如果你横向有 5 个单位，而你返回当前 item 占用 5 个单位，那么它就会看起来单独占用一行 */</span></span><br><span class="line">        layoutManager.setSpanSizeLookup(<span class="keyword">new</span> <span class="title class_">GridLayoutManager</span>.SpanSizeLookup() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getSpanSize</span><span class="params">(<span class="type">int</span> position)</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> (items.get(position) <span class="keyword">instanceof</span> Category) ? SPAN_COUNT : <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        recyclerView.setLayoutManager(layoutManager);</span><br><span class="line">        </span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line">        adapter.applyGlobalMultiTypePool();</span><br><span class="line">        adapter.register(Square.class, <span class="keyword">new</span> <span class="title class_">SquareViewProvider</span>());</span><br><span class="line"></span><br><span class="line">        assertAllRegistered(adapter, items);</span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">        loadData();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">loadData</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据扁平化处理"><a href="#数据扁平化处理" class="headerlink" title="数据扁平化处理"></a>数据扁平化处理</h2><p>在一个<strong>垂直</strong> <code>RecyclerView</code> 中，<code>Item</code> 们都是同级的，没有任何嵌套关系，但我们的数据结构往往存在嵌套关系，比如 <code>Post</code> 内部包含了 <code>Comment</code>s 数据，或换句话说 <code>Post</code> 嵌套了 <code>Comment</code>，就像微信朋友圈一样，”动态” 伴随着 “评论”。那么如何把 非扁平化 的数据排布在 扁平 的列表中呢？必然需要一个_数据扁平化处理_的过程，就像 <code>ListView</code> 的数据需要一个 <code>Adapter</code> 来适配，<code>Adapter</code> 就像一个油漏斗，把油引入瓶子中。我们在面对嵌套数据结构的时候，可以采用如下的扁平化处理，关于扁平化这个词，不必太纠结，简单说，就是把嵌套数据都拉出来，摊平，让 <code>Comment</code> 和 <code>Post</code> 同级，最后把它们都 add 进同一个 <code>Items</code> 容器，交给 <code>MultiTypeAdapter</code>. 示例：</p>
+<p>假设：你的 <code>Post</code> 是这样的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Post</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String content;</span><br><span class="line">    <span class="keyword">public</span> List&lt;Comment&gt; comments; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设：你的 <code>Comment</code> 是这样的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Comment</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String content;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设：你服务端返回的 JSON 数据是这样的：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span><span class="string">&quot;I have released the MultiType v2.2.1&quot;</span><span class="punctuation">,</span> </span><br><span class="line">        <span class="attr">&quot;comments&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span><span class="string">&quot;great&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span><span class="string">&quot;I love your post!&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>那么你的 JSON 转成 Java Bean 之后，你拿到手应该是个 <code>List&lt;Post&gt; posts</code> 对象，现在我们写一个扁平化处理的方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> List&lt;Item&gt; <span class="title function_">flattenData</span><span class="params">(List&lt;Post&gt; posts)</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> List&lt;Item&gt; items = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (Post post : posts) &#123;</span><br><span class="line">        <span class="comment">/* 将 post 加进 items，Provider 内部拿到它的时候，</span></span><br><span class="line"><span class="comment">         * 我们无视它的 comments 内容即可 */</span></span><br><span class="line">        items.add(post);</span><br><span class="line">        <span class="comment">/* 紧接着将 comments 拿出来插入进 items，</span></span><br><span class="line"><span class="comment">         * 评论就能正好处于该条 post 下面 */</span></span><br><span class="line">        items.addAll(post.comments);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> items;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后我们所有的 <code>posts</code> 在加入全局 MultiType <code>Items</code> 之前，都需要经过扁平化处理：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">items.addAll(flattenData(posts));</span><br><span class="line">adapter.notifyDataSetChanged();</span><br></pre></td></tr></table></figure>
+
+<p>整个过程其实并不困难，相信大家都已经理解了。</p>
+<h1 id="更多示例"><a href="#更多示例" class="headerlink" title="更多示例"></a>更多示例</h1><p><strong>MultiType</strong> 的开源项目提供了许多的 sample (示例) 程序，这些示例秉承了一贯的代码清晰、干净的风格，十分易于阅读：</p>
+<ul>
+<li><p><a href="https://github.com/drakeet/MultiType/tree/master/sample/src/main/java/me/drakeet/multitype/sample/weibo">仿造<strong>微博</strong>的数据结构和二级 ViewProvider</a></p>
+<p>这是一个类似微博数据结构的示例，数据两层结构，Item 也是两层结构：一层框架（包含头像用户名等），一层 content view(微博内容)，内容嵌套于框架中。微博的每一条微博 Item 都包含了这样两层嵌套关系，这样做的好处是，你不必每个 Item 都去重复制造一遍外层框架。</p>
+<p>或者换一个比喻，就像聊天消息，一条聊天消息也是两层的，一层头像、用户名、聊天气泡框，一层你的文字、图片等。另外，每一种消息都有左边和右边的样式，分别对应别人发来的消息和你发出的消息。如果左边算一种，右边又算一种，就是比较不好的设计了，会导致布局内容重复、冗余，修改操作都要做两遍。最好的方案是让他们视被为同一种类型，然后在 Item 框层次进行左右边判断和框架相关数据绑定。</p>
+<p>我提供的这个二级 <code>ViewProvider</code> 示例便是这样的两层结构。它能够让你每次新增加一个类型，只要实现内容即可，框不应该重复实现。</p>
+<p>如果再不明白，或许你可以看看我的这个示例中 微博 Item 框的布局：</p>
+<p><img src="http://ww2.sinaimg.cn/large/86e2ff85gw1f9brj5gw1jj21e211ane6.jpg"></p>
+<p>从我这个 <code>frame</code> 布局可以看出来，它内部有一个 <code>FrameLayout</code> 作为 <code>container</code> 将用于容纳不同的微博内容，而这一层框架则是共同的。</p>
+<p>这个例子算高级中的高级，但实际上也是很简单，展示了 <strong>MultiType</strong> 优秀的可拓展能力。完整运行结果展示如下：</p>
+<p><img src="http://ww3.sinaimg.cn/large/86e2ff85jw1f9a7tek74lj21401z414s.jpg" width=270 height=486/> <img src="http://ww1.sinaimg.cn/mw1024/86e2ff85jw1f9a7z4yqlkj21401z4n8r.jpg" width=270 height=486/></p>
+<blockquote>
+<p>注：在示例中我们并没有示范服务端 JSON 数据转为我们定义的 Weibo 对象过程（很快会补足），实际上对于完整链路，这个过程是需要做数据转换，我们需要在 <code>Weibo</code> 层加一个 <code>type</code> 或 <code>describe</code> 字段用于描述微博内容类型，然后再将微博内容的 JSON 文本转为具体微博内容对象交给 Weibo. </p>
+</blockquote>
+</li>
+<li><p><a href="https://github.com/drakeet/about-page">drakeet&#x2F;about-page</a></p>
+<p>一个 Material Design 的关于页面，核心基于 MultiType，包含了多种 <code>Item</code>s，美观，容易使用。</p>
+<p><img src="http://ww2.sinaimg.cn/large/86e2ff85gw1f93gq2tevbj21700pcjyp.jpg"></p>
+</li>
+<li><p><a href="https://github.com/drakeet/MultiType/tree/master/sample/src/main/java/me/drakeet/multitype/sample/grid">线性和网格布局混排</a></p>
+<p>使用 <code>MultiType</code> 和 <code>GridLayoutManager</code> 实现网格和线性混合布局，实现一个选集页面。</p>
+<img src="http://ww1.sinaimg.cn/large/86e2ff85gw1f96yfddvksj21401z479t.jpg" width=270 height=486/>
+</li>
+<li><p><a href="https://github.com/drakeet/TimeMachine">drakeet&#x2F;TimeMachine</a></p>
+<p>TimeMachine 使用了 <strong>MultiType</strong> 来创建一个复杂的聊天页面，页面和需求虽然复杂，但使用 <strong>MultiType</strong> 显得轻松简单。</p>
+<p><img src="http://ww1.sinaimg.cn/large/86e2ff85gw1f96yg01b5nj20k00zkgng.jpg" width="270" height="486"/> <img src="http://ww3.sinaimg.cn/large/86e2ff85gw1f94i6ysea2j20k00zkmzn.jpg" width="270" height="486"/></p>
+</li>
+<li><p><a href="https://github.com/drakeet/MultiType/tree/master/sample/src/main/java/me/drakeet/multitype/sample/bilibili">类似 Bilibili iOS 端首页</a></p>
+<p>使用 <code>MultiType</code> 实现类似 Bilibili iOS 端首页复杂的多类型列表视图，包括嵌套横向 <code>RecyclerView</code>.</p>
+<img src="http://ww3.sinaimg.cn/large/86e2ff85gw1f96ygmroy0j21401z4nl9.jpg" width="270" height="486"/></li>
+</ul>
+<p>附：一个第三方示例，<a href="https://github.com/WanLiLi/MultiTypeDemo">采用真实的网络请求数据演示 MultiType 框架的用法 by WanLiLi</a>. 点评：看了下，代码不够清爽，但实现效果十分不错。</p>
+<h1 id="Q-A"><a href="#Q-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h1><ul>
+<li><p><strong>Q: 全局类型池的主要作用是什么，能取消全局的使用吗？</strong></p>
+<p>A: 全局类型池的主要作用是，注册一些能够各个地方复用的类型，可以存一些比如：Line、Space、Header、LoadMoreFooter. 默认情况下，全局类型池是不会生效的，只有你调用 <code>adapter.applyGlobalMultiTypePool()</code> 使用全局类型池，它才会被应用，并加入到你当下的局部类型池中。没有调用这一行代码，全局的就不会参入你的局部类型池。也就是说，终归都是局部类型池，只是你确定使用全局的时候，它会把全局的拷贝一份，然后加入到你这个局部类型池中。</p>
+</li>
+<li><p><strong>Q: 使用全局类型的话，只能是在 Application 中进行注册吗？</strong></p>
+<p>A: 不，只是推荐这么做而已。在 <code>Application</code> 初始注册，能够确保类型在使用之前就注册好。另外，位置统一固定，有利于寻找代码。不然出了问题，你需要到处寻找是在哪注册了全局类型。注册全局的代码如果分散到各个地方，就不好控制和追寻，因此最好统一一个地方注册。换一个角度来说，注册全局类型的动作存在着约定性，约定的东西、可被破坏的东西，有时会比较不可靠，<strong>因此能够使用局部类型池的情况，最好使用局部类型池。</strong></p>
+</li>
+<li><p><strong>Q: 为什么不全然使用全局类型池？</strong></p>
+<p>A: <strong>MultiType</strong> 最早的版本是只支持全局类型池的，因为它带来的好处诸多，但随着更多人使用，它的问题也逐渐暴露出来。一，全局类型池的注册容易分散到许多地方，这是无法约束的，会导致代码难以追寻。二，如果使用不当，可能引起内存泄漏问题，我自己是不会写出内存泄漏的代码的，但如果提供了可能性，就有很多人会趟上去。三，为了解决一对多的问题，我想了许多方案，很多几乎写好了，但都被推翻了，后来我发现，这些麻烦，都是因为一开始基于全局类型池引起的，那些方案固然都可以，但会使代码变得复杂，我不喜欢。</p>
+</li>
+<li><p><strong>Q: 觉得 MultiType 不够精简，应该怎么做？</strong></p>
+<p>A: 在前面 “设计思想” 中我们谈到：_MultiType 或许不是使用起来最简单的，但很可能是使用起来最灵活的。_其中的缘由是它高度可定制、可拓展，而不是把一些路封死。作为一个基础类库，简单和灵活需要一个均衡点，过度精简便要以失去灵活性为代价。如果觉得 <strong>MultiType</strong> 不够精简，想将它修改得更加容易使用，我推荐的方式是去继承 <code>MultiTypeAdapter</code> 或 <code>ItemViewProvider</code>，甚至你可以重新实现一个 <code>TypePool</code> 再设置给 <code>MultiTypeAdapter</code>. 我们不应该直接到底层去修改、破坏它们。总之，利用开放接口或继承的做法不管对于 <strong>MultiType</strong> 还是其它开源库，都应该是定制的首选。</p>
+</li>
+<li><p><strong>Q: 在 <code>ItemViewProvider</code> 中如何拿到 <code>Context</code> 对象？</strong></p>
+<p>A: 有人问我说，他在 <code>ItemViewProvider</code> 里使用 <a href="https://github.com/bumptech/glide">Glide</a> 来加载图片需要获取到 Activity <code>Context</code> 对象，要怎么才能拿到 <code>Context</code> 对象？这是一个特别简单的问题，但我想既然有人问，应该比较典型，我就详细解答下：首先，在 Android 开发中，任何 <code>View</code> 对象都能通过 <code>view.getContext()</code> 拿到 <code>Context</code> 对象，这些对象本质上都是 <code>Activity</code> 对象的引用。而在我们的 <code>ItemViewProvider</code> 中，可以通过 <code>holder.itemView.getContext()</code> 获取到 <code>Context</code> 对象，也可以通过 viewHolder 的任意 <code>View</code> 对象 <code>getContext()</code> 方法拿到 <code>Context</code> 对象. <code>Context</code> 中文释义是 _”上下文对象”_，一般情况下，都是由 <code>Activity</code> 传递给 <code>View</code>s，<code>View</code>s 内部再进行传递。比如我们使用 <code>RecyclerView</code>，<code>Activity</code> 会将它的 <code>Context</code> 传递给 <code>RecyclerView</code>，<code>RecyclerView</code> 再传递给 <code>Adapter</code>，<code>Adapter</code> 再传递给 <code>ViewHolder</code> 的 <code>itemView</code>，<code>itemView</code> 再传递给它的各个子 <code>View</code>s，传递来传递去，其实都是同一个对象的引用。</p>
+<p>总而言之，拿到 <code>Context</code> 对象非常简单，只要你能拿到一个 <code>View</code> 对象，调用 <code>view.getContext()</code> 即可。另外，也可以参考 <em><a href="#%E4%B8%8E-viewprovider-%E9%80%9A%E8%AE%AF">与 provider 通讯</a></em> 章节，我们可以很方便地给 <code>provider</code> 传递任何对象进去，包括 <code>Context</code> 对象。</p>
+</li>
+</ul>
+<h1 id="感谢"><a href="#感谢" class="headerlink" title="感谢"></a>感谢</h1><p>在 <strong>MultiType</strong> 开发维护过程中，很多朋友给了我很多反馈，我也非常乐意于与大家交流，有问必答，因为这是一个难得不错的项目，它比较接近我心中对于一个完美项目的要求：设计精巧，代码干净漂亮。</p>
+<p>我向来是不太在意项目的 star 数目的，但热衷于把我的好东西分享给更多人使用，因此在<a href="https://github.com/drakeet">我的 GitHub</a> 首页我不会把我一些高 star 项目摆出来，而是放一些我觉得代码相对比较好的项目。这是我的动力，我想写一份完美的代码，就像王垠的 40 行一样，达到自觉得天衣无缝、犹如天神衣袖般的优雅，嗯，要是哪天我做到了，我就停止开源，哈哈。</p>
+<p>话说回来，这个项目，特别感谢大家的帮忙、反馈，感谢一些朋友的 PR、贡献和推荐，是你们让我觉得开源是一件除了完善自我之外 还充满了意义的一件事情 – 能够与更多人协同，能够面向更宽广的世界，谢谢大家！以下是感谢名单：</p>
+<p><a href="https://github.com/70kg">70kg</a>、<a href="https://github.com/zubinxiong">zubinxiong</a>、<a href="https://github.com/WanLiLi">WanLiLi</a>、<a href="https://github.com/daimajia">代码家</a>、<a href="https://github.com/CaMnter">CaMnter</a>、<a href="https://github.com/android-xiaowei">android-xiaowei</a>、<a href="https://github.com/burgessjp">burgessjp</a>、<a href="https://github.com/lixi0912">lixi0912</a>、<a href="https://github.com/simidaxu">simidaxu</a>、<a href="https://github.com/maoruibin">咕咚</a>、<a href="https://github.com/LuckyJayce">LuckyJayce</a>、<a href="https://github.com/BelongsH">BelongsH</a>、<a href="https://github.com/tmexcept">tmexcept</a>、<a href="https://github.com/TellH">TellH</a>、<a href="https://github.com/Panl">Ray Pan</a>、<a href="https://github.com/DearZack">Zack</a>、<a href="https://github.com/ChrisZou">Chris</a></p>
+<h1 id="引用文献"><a href="#引用文献" class="headerlink" title="引用文献"></a>引用文献</h1><ul>
+<li>《Android 内存泄漏案例和解析》<a href="https://drakeet.me/android-leaks">https://drakeet.me/android-leaks</a></li>
+<li>《Android 复杂的多类型列表视图新写法：MultiType》<a href="https://drakeet.me/multitype">https://drakeet.me/multitype</a></li>
+<li>《使用 Google AutoValue 自动生成代码》<a href="http://tedyin.me/2016/04/11/auto-value/">http://tedyin.me/2016/04/11/auto-value/</a></li>
+<li>我的个人博客 <a href="http://drakeet.me/">http://drakeet.me</a></li>
+<li><strong>MultiType</strong> 源代码 <a href="https://github.com/drakeet/MultiType">https://github.com/drakeet/MultiType</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>RecyclerView</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android 性能优化总结</title>
+    <url>/2017/04/01/performance-optimization/</url>
+    <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<span id="more"></span></p>
+<h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
+<ul>
+<li><p>首先删除布局中无用的控件和层级，其次有选择的使用 ViewGroup, 比如 LinearLayout 和 RelativeLayout 都可以实现，那么就选用 LinearLayout, 因为 RelativeLayout 功能复杂，他的布局过程花费更过的 CPU 时间。另外，减少嵌套是经常用也是最直观的方式。</p>
+</li>
+<li><p>采用 <code>&lt;include&gt;</code> 标签， <code>&lt;merge&gt;</code> 标签和<code>ViewStub</code>。<code>&lt;include&gt;</code> 标签主要用于布局重用，<code>&lt;merge&gt;</code> 标签用于减少嵌套，可以配合<code>&lt;include&gt;</code> 标签一块使用或者在自定义 View 时使用。<code>ViewStub</code> 则提供了按需加载的功能，它非常轻量级，宽高都是 0，因此本身不参与布局和绘制，很多布局在正常情况下不会显示，在特定场景下显示，因此只需要到该显示的时候再加载就好，可以提高初始化的性能。</p>
+</li>
+</ul>
+<h3 id="2-绘制优化"><a href="#2-绘制优化" class="headerlink" title="2. 绘制优化"></a>2. 绘制优化</h3><p>绘制优化是指 View 的 onDraw 方法避免执行大量的操作，主要体现在两个方面。</p>
+<ul>
+<li><p>首先，onDraw 不要创建新的局部对象，因为 onDraw 会频繁的调用，这样会瞬间产生大量的临时对象，这不仅占用过多的内存，而且会导致频繁的 GC，降低了程序执行的效率。</p>
+</li>
+<li><p>其次，onDraw 方法中不要做耗时任务，也不能执行大量的循环操作，尽管每次循环都很轻量级，但大量的循环仍然十分抢占 CPU 的时间片，这会造成 View 绘制过程不流畅。谷歌官方性能优化标准，View 的绘制帧率保持在 60fps 是最佳的，这就要求每帧的绘制时间不超过 16ms(16ms &#x3D; 1000&#x2F;60)。</p>
+</li>
+</ul>
+<h3 id="3-内存泄漏优化"><a href="#3-内存泄漏优化" class="headerlink" title="3. 内存泄漏优化"></a>3. 内存泄漏优化</h3><p>内存泄漏对开发人员的经验和开发意识要求较高，因此也是最容易犯的错误之一。内存泄漏的优化主要有两个方面，一方面就是开发中避免写出有内存泄露的代码，另一方面是通过一些分析工具找出潜在的内存泄漏而解决。列举一些容易出现内存泄漏的编码情况：</p>
+<ul>
+<li><p>静态变量导致内存泄漏</p>
+<p>  比如 <code>Context</code>, <code>View</code> 为静态变量，它内部持有了 Activity，所以当 Activity 关闭后仍然无法释放。</p>
+</li>
+<li><p>单例模式导致内存泄漏</p>
+<p>  比较明显的是同上，直接引用对象持有了 Activity，导致无法释放。另一种不太明显的是注册监听方式，只注册，而缺少取消注册的情况也会引起内存泄漏。因为单例的特点是其生命周期和 Applation 保持一致，因此会导致内存泄漏。</p>
+</li>
+<li><p>属性动画导致内存泄漏</p>
+<p>  属性动画是一类无限循环的动画，如果在 Activity 中播放此类动画且没有在 onDestory 中停止，那么动画就会一直播放下去，因为 Activity 会被动画 View 持有，最终 Activity 无法释放。解决方法就是及时停止动画。</p>
+</li>
+</ul>
+<p>至于分析内存泄漏的工具有很多，比如：</p>
+<ul>
+<li><p>Android Studio自带的 Profiler</p>
+<p>  可以直观的看到 CPU，内存，网络变化，也可以做很多模拟操作，但是不太容易看出内存泄漏，需要配合 MTA 使用。</p>
+</li>
+<li><p>MAT</p>
+<p>  MAT 全称 Eclipse Memory Analyzer，是一款强大的内存泄漏分析工具。</p>
+</li>
+<li><p>Android LeakCanary</p>
+<p> Android LeakCanary 易于集成，自动检测出内存泄漏，十分好用。目前我们项目中也是用的 LeakCanary。使用方法可以去参考文档。</p>
+</li>
+</ul>
+<p>上面这些工具只是帮助我们分析和定位内存泄漏的位置，等知道问题出在哪了，才能去解决问题。</p>
+<h3 id="4-响应速度优化"><a href="#4-响应速度优化" class="headerlink" title="4. 响应速度优化"></a>4. 响应速度优化</h3><p>核心思想就是避免在主线程中做耗时操作，当有耗时操作时应当放在子线程中去操作。响应速度过慢一般体现在 Activity 启动速度上面，主线程做太多事情，会导致黑屏甚至出现 ANR。</p>
+<ul>
+<li>耗时操作放在子线程</li>
+<li>业务优化，比如采用新算法，代码重构，偿还历史债务等</li>
+<li>通过分析 trace.txt 文件定位 ANR 的原因</li>
+<li>主线程和子线程抢占同步锁，子线程持有了主线程所需的锁</li>
+</ul>
+<h3 id="5-RecyclerView-和-Bitmap-优化"><a href="#5-RecyclerView-和-Bitmap-优化" class="headerlink" title="5. RecyclerView 和 Bitmap 优化"></a>5. RecyclerView 和 Bitmap 优化</h3><ul>
+<li>避免再 onBindView 中执行耗时操作</li>
+<li>根据列表的滑动状态来控制任务的执行频率，比如当列表快速滑动时不适合开启大量的异步任务</li>
+<li>对于 Bitmap 主要通过 BitmapFactory.Options 来根据需要对图片进行采样，加载合适大小的图片，降低 Bitmap 的大小</li>
+</ul>
+<h3 id="6-线程优化"><a href="#6-线程优化" class="headerlink" title="6.线程优化"></a>6.线程优化</h3><p>线程优化主要是采用线程池，避免程序中存在大量的 Thread，线程池可以重用内部的线程，从而避免了线程的创建和销毁代码的性能开销，同时线程池还能有效的控制线程中的最大并发数，避免大量的线程因互相抢占资源而导致阻塞现象的发生。因此开发过程中尽量使用线程池，而不是每次都要创建一个 Thread。</p>
+<h3 id="7-优化建议"><a href="#7-优化建议" class="headerlink" title="7. 优化建议"></a>7. 优化建议</h3><ul>
+<li>尽量避免创建过多对象</li>
+<li>不要过多使用枚举，枚举占用的内存空间比整型大</li>
+<li>常量使用 static final 来修饰</li>
+<li>使用一些 Android 特有的数据结构，他们有更好的性能</li>
+<li>适当使用软引用，弱引用</li>
+<li>采用内存缓存和磁盘缓存</li>
+<li>尽量采用静态内部类，这样避免潜在的由于内部类导致内存泄漏</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>性能优化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用Python写一个小的爬虫工具</title>
+    <url>/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/</url>
+    <content><![CDATA[<p>事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。<br>具体链接在这：<a href="https://www.pingxx.com/api#%E9%93%B6%E8%A1%8C%E7%BC%96%E5%8F%B7%E8%AF%B4%E6%98%8E">https://www.pingxx.com/api#银行编号说明</a><br>那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。<span id="more"></span>要确实要了，但还是要自己弄一下，要善于将生活中可以写代码处理的事用代码去解决。<br>确定了要做什么事就好办了，首先想到的就是用Python爬虫去解析网页，然后分析数据处理。</p>
+<h3 id="组成爬虫的关键模块"><a href="#组成爬虫的关键模块" class="headerlink" title="组成爬虫的关键模块"></a>组成爬虫的关键模块</h3><ul>
+<li>URL管理器<br>用于对需要爬取的URL和已经爬取过的URL进行管理，可以用set管理也可以用其他工具处理，这里只是对单个固定网页爬取，就用字符串代替了</li>
+<li>HTML下载器<br>将URL管理器中的对应的url的网页下载下来，存为字符串，然后可以将这个字符串传给网页解析器解析。这里用的是Python自带的urllib模块，在Python2.7 中该模块就是有名的urllib2，Python3.0中将urllib2 统一放到urllib.request下，使用方法略有不同，自行google</li>
+<li>HTML解析器<br>一方面会解析出有价值的数据，另一方面，由于每一个页面都有很多指向其它页面的网页，这些URL被解析出来之后，可以补充进URL管理器，以备之后爬取。这里用的第三方模块BeautifulSoup，需要安装，安装方法如下:<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ easy_install beautifulsoup4</span><br></pre></td></tr></table></figure>
+或者<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pip install beautifulsoup4</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="下载网页"><a href="#下载网页" class="headerlink" title="下载网页"></a>下载网页</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line"></span><br><span class="line">response = urllib.request.urlopen(&quot;https://www.pingxx.com/api#银行编号说明&quot;)</span><br><span class="line">print(response.read())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>没错就需要两行代码就可以下载一个网页，其实一行也可以</p>
+<h3 id="解析网页"><a href="#解析网页" class="headerlink" title="解析网页"></a>解析网页</h3><p>上面下的网页就是一个html的源码，要解析它，BeautifulSoup支持多种方式的解析，获取自己想要的数据。这里就需要去网站看一看源码，我们可以使用Command+option+J 审查元素，来看一下我们需要数据处的源码的一些可用的地方，以方便爬取，下图使我们定位到的源码</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Paste_Image.png"></p>
+<p>查看之后，分析需要的数据在那个div下的table里，我们需要获取table，然后解析table就可以了，但是div不太好直接拿到，但是有个</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;h2 id=&quot;银行编号说明&quot;&gt;银行编号说明&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
+<p>比较好拿，于是就先取他，再拿他的父节点的然后再取table<br>代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response = urllib.request.urlopen(&quot;https://www.pingxx.com/api#银行编号说明&quot;)</span><br><span class="line">soup = BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table = soup.find(&quot;h2&quot;, id=&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br></pre></td></tr></table></figure>
+<p>这样就获取到了table，剩下的就简单了，就是处理table了。先获取所有的tr，再获取每个tr中的td，然后获取需要td中的值进行拼接Json字符串。<br>完整代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response = urllib.request.urlopen(&quot;https://www.pingxx.com/api#银行编号说明&quot;)</span><br><span class="line">soup = BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table = soup.find(&quot;h2&quot;, id=&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br><span class="line"></span><br><span class="line">bankJson = &quot;[&quot;</span><br><span class="line">for row in table.findAll(&#x27;tr&#x27;):</span><br><span class="line">    if len(row) &gt; 2:</span><br><span class="line">        cells = row.findAll(&#x27;td&#x27;)</span><br><span class="line">        bank_code = cells[0].find(text=True)</span><br><span class="line">        bank_name = cells[1].find(text=True)</span><br><span class="line">        bankJson = bankJson + &quot;&#123;&quot; + &quot;\&quot;code\&quot;:\&quot;&quot; + bank_code + &quot;\&quot;,&quot; + &quot;\&quot;name\&quot;:\&quot;&quot; + bank_name + &quot;\&quot;&#125;,&quot;</span><br><span class="line"></span><br><span class="line">bankJson = bankJson[0:len(bankJson) - 1] + &quot;]&quot;</span><br><span class="line">print(bankJson)</span><br></pre></td></tr></table></figure>
+
+<p>运行代码就获取到打印的结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[&#123;&quot;code&quot;:&quot;0100&quot;,&quot;name&quot;:&quot;中国邮政储蓄银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0102&quot;,&quot;name&quot;:&quot;工商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0103&quot;,&quot;name&quot;:&quot;农业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0104&quot;,&quot;name&quot;:&quot;中国银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0105&quot;,&quot;name&quot;:&quot;建设银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0301&quot;,&quot;name&quot;:&quot;交通银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0302&quot;,&quot;name&quot;:&quot;中信银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0303&quot;,&quot;name&quot;:&quot;光大银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0304&quot;,&quot;name&quot;:&quot;华夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0305&quot;,&quot;name&quot;:&quot;民生银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0306&quot;,&quot;name&quot;:&quot;广发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0308&quot;,&quot;name&quot;:&quot;招商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0309&quot;,&quot;name&quot;:&quot;兴业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0310&quot;,&quot;name&quot;:&quot;浦发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0311&quot;,&quot;name&quot;:&quot;恒丰银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0313&quot;,&quot;name&quot;:&quot;临沂市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0316&quot;,&quot;name&quot;:&quot;浙商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0317&quot;,&quot;name&quot;:&quot;渤海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0318&quot;,&quot;name&quot;:&quot;平安银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0328&quot;,&quot;name&quot;:&quot;新韩银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0329&quot;,&quot;name&quot;:&quot;韩亚银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0336&quot;,&quot;name&quot;:&quot;企业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0401&quot;,&quot;name&quot;:&quot;上海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0402&quot;,&quot;name&quot;:&quot;厦门银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0403&quot;,&quot;name&quot;:&quot;北京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0404&quot;,&quot;name&quot;:&quot;烟台市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0405&quot;,&quot;name&quot;:&quot;福建海峡银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0406&quot;,&quot;name&quot;:&quot;吉林银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0408&quot;,&quot;name&quot;:&quot;宁波银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0412&quot;,&quot;name&quot;:&quot;温州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0413&quot;,&quot;name&quot;:&quot;广州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0414&quot;,&quot;name&quot;:&quot;汉口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0418&quot;,&quot;name&quot;:&quot;洛阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0420&quot;,&quot;name&quot;:&quot;大连银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0422&quot;,&quot;name&quot;:&quot;河北银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0423&quot;,&quot;name&quot;:&quot;杭州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0424&quot;,&quot;name&quot;:&quot;南京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0427&quot;,&quot;name&quot;:&quot;乌鲁木齐市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0428&quot;,&quot;name&quot;:&quot;绍兴银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0433&quot;,&quot;name&quot;:&quot;葫芦岛市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0434&quot;,&quot;name&quot;:&quot;天津银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0435&quot;,&quot;name&quot;:&quot;郑州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0436&quot;,&quot;name&quot;:&quot;宁夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0438&quot;,&quot;name&quot;:&quot;齐商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0439&quot;,&quot;name&quot;:&quot;锦州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0440&quot;,&quot;name&quot;:&quot;徽商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0441&quot;,&quot;name&quot;:&quot;重庆银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0442&quot;,&quot;name&quot;:&quot;哈尔滨银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0443&quot;,&quot;name&quot;:&quot;贵阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0447&quot;,&quot;name&quot;:&quot;兰州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0448&quot;,&quot;name&quot;:&quot;南昌银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0449&quot;,&quot;name&quot;:&quot;晋商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0450&quot;,&quot;name&quot;:&quot;青岛银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0455&quot;,&quot;name&quot;:&quot;日照市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0456&quot;,&quot;name&quot;:&quot;鞍山银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0458&quot;,&quot;name&quot;:&quot;青海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0459&quot;,&quot;name&quot;:&quot;台州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0461&quot;,&quot;name&quot;:&quot;长沙银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0463&quot;,&quot;name&quot;:&quot;赣州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0465&quot;,&quot;name&quot;:&quot;营口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0467&quot;,&quot;name&quot;:&quot;阜新银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0474&quot;,&quot;name&quot;:&quot;内蒙古银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0475&quot;,&quot;name&quot;:&quot;湖州市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0476&quot;,&quot;name&quot;:&quot;沧州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0479&quot;,&quot;name&quot;:&quot;包商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0481&quot;,&quot;name&quot;:&quot;威海商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0483&quot;,&quot;name&quot;:&quot;攀枝花市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0485&quot;,&quot;name&quot;:&quot;绵阳市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0490&quot;,&quot;name&quot;:&quot;张家口市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0492&quot;,&quot;name&quot;:&quot;龙江银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0495&quot;,&quot;name&quot;:&quot;柳州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0497&quot;,&quot;name&quot;:&quot;莱商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0498&quot;,&quot;name&quot;:&quot;德阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0503&quot;,&quot;name&quot;:&quot;晋城银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0505&quot;,&quot;name&quot;:&quot;东莞商行&quot;&#125;,&#123;&quot;code&quot;:&quot;0508&quot;,&quot;name&quot;:&quot;江苏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0513&quot;,&quot;name&quot;:&quot;承德市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0515&quot;,&quot;name&quot;:&quot;德州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0517&quot;,&quot;name&quot;:&quot;邯郸市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0525&quot;,&quot;name&quot;:&quot;浙江民泰商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0526&quot;,&quot;name&quot;:&quot;上饶市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0527&quot;,&quot;name&quot;:&quot;东营银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0528&quot;,&quot;name&quot;:&quot;泰安市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0530&quot;,&quot;name&quot;:&quot;浙江稠州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0534&quot;,&quot;name&quot;:&quot;鄂尔多斯银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0537&quot;,&quot;name&quot;:&quot;济宁银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0547&quot;,&quot;name&quot;:&quot;昆仑银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0554&quot;,&quot;name&quot;:&quot;邢台银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0556&quot;,&quot;name&quot;:&quot;漯河商行&quot;&#125;,&#123;&quot;code&quot;:&quot;1401&quot;,&quot;name&quot;:&quot;上海农商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1402&quot;,&quot;name&quot;:&quot;昆山农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1403&quot;,&quot;name&quot;:&quot;常熟市农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1404&quot;,&quot;name&quot;:&quot;深圳农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1405&quot;,&quot;name&quot;:&quot;广州农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1408&quot;,&quot;name&quot;:&quot;佛山顺德农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1409&quot;,&quot;name&quot;:&quot;昆明农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1410&quot;,&quot;name&quot;:&quot;湖北农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1415&quot;,&quot;name&quot;:&quot;东莞农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1416&quot;,&quot;name&quot;:&quot;张家港农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1417&quot;,&quot;name&quot;:&quot;福建省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1418&quot;,&quot;name&quot;:&quot;北京农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1419&quot;,&quot;name&quot;:&quot;天津农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1420&quot;,&quot;name&quot;:&quot;宁波鄞州农村合作银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1424&quot;,&quot;name&quot;:&quot;江苏省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1428&quot;,&quot;name&quot;:&quot;江苏吴江农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1430&quot;,&quot;name&quot;:&quot;苏州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1443&quot;,&quot;name&quot;:&quot;广西农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1446&quot;,&quot;name&quot;:&quot;黄河农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1447&quot;,&quot;name&quot;:&quot;安徽省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1448&quot;,&quot;name&quot;:&quot;海南省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1513&quot;,&quot;name&quot;:&quot;重庆农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6462&quot;,&quot;name&quot;:&quot;潍坊市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6466&quot;,&quot;name&quot;:&quot;富滇银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6473&quot;,&quot;name&quot;:&quot;浙江泰隆商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6478&quot;,&quot;name&quot;:&quot;广西北部湾银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6567&quot;,&quot;name&quot;:&quot;商丘商行&quot;&#125;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>好了，问题解决了，说实话第一次写代码去解决实际中的碰到的问题，挺好玩，带着要解决的问题去学习的效果会更好一些。感想就是在想学东西或者想做一些事情的时候，不要先想太多，比如把所有资料都准备齐、哪个人的资料好，怎么才能少走弯路，学不好做不好会怎么样,等等…..然后你的激情就没了，这件事也就不了了之了，这些都不好。我们要的就是想做什么立刻去做，just do it。</p>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>爬虫</tag>
+      </tags>
+  </entry>
+</search>
