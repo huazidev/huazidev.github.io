@@ -1,37 +1,560 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文来自 MultiType 作者 Drakeet。 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 Github 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【转】Android 复杂的列表视图新写法 MultiType">
+<meta property="og:url" content="http://yoursite.com/2017/05/06/fork-effect-multitype/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="本文来自 MultiType 作者 Drakeet。 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 Github 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。">
+<meta property="og:locale">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/86e2ff85gw1f9mqd8lwzkj21hc0f8n4k.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/86e2ff85gw1f9bf092eraj21kw0xr1el.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/86e2ff85gw1f935l0kwilj21kw0t3akm.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/86e2ff85gw1f9brj5gw1jj21e211ane6.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/86e2ff85jw1f9a7tek74lj21401z414s.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/mw1024/86e2ff85jw1f9a7z4yqlkj21401z4n8r.jpg">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/86e2ff85gw1f93gq2tevbj21700pcjyp.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/86e2ff85gw1f96yfddvksj21401z479t.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/86e2ff85gw1f96yg01b5nj20k00zkgng.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/86e2ff85gw1f94i6ysea2j20k00zkmzn.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/86e2ff85gw1f96ygmroy0j21401z4nl9.jpg">
+<meta property="article:published_time" content="2017-05-06T03:52:18.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.974Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="RecyclerView">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ww4.sinaimg.cn/large/86e2ff85gw1f9mqd8lwzkj21hc0f8n4k.jpg">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2017/05/06/fork-effect-multitype/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2017/05/06/fork-effect-multitype/","path":"2017/05/06/fork-effect-multitype/","title":"【转】Android 复杂的列表视图新写法 MultiType"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【转】Android 复杂的列表视图新写法 MultiType | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95"><span class="nav-number">2.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MultiType-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">MultiType 的特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E8%A7%88"><span class="nav-number">4.</span> <span class="nav-text">总览</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MultiType-%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">MultiType 基础用法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E5%85%A5"><span class="nav-number">5.0.1.</span> <span class="nav-text">引入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">5.1.</span> <span class="nav-text">使用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3"><span class="nav-number">6.</span> <span class="nav-text">设计思想</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95"><span class="nav-number">7.</span> <span class="nav-text">高级用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-MultiTypeTemplates-%E6%8F%92%E4%BB%B6%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81"><span class="nav-number">7.1.</span> <span class="nav-text">使用 MultiTypeTemplates 插件自动生成代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-%E5%85%A8%E5%B1%80%E7%B1%BB%E5%9E%8B%E6%B1%A0"><span class="nav-number">7.2.</span> <span class="nav-text">使用 全局类型池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%B1%BB%E5%9E%8B%E5%AF%B9%E5%BA%94%E5%A4%9A%E4%B8%AA-ViewProvider"><span class="nav-number">7.3.</span> <span class="nav-text">一个类型对应多个 ViewProvider</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-ViewProvider-%E9%80%9A%E8%AE%AF"><span class="nav-number">7.4.</span> <span class="nav-text">与 ViewProvider 通讯</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%AD%E8%A8%80%EF%BC%8C%E6%AF%94%E4%BC%A0%E7%BB%9F-Adapter-%E6%9B%B4%E5%8A%A0%E6%98%93%E4%BA%8E%E8%B0%83%E8%AF%95"><span class="nav-number">7.5.</span> <span class="nav-text">使用断言，比传统 Adapter 更加易于调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%AF%E6%8C%81-Google-AutoValue"><span class="nav-number">7.6.</span> <span class="nav-text">支持 Google AutoValue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9-class-%E8%BF%9B%E8%A1%8C%E4%BA%8C%E7%BA%A7%E5%88%86%E5%8F%91"><span class="nav-number">7.7.</span> <span class="nav-text">对 class 进行二级分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MultiType-%E4%B8%8E%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E3%80%81%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E3%80%81HeaderView%E3%80%81FooterView%E3%80%81Diff"><span class="nav-number">7.8.</span> <span class="nav-text">MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0-RecyclerView-%E5%B5%8C%E5%A5%97%E6%A8%AA%E5%90%91-RecyclerView"><span class="nav-number">7.9.</span> <span class="nav-text">实现 RecyclerView 嵌套横向 RecyclerView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80%E5%92%8C%E7%BD%91%E6%A0%BC%E5%B8%83%E5%B1%80%E6%B7%B7%E6%8E%92%E5%88%97%E8%A1%A8"><span class="nav-number">7.10.</span> <span class="nav-text">实现线性布局和网格布局混排列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%89%81%E5%B9%B3%E5%8C%96%E5%A4%84%E7%90%86"><span class="nav-number">7.11.</span> <span class="nav-text">数据扁平化处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A%E7%A4%BA%E4%BE%8B"><span class="nav-number">8.</span> <span class="nav-text">更多示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-A"><span class="nav-number">9.</span> <span class="nav-text">Q &amp; A</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%84%9F%E8%B0%A2"><span class="nav-number">10.</span> <span class="nav-text">感谢</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E6%96%87%E7%8C%AE"><span class="nav-number">11.</span> <span class="nav-text">引用文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/06/fork-effect-multitype/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【转】Android 复杂的列表视图新写法 MultiType | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【转】Android 复杂的列表视图新写法 MultiType
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-05-06 11:52:18" itemprop="dateCreated datePublished" datetime="2017-05-06T11:52:18+08:00">2017-05-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><strong>本文来自 <code>MultiType</code> 作者 Drakeet。</strong> 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 <code>Github</code> 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。<span id="more"></span></p>
+<p>以下是原文：</p>
+<hr>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在开发我的 <strong><a target="_blank" rel="noopener" href="https://github.com/drakeet/TimeMachine">TimeMachine</a></strong> 时，我有一个复杂的聊天页面，于是我设计了我的类型池系统，它是完全解耦的，因此我能够轻松将它抽离出来分享，并给它取名为 <strong>MultiType</strong>.</p>
+<p>从前，<strong>比如我们写一个类似微博列表页面</strong>，这样的列表是十分复杂的：有纯文本的、带转发原文的、带图片的、带视频的、带文章的等等，甚至穿插一条可以横向滑动的好友推荐条目。不同的 Item 类型众多，而且随着业务发展，还会更多。如果我们使用传统的开发方式，经常要做一些繁琐的工作，代码可能都堆积在一个 <code>Adapter</code> 中：我们需要覆写 <code>RecyclerView.Adapter</code> 的 <code>getItemViewType</code> 方法，罗列一些 <code>type</code> 整型常量，并且 <code>ViewHolder</code> 转型、绑定数据也比较麻烦。一旦产品需求有变，或者产品设计说需要增加一种新的 Item 类型，我们需要去代码堆里找到我们原来的逻辑去修改，或者找到正确的位置去增加代码。这些过程都比较繁琐，侵入较强，需要小心翼翼，以免改错影响到其他地方。</p>
+<p>现在好了，我们有了 <strong>MultiType</strong>，简单来说，<strong>MultiType 就是一个多类型列表视图的中间分发框架，它能帮助你快速并且清晰地开发一些复杂的列表页面。</strong>它本是为聊天页面开发的，聊天页面的消息类型也是有大量不同种类，并且新增频繁，而 <strong>MultiType</strong> 能够轻松胜任，代码模块化，随时可拓展新的类型进入列表当中。它内建了 <code>类型</code> - <code>View</code> 的复用池系统，支持 <code>RecyclerView</code>，使用简单灵活，令代码清晰、拥抱变化。</p>
+<p>因此，我写了这篇文章，目的有几个：一是以作者的角度对 <strong>MultiType</strong> 进行入门和进阶详解。二是传递我开发过程中的思想、设计理念，这些偏细腻的内容，即使不使用 <strong>MultiType</strong>，想必也能带来很多启发。最后就是把我自觉得不错的东西分享给大家，试想如果你制造的东西很多人在用，即使没有带来任何收益，也是一件很自豪的事情。</p>
+<h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><ul>
+<li><a href="#multitype-%E7%9A%84%E7%89%B9%E6%80%A7">MultiType 的特性</a></li>
+<li><a href="#%E6%80%BB%E8%A7%88">总览</a></li>
+<li><a href="#multitype-%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95">MultiType 基础用法</a></li>
+<li><a href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3">设计思想</a></li>
+<li><a href="#%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95">高级用法</a><ul>
+<li><a href="#%E4%BD%BF%E7%94%A8-multitypetemplates-%E6%8F%92%E4%BB%B6%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81">使用 MultiTypeTemplates 插件自动生成代码</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-%E5%85%A8%E5%B1%80%E7%B1%BB%E5%9E%8B%E6%B1%A0">使用 全局类型池</a></li>
+<li><a href="#%E4%B8%80%E4%B8%AA%E7%B1%BB%E5%9E%8B%E5%AF%B9%E5%BA%94%E5%A4%9A%E4%B8%AA-viewprovider">一个类型对应多个 ViewProvider</a></li>
+<li><a href="#%E4%B8%8E-viewprovider-%E9%80%9A%E8%AE%AF">与 ViewProvider 通讯</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E6%96%AD%E8%A8%80%E6%AF%94%E4%BC%A0%E7%BB%9F-adapter-%E6%9B%B4%E5%8A%A0%E6%98%93%E4%BA%8E%E8%B0%83%E8%AF%95">使用断言，比传统 Adapter 更加易于调试</a></li>
+<li><a href="#%E6%94%AF%E6%8C%81-google-autovalue">支持 Google AutoValue</a></li>
+<li><a href="#%E5%AF%B9-class-%E8%BF%9B%E8%A1%8C%E4%BA%8C%E7%BA%A7%E5%88%86%E5%8F%91">对 class 进行二级分发</a></li>
+<li><a href="#multitype-%E4%B8%8E%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9Aheaderviewfooterviewdiff">MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0-recyclerview-%E5%B5%8C%E5%A5%97%E6%A8%AA%E5%90%91-recyclerview">实现 RecyclerView 嵌套横向 RecyclerView</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0%E7%BA%BF%E6%80%A7%E5%B8%83%E5%B1%80%E5%92%8C%E7%BD%91%E6%A0%BC%E5%B8%83%E5%B1%80%E6%B7%B7%E6%8E%92%E5%88%97%E8%A1%A8">实现线性布局和网格布局混排列表</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E6%89%81%E5%B9%B3%E5%8C%96%E5%A4%84%E7%90%86">数据扁平化处理</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9B%B4%E5%A4%9A%E7%A4%BA%E4%BE%8B">更多示例</a><ul>
+<li><strong>仿造微博的数据结构和二级 ViewProvider</strong></li>
+<li>drakeet&#x2F;about-page</li>
+<li>线性和网格布局混排</li>
+<li>drakeet&#x2F;TimeMachine</li>
+<li>类似 Bilibili iOS 端首页</li>
+</ul>
+</li>
+<li><a href="#q--a">Q &amp; A</a><ul>
+<li>Q: 全局类型池的主要作用是什么，能取消全局的使用吗？</li>
+<li>Q: 使用全局类型的话，只能是在 Application 中进行注册吗？</li>
+<li>Q: 为什么不全然使用全局类型池？</li>
+<li>Q: 觉得 MultiType 不够精简，应该怎么做？</li>
+<li>Q: 在 <code>ItemViewProvider</code> 中如何拿到 <code>Context</code> 对象？</li>
+</ul>
+</li>
+<li><a href="#%E6%84%9F%E8%B0%A2">感谢</a></li>
+<li><a href="#%E5%BC%95%E7%94%A8%E6%96%87%E7%8C%AE">引用文献</a></li>
+</ul>
+<h1 id="MultiType-的特性"><a href="#MultiType-的特性" class="headerlink" title="MultiType 的特性"></a>MultiType 的特性</h1><ul>
+<li>轻盈，整个类库只有 10 个类文件，<code>aar</code> 或 <code>jar</code> 包大小只有 10KB</li>
+<li>周到，支持 局部类型池 和 全局类型池，并支持二者共用，当出现冲突时，以局部的为准</li>
+<li>灵活，几乎所有的部件(类)都可被替换、可继承定制，面向接口&#x2F;抽象编程</li>
+<li>纯粹，只负责本分工作，专注多类型的列表视图 类型分发</li>
+<li>高效，没有性能损失，内存友好，最大限度发挥 <code>RecyclerView</code> 的复用性</li>
+<li>可读，代码清晰干净、设计精巧，极力避免复杂化，可读性很好，为拓展和自行解决问题提供了基础</li>
+</ul>
+<h1 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h1><p>MultiType 能轻松实现如下页面，它们将在示例篇章具体提供: </p>
+<p><img src="http://ww4.sinaimg.cn/large/86e2ff85gw1f9mqd8lwzkj21hc0f8n4k.jpg"></p>
+<p>MultiType 的源码关系：</p>
+<p><a target="_blank" rel="noopener" href="http://ww2.sinaimg.cn/large/86e2ff85gw1f9bekb34xfj21kw0y3av4.jpg"><img src="http://ww4.sinaimg.cn/large/86e2ff85gw1f9bf092eraj21kw0xr1el.jpg"></a></p>
+<h1 id="MultiType-基础用法"><a href="#MultiType-基础用法" class="headerlink" title="MultiType 基础用法"></a>MultiType 基础用法</h1><p>可能有的新手看到以上特性介绍说什么 “冲突”、抽象编程的，还有那看不懂的总览图，都是一脸懵逼，完全不要紧，不懂可以回过头来再看，我们先从基础用法入手，其实 <strong>MultiType</strong> 使用起来特别简单。使用 <strong>MultiType</strong> 一般情况下只要 maven 引入 + 三个小步骤。之后还会介绍使用插件生成代码方式，步骤将更加简化：</p>
+<h3 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h3><p>在你的 <code>build.gradle</code>:</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    compile <span class="string">&#x27;me.drakeet.multitype:multitype:2.2.1&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：<strong>MultiType</strong> 内部引用了 <code>recyclerview-v7:24.2.1</code>，如果你不想使用这个版本，可以使用 <code>exclude</code> 将它排除掉，再自行引入你选择的版本。示例如下：</p>
+</blockquote>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    compile(<span class="string">&#x27;me.drakeet.multitype:multitype:2.2.1&#x27;</span>, &#123;</span><br><span class="line">       exclude <span class="attr">group:</span> <span class="string">&#x27;com.android.support&#x27;</span></span><br><span class="line">    &#125;)</span><br><span class="line">    compile <span class="string">&#x27;com.android.support:recyclerview-v7:你选择的版本&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><strong>Step 1</strong>. 创建一个 <code>class implements Item</code>，它将是你的数据类型或 Java bean&#x2F;model. </p>
+<p> 这是一个类似 Java <code>Serializable</code> 接口，只要显式 <code>implements</code> 即可，除此之外什么都不用做。它的作用是让 MultiType 把你的所有实体类都视为 <code>Item</code> 接口，而且由于它仅是个接口，你仍然可以随意安排你的继承关系。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Category</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="keyword">public</span> String text;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Category</span><span class="params">(<span class="meta">@NonNull</span> <span class="keyword">final</span> String text)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.text = text;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 2</strong>. 创建一个 <code>class</code> 继承 <code>ItemViewProvider</code>. </p>
+<p> <code>ItemViewProvider</code> 是个抽象类，其中 <code>onCreateViewHolder</code> 方法用于生产你的 Item View Holder, <code>onBindViewHolder</code> 用于绑定数据到 <code>View</code>s. 一般一个 <code>ItemViewProvider</code> 类在内存中只会有一个实例对象，MultiType 内部将复用这个 provider 对象来生产所有相关的 Item Views 和绑定数据。示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CategoryViewProvider</span></span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;Category, CategoryViewProvider.ViewHolder&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> ViewHolder <span class="title function_">onCreateViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@NonNull</span> ViewGroup parent)</span> &#123;</span><br><span class="line">        <span class="type">View</span> <span class="variable">root</span> <span class="operator">=</span> inflater.inflate(R.layout.item_category, parent, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ViewHolder</span>(root);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> ViewHolder holder, <span class="meta">@NonNull</span> Category category)</span> &#123;</span><br><span class="line">        holder.category.setText(category.text);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ViewHolder</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@NonNull</span> <span class="keyword">private</span> <span class="keyword">final</span> TextView category;</span><br><span class="line"></span><br><span class="line">        ViewHolder(<span class="meta">@NonNull</span> View itemView) &#123;</span><br><span class="line">            <span class="built_in">super</span>(itemView);</span><br><span class="line">            <span class="built_in">this</span>.category = (TextView) itemView.findViewById(R.id.category);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 3</strong>. 好了，你不必再创建新的类文件了，在 <code>Activity</code> 中加入 <code>RecyclerView</code> 和 <code>List</code> 并注册你的类型就完事了，示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Items 等价于 ArrayList&lt;Item&gt; */</span></span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line"></span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 注册类型和 View 的对应关系 */</span></span><br><span class="line">        adapter.register(Category.class, <span class="keyword">new</span> <span class="title class_">CategoryViewProvider</span>());</span><br><span class="line">        adapter.register(Song.class, <span class="keyword">new</span> <span class="title class_">SongViewProvider</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 模拟加载数据，也可以稍后再加载，然后使用</span></span><br><span class="line"><span class="comment">         * adapter.notifyDataSetChanged() 刷新列表 */</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">Category</span>(<span class="string">&quot;Songs&quot;</span>));</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">Song</span>(<span class="string">&quot;小艾大人&quot;</span>, R.drawable.avatar_dakeet));</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">Song</span>(<span class="string">&quot;许岑&quot;</span>, R.drawable.avatar_cen));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大功告成！这就是 <strong>MultiType</strong> 的基础用法了，简单、符合直觉。其中 <code>onCreateViewHolder</code> 和 <code>onBindViewHolder</code> 方法名沿袭了使用 <code>RecyclerView</code> 的习惯，令人一目了然，减少了新人的学习成本。</p>
+<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p><strong>MultiType</strong> 设计伊始，我给它定了几个原则：</p>
+<ul>
+<li><p>要简单，便于他人阅读代码。</p>
+<p>因此我极力去避免将它复杂化，比如引入显性 item id 机制（MultiType 内部有隐性 id），比如加入许多不相干的内容，比如使用 apt + 注解完成类型和 View 自动绑定、自动注册，再比如，使用反射。这些我都是拒绝的。我想写人人可读的代码，使用简单的方式，去实现复杂的需求。过多不相干、没必要的代码，将会使项目变得令人晕头转向，难以阅读，遇到需要定制、解决问题的时候，无从下手。</p>
+</li>
+<li><p>要灵活，便于拓展和适应各种需求</p>
+<p>很多人会得意地告诉我，他们把 <strong>MultiType</strong> 源码精简成三四个类，甚至一个类，以为代码越少就是越好，这我也是不能赞同的。<strong>MultiType</strong> 考虑得比他们更远，这是一个提供给大众使用的类库，过度的精简只会使得灵活性大幅失去。<strong>它或许不是使用起来最简单的，但很可能是使用起来最灵活的。</strong> 在我看来，灵活性的优先级大于简单性。因此，<strong>MultiType</strong> 各个组件都是以接口或抽象进行连接，这意味着它所有的角色、组件都可以被替换，或者被拓展和继承。如果你觉得它使用起来还不够简单，完全可以通过继承来封装出更具体符合你使用需求的方法。它已经暴露了足够丰富、周到的接口以供自行实现，我们不应该直接去修改源码，这会导致一旦后续发现你的精简版满足不了你的需求时，已经没有回头路了。</p>
+</li>
+<li><p>要直观，使用起来能令项目代码更清晰、模块化</p>
+<p><strong>MultiType</strong> 提供的 <code>ItemViewProvider</code> 沿袭了 <code>RecyclerView Adapter</code> 的接口命名，使用起来更加舒适，符合习惯。另外，手动写一个新的 <code>ItemViewProvider</code> 需要提供了 类型 泛型，虽然略微有点儿麻烦，但能带来一些好处，指定泛型之后，我们不再需要自己做强制转型，而且代码能够显式表明 <code>ItemViewProvider</code> 和 <code>Item class</code> 的对应关系，简单直观。另外，现在我们有 <strong>MultiTypeTemplates</strong> 插件来自动生成代码，这个过程变得更加顺滑简单。</p>
+</li>
+</ul>
+<h1 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h1><p>介绍了基础用法和设计思想后，我们可以来介绍一下 MultiType 的高级用法。这是一些典型需求和案例，它们是基础用法的延伸，也是设计思想的体现。也许一开始并不会使用到，但如若了解，能够拓宽使用 MultiType 的思路，并且其中也分享了许多有意思的内容和考虑问题的角度。</p>
+<h2 id="使用-MultiTypeTemplates-插件自动生成代码"><a href="#使用-MultiTypeTemplates-插件自动生成代码" class="headerlink" title="使用 MultiTypeTemplates 插件自动生成代码"></a>使用 MultiTypeTemplates 插件自动生成代码</h2><p>在基础用法中，我们了通过 3 个步骤完成 <strong>MultiType</strong> 的初次接入使用，实际上这个过程可以更加简化，<strong>MultiType</strong> 提供了 Android Studio 插件来自动生成代码：<strong>MultiTypeTemplates</strong>，源码也是开源的，<a target="_blank" rel="noopener" href="https://github.com/drakeet/MultiTypeTemplates">https://github.com/drakeet/MultiTypeTemplates</a>，不仅提供了一键生成 <code>Item</code> 和 <code>ItemViewProvider</code>，而且<strong>是一个很好的利用代码模版自动生成代码的示例。</strong>其中使用到了官方提供的代码模版 API，也用到了我自己发明的更灵活修改模版内容的方法，有兴趣做这方面插件的可以看看。</p>
+<p>话说回来，安装和使用 <strong>MultiTypeTemplates</strong> 非常简单：</p>
+<p><strong>Step 1.</strong> 打开 Android Studio 的<code>设置</code> -&gt; <code>Plugin</code> -&gt; <code>Browse repositories</code>，搜索 <code>MultiTypeTemplates</code> 即可获得下载安装：</p>
+<p><img src="http://ww4.sinaimg.cn/large/86e2ff85gw1f935l0kwilj21kw0t3akm.jpg"></p>
+<p><strong>Step 2.</strong> 安装完成后，重启 Android Studio. 右键点击你的 package，选择 <code>New</code> -&gt; <code>MultiType Item</code>，然后输入你的 <code>Item</code> 名字，它就会自动生成 <code>Item</code> and <code>ItemViewProvider</code> 文件和代码。</p>
+<p>比如你输入的是 “Category”，它就会自动生成 <code>Category.java</code> 和 <code>CategoryViewProvider.java</code>.</p>
+<p>特别方便，相信你会很喜欢它。未来这个插件也将会支持自动生成布局文件，这是目前欠缺的，但不要紧，其实 AS 在这方面已经很方便了，对布局 <code>R.layout.item_category</code> 使用 <code>alt + enter</code> 快捷键即可自动生成布局文件。</p>
+<h2 id="使用-全局类型池"><a href="#使用-全局类型池" class="headerlink" title="使用 全局类型池"></a>使用 全局类型池</h2><p>在基础用法中，我们并没有提到 全局类型池，实际上，<strong>MultiType</strong> 支持 局部类型池 和 全局类型池，并支持二者共用，当出现冲突时，以局部的为准。使用局部类型池就如上面的示例，调用 <code>adapter.register()</code> 即可。而使用全局类型池也是很容易的，<strong>MultiType</strong> 提供了一个内置的 <code>GlobalMultiTypePool</code> 作为全局类型池来存储类型和 view 关系，使用如下：</p>
+<p>只要在使用你的全局类型之前任意位置注册类型，通过调用 <code>GlobalMultiTypePool.register(...)</code> 静态方法完成注册。推荐统一在 <code>Application</code> 初始便进行注册，这样代码便于寻找和阅读。</p>
+<p>之后回到你的 <code>Activity</code>，调用 <code>adapter.applyGlobalMultiTypePool()</code> 方法应用你注册过的全局类型即可。</p>
+<p><code>GlobalMultiTypePool</code> 让一些普适性的类型能够全局共用，但使用全局类型池不当也会带来问题，这是没有全然采用全局类型池的原因。问题在于全局类型池是静态的，如果你在 <code>Activity</code> 中注册<strong>全局</strong>类型（虽然并不推荐。因为全局类型最好统一在一个地方注册，便于管理），并传入带 <code>Activity</code> 引用的变量进去，就可能造成内存泄露。举个例子，如下是一个很常见的场景，我们把一个点击回调传递给 <code>provider</code>，并注册到全局类型池：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LeakActivity</span> <span class="keyword">extends</span> <span class="title class_">Activity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_leak);</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line"></span><br><span class="line">        <span class="type">OnClickListener</span> <span class="variable">listener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OnClickListener</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 在 applyGlobalMultiTypePool 之前注册全局 */</span></span><br><span class="line">        GlobalMultiTypePool.register(Post.class, <span class="keyword">new</span> <span class="title class_">PostViewProvider</span>(listener));</span><br><span class="line">        </span><br><span class="line">        adapter.applyGlobalMultiTypePool(); <span class="comment">// &lt;- 使全局的类型加入到局部中来</span></span><br><span class="line"></span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于 Java 匿名内部类 或 非静态内部类，都会默认持有 外部类 的引用，比如这里的 <code>OnClickListener</code> 匿名类对象会持有 <code>LeakActivity.this</code>，当 <code>listener</code> 传递给 <code>new PostViewProvider()</code> 构造函数的时候，<code>GlobalMultiTypePool</code> 内置的静态类型池将长久持有 <code>provider -&gt; listener -&gt; LeakActivity.this</code> 引用链，若没有及时释放，就会引起内存泄露。</p>
+<p>因此，<strong>在使用全局类型池时，最好不要给 <code>provider</code> 传递回调对象或者外部引用，否则就应手动释放或使用弱引用(<code>WeakReference</code>)。</strong>除此之外，全局类型池没有什么其他问题，类型池都只会持有 <code>class</code> 和非常轻薄的 <code>provider</code> 对象。我做过一个试验，就算拥有上万个类型和 <code>provider</code>，内存占用也是很少的，索引速度也很快，在主线程连续注册一万个类型花费不过 10 毫秒的时间，何况一般一个应用根本不可能有这么多类型，完全不必担心这方面的问题。</p>
+<p>另外一个特性是，不管是全局类型池还是局部类型池，都支持重复注册类型。当发现重复时，之后注册的会把之前注册的类型覆盖掉，因此对于全局类型池，需要谨慎进行重复注册，以免影响到其他地方。</p>
+<h2 id="一个类型对应多个-ViewProvider"><a href="#一个类型对应多个-ViewProvider" class="headerlink" title="一个类型对应多个 ViewProvider"></a>一个类型对应多个 <code>ViewProvider</code></h2><blockquote>
+<p>注：本文所有的 <code>ViewProvider</code> 都指的是 <code>ItemViewProvider</code>.</p>
+</blockquote>
+<p><strong>MultiType</strong> 天然支持一个类型对应多个 <code>ViewProvider</code>，但仅限于在不同的列表中。比如你在 <code>adapter1</code> 中注册了 <code>Post.class</code> 对应 <code>SinglePostViewProvider</code>，在另一个 <code>adapter2</code> 中注册了 <code>Post.class</code> 对应 <code>PostDetailViewProvider</code>，这便是一对多的场景。只要是在不同的局部类型池中，无论如何都不会相互干扰，都是允许的。</p>
+<p>而对于在 同一个列表中 一对多的问题，首先这种场景非常少见，再者不管支不支持一对多，开发者都要去判断哪个时候运用哪个 <code>ViewProvider</code>，这是逃不掉的，否则程序就无所适从了。因此，<strong>MultiType</strong> 不去特别解决这个问题，<strong>如果要实现同一个列表中一对多，只要空继承你的类型，然后把它视为新的类型，注册到你的类型池中即可</strong>。</p>
+<h2 id="与-ViewProvider-通讯"><a href="#与-ViewProvider-通讯" class="headerlink" title="与 ViewProvider 通讯"></a>与 <code>ViewProvider</code> 通讯</h2><p><code>ItemViewProvider</code> 对象可以接受外部类型、回调函数，只要在使用之前，传递进去即可，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">OnClickListener</span> <span class="variable">listener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OnClickListener</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">adapter.register(Post.class, <span class="keyword">new</span> <span class="title class_">PostViewProvider</span>(xxx, listener));</span><br></pre></td></tr></table></figure>
+
+<p>但话说回来，对于点击事件，能不依赖 <code>provider</code> 外部内容的话，最好就在 <code>provider</code> 内部完成。<code>provider</code> 内部能够接收到 Views 和 数据，大部分情况下，完全有能力不依赖外部 独立完成逻辑。这样能使代码更加模块化，便于解耦，例如下面便是一个完全自包含的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SquareViewProvider</span> <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;Square, SquareViewProvider.ViewHolder&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> ViewHolder <span class="title function_">onCreateViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@NonNull</span> ViewGroup parent)</span> &#123;</span><br><span class="line">        <span class="type">View</span> <span class="variable">root</span> <span class="operator">=</span> inflater.inflate(R.layout.item_square, parent, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ViewHolder</span>(root);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> ViewHolder holder, <span class="meta">@NonNull</span> Square square)</span> &#123;</span><br><span class="line">        holder.square = square;</span><br><span class="line">        holder.squareView.setText(valueOf(square.number));</span><br><span class="line">        holder.squareView.setSelected(square.isSelected);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ViewHolder</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> TextView squareView;</span><br><span class="line">        <span class="keyword">private</span> Square square;</span><br><span class="line"></span><br><span class="line">        ViewHolder(<span class="keyword">final</span> View itemView) &#123;</span><br><span class="line">            <span class="built_in">super</span>(itemView);</span><br><span class="line">            squareView = (TextView) itemView.findViewById(R.id.square);</span><br><span class="line">            itemView.setOnClickListener(<span class="keyword">new</span> <span class="title class_">View</span>.OnClickListener() &#123;</span><br><span class="line">                <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">                    itemView.setSelected(square.isSelected = !square.isSelected);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用断言，比传统-Adapter-更加易于调试"><a href="#使用断言，比传统-Adapter-更加易于调试" class="headerlink" title="使用断言，比传统 Adapter 更加易于调试"></a>使用断言，比传统 Adapter 更加易于调试</h2><p><strong>众所周知，如果一个传统的 <code>RecyclerView</code> <code>Adapter</code> 内部有异常导致崩溃，它的异常栈是不会指向到你的 <code>Activity</code><strong>，这给我们开发调试过程中带来了麻烦。如果我们的 <code>Adapter</code> 是复用的，就不知道是哪一个页面崩溃。而对于 <code>MultiTypeAdapter</code>，我们显然要用于多个地方，而且可能出现开发者忘记注册类型等等问题。为了便于调试，开发期快速失败，</strong>MultiType</strong> 提供了很方便的断言 API: <code>MultiTypeAsserts</code>，使用方式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> me.drakeet.multitype.MultiTypeAsserts.assertAllRegistered;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> me.drakeet.multitype.MultiTypeAsserts.assertHasTheSameAdapter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleActivity</span> <span class="keyword">extends</span> <span class="title class_">MenuBaseActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line"></span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line">        adapter.register(TextItem.class, <span class="keyword">new</span> <span class="title class_">TextItemViewProvider</span>());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">            items.add(<span class="keyword">new</span> <span class="title class_">TextItem</span>(valueOf(i)));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 断言所有使用的类型都已注册 */</span></span><br><span class="line">        assertAllRegistered(adapter, items);</span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">        <span class="comment">/* 断言 recyclerView 使用的是正确的 adapter */</span></span><br><span class="line">        assertHasTheSameAdapter(recyclerView, adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>assertAllRegistered</code> 和 <code>assertHasTheSameAdapter</code> 都是可选择性使用，<code>assertAllRegistered</code> 需要在加载或更新数据之后， <code>assertHasTheSameAdapter</code> 必须在 <code>recyclerView.setAdapter(adapter)</code> 之后。</p>
+<p>这样做以后，<code>MultiTypeAdapter</code> 相关的异常都会报到你的 <code>Activity</code>，并且会详细注明出错的原因，而如果符合断言，断言代码不会有任何副作用或影响你的代码逻辑，这时你可以把它当作废话。关于这个类的源代码也是很简单，有兴趣可以直接看看源码：<a target="_blank" rel="noopener" href="https://github.com/drakeet/MultiType/blob/master/library/src/main/java/me/drakeet/multitype/MultiTypeAsserts.java">drakeet&#x2F;multitype&#x2F;MultiTypeAsserts.java</a></p>
+<h2 id="支持-Google-AutoValue"><a href="#支持-Google-AutoValue" class="headerlink" title="支持 Google AutoValue"></a>支持 Google AutoValue</h2><p><a target="_blank" rel="noopener" href="https://github.com/google/auto/tree/master/value">AutoValue</a> 是 Google 提供的一个在 Java 实体类中自动生成代码的类库，使你更专注于处理项目的其他逻辑，它可使代码更少，更干净，以及更少的 bug. </p>
+<p>当我们使用传统方式创建一个 Java 模型类的时候，经常需要写一堆 <code>toString()</code>、<code>hashCode()</code>、getter、setter 等等方法，而且对于 Android 开发，大多情况下需要实现 <code>Parcelable</code> 接口。这样的结果是，我本来想要一个只有几个属性的小模型类，但出于各种原因，这个模型类方法数变得十分繁复，阅读起来很不清爽，并且难免会写错内容。AutoValue 的出现解决了这个问题，我们只需定义一些抽象类交给 AutoValue，AutoValue 会<strong>自动</strong>生成该抽象类的具体实现子类，并携带各种样板代码。</p>
+<p>更详细的介绍内容和使用教程，我会在文章末尾会给出 AutoValue 的相关链接，不熟悉 AutoValue 可以借此机会看一下，在这里就不做过多介绍了。新手暂时看不懂也不必纠结，了解之后都是十分容易的。</p>
+<p><strong>MultiType</strong> 支持了 Google AutoValue，支持自动映射某个已经注册的类型的<strong>子类</strong>到同一 View Provider，规则是：如果子类<strong>有</strong>注册，就用注册的映射关系；如果子类<strong>没</strong>注册，则该子类对象使用注册过的父类映射关系。</p>
+<h2 id="对-class-进行二级分发"><a href="#对-class-进行二级分发" class="headerlink" title="对 class 进行二级分发"></a>对 class 进行二级分发</h2><p>我的另外一个项目，即一开始提到的 <strong>TimeMachine</strong>，它是一个看起来特别像聊天软件的 SDK，但还处于非常初期阶段，大家可以不必太关心它。话说回来，在我的 <strong>TimeMachine</strong> 中，我的消息数据结构是 <code>Message</code> - <code>MessageContent</code>，<code>Message</code> 包含了 <code>MessageContent</code>. 因此产生了一个问题，我的 <code>message</code> 对象们都是一样的 <code>Message</code> 类型，但 <code>message</code> 包含的 <code>content</code> 对象不一样，我需要根据 <code>content</code> 来分发数据到 <code>ItemViewProvider</code>，但我加入 <code>Items</code> 中的数据都是 <code>Message</code> 对象，因此，如果什么也不做，它们会被视为同一类型。对于这种场景，我们可以继承 <code>MultiTypeAdapter</code> 并覆写 <code>onFlattenClass(@NonNull Item message)</code> 方法进行二级分发，以我的 <code>MessageAdapter</code> 为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MessageAdapter</span> <span class="keyword">extends</span> <span class="title class_">MultiTypeAdapter</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MessageAdapter</span><span class="params">(<span class="meta">@NonNull</span> List&lt;Message&gt; messages)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(messages);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span> <span class="keyword">public</span> Class <span class="title function_">onFlattenClass</span><span class="params">(<span class="meta">@NonNull</span> Item message)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ((Message) message).content.getClass();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是不是十分简单？这样以后，我就可以直接将 <code>MessageContent.class</code> 注册进类型池，而将包含不同 <code>content</code> 的 <code>Message</code> 对象 add 进 <code>Items</code> List，<code>MessageAdapter</code> 会自动取出 <code>message</code> 的 <code>content</code> 对象，并以它为基准定位 <code>ItemViewProvider</code> 同时会把整个 <code>Message </code>对象发给 <code>provider</code>，<code>provider</code> 可进行分层，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">MessageViewProvider</span>&lt;C <span class="keyword">extends</span> <span class="title class_">Content</span>, V <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder&gt;</span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;Message, V&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> V holder, <span class="meta">@NonNull</span> Message message)</span> &#123;</span><br><span class="line">        onBindViewHolder(holder, (C) message.content, message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 留给子类的抽象方法 */</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> V holder, <span class="meta">@NonNull</span> C content, <span class="meta">@NonNull</span> Message message)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总的来说，对 class 进行二级分发往往要伴随着对 <code>ItemViewProvider</code> 进行二级处理，对此我给出了一个详细的示例，到本文到 “示例” 章节中我们会再详细介绍 <code>ItemViewProvider</code> 二级分发的场景和更具体运用。</p>
+<h2 id="MultiType-与下拉刷新、加载更多、HeaderView、FooterView、Diff"><a href="#MultiType-与下拉刷新、加载更多、HeaderView、FooterView、Diff" class="headerlink" title="MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff"></a>MultiType 与下拉刷新、加载更多、HeaderView、FooterView、Diff</h2><p><strong>MultiType</strong> 设计从始至终，都极力避免往复杂化方向发展，一开始我的设计宗旨就是它应该是一个非常纯粹的、专一的项目，而非各种乱七八糟的功能都要囊括进来的多合一大型库，因此它很克制，期间有许多人给我发过一些无关特性的 Pull Request，表示感谢，但全被拒绝了。</p>
+<p>对于很多人关心的 下拉刷新、加载更多、HeaderView、FooterView、Diff 这些功能特性，其实都不应该是 <strong>MultiType</strong> 的范畴，<strong>MultiType</strong> 的分内之事是做类型、事件与 View 的分发、连接工作，其余无关的需求，都是可以在 <strong>MultiType</strong> 外部完成，或者通过继承 进行自行封装和拓展，而作为一个基础、公共类库，我想它是不应该包含这些内容。</p>
+<p>但很多新手可能并不习惯代码分工、模块化，因此在此我有必要对这几个点简单示范下如何在 <strong>MultiType</strong> 之外去实现：</p>
+<ul>
+<li><p><strong>下拉刷新：</strong></p>
+<p>对于下拉刷新，<code>Android</code> 官方提供了 <code>support.v4</code> <code>SwipeRefreshLayout</code>，在 <code>Activity</code> 层面，可以拿到 <code>SwipeRefreshLayout</code> 并 <code>setOnRefreshListener</code>.</p>
+</li>
+<li><p><strong>加载更多：</strong></p>
+<p><code>RecyclerView</code> 提供了 <code>addOnScrollListener</code> 滚动位置变化监听，要实现加载更多，只要监听并检测列表是否滚动到底部即可，有多种方式，鉴于 <code>LayoutManager</code> 本应该只做布局相关的事务，因此我们推荐直接在 <code>OnScrollListener</code> 层面进行判断。提供一个简单版 <code>OnScrollListener</code> 继承类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">OnLoadMoreListener</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.OnScrollListener &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LinearLayoutManager layoutManager;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> itemCount, lastPosition, lastItemCount;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">onLoadMore</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onScrolled</span><span class="params">(RecyclerView recyclerView, <span class="type">int</span> dx, <span class="type">int</span> dy)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (recyclerView.getLayoutManager() <span class="keyword">instanceof</span> LinearLayoutManager) &#123;</span><br><span class="line">            layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();</span><br><span class="line"></span><br><span class="line">            itemCount = layoutManager.getItemCount();</span><br><span class="line">            lastPosition = layoutManager.findLastCompletelyVisibleItemPosition();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            Log.e(<span class="string">&quot;OnLoadMoreListener&quot;</span>, <span class="string">&quot;The OnLoadMoreListener only support LinearLayoutManager&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (lastItemCount != itemCount &amp;&amp; lastPosition == itemCount - <span class="number">1</span>) &#123;</span><br><span class="line">            lastItemCount = itemCount;</span><br><span class="line">            <span class="built_in">this</span>.onLoadMore();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取数据后做 Diff 更新：</strong></p>
+<p>可以在 <code>Activity</code> 中进行 Diff，或者继承 <code>MultiTypeAdapter</code> 提供接收数据方法，在方法中进行 Diff. <strong>MultiType</strong> 不提供内置 Diff 方案，不然需要依赖 v4 包，并且这也不应该属于它的范畴。</p>
+</li>
+<li><p><strong>HeaderView、FooterView</strong></p>
+<p><strong>MultiType</strong> 其实本身就支持 <code>HeaderView</code>、<code>FooterView</code>，只要创建一个 <code>Header.class</code> - <code>HeaderViewProvider</code> 和 <code>Footer.class</code> - <code>FooterViewProvider</code> 即可，然后把 <code>new Header()</code> 添加到 <code>items</code> 第一个位置，把 <code>new Footer()</code> 添加到 <code>items</code> 最后一个位置。需要注意的是，如果使用了 Footer View，在底部插入数据的时候，需要添加到 <code>最后位置 - 1</code>，即倒二个位置，或者把 <code>Footer</code> remove 掉，再添加数据，最后再插入一个新的 <code>Footer</code>.</p>
+</li>
+</ul>
+<h2 id="实现-RecyclerView-嵌套横向-RecyclerView"><a href="#实现-RecyclerView-嵌套横向-RecyclerView" class="headerlink" title="实现 RecyclerView 嵌套横向 RecyclerView"></a>实现 RecyclerView 嵌套横向 RecyclerView</h2><p><strong>MultiType</strong> 天生就适合实现类似 Google Play 或 iOS App Store 那样复杂的首页列表，这种页面通常会在垂直列表中嵌套横向列表，其实横向列表我们完全可以把它视为一种 <code>Item</code> 类型，这个 item 持有一个列表数据和当前横向列表滑动到的位置，类似这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PostList</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> List&lt;Post&gt; posts;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> currentPosition;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">PostList</span><span class="params">(<span class="meta">@NonNull</span> List&lt;Post&gt; posts)</span> &#123;<span class="built_in">this</span>.posts = posts;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的 <code>HorizontalItemViewProvider</code> 类似这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HorizontalItemViewProvider</span></span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">ItemViewProvider</span>&lt;PostList, HorizontalItemViewProvider.ViewHolder&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NonNull</span> <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> ViewHolder <span class="title function_">onCreateViewHolder</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@NonNull</span> ViewGroup parent)</span> &#123;</span><br><span class="line">        <span class="comment">/* item_horizontal_list 就是一个只有 RecyclerView 的布局 */</span></span><br><span class="line">        <span class="type">View</span> <span class="variable">view</span> <span class="operator">=</span> inflater.inflate(R.layout.item_horizontal_list, parent, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ViewHolder</span>(view);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> ViewHolder holder, <span class="meta">@NonNull</span> PostList postList)</span> &#123;</span><br><span class="line">        holder.setPosts(postList.posts);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ViewHolder</span> <span class="keyword">extends</span> <span class="title class_">RecyclerView</span>.ViewHolder &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> RecyclerView recyclerView;</span><br><span class="line">        <span class="keyword">private</span> PostsAdapter adapter;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="title function_">ViewHolder</span><span class="params">(<span class="meta">@NonNull</span> View itemView)</span> &#123;</span><br><span class="line">            <span class="built_in">super</span>(itemView);</span><br><span class="line">            recyclerView = (RecyclerView) itemView.findViewById(R.id.post_list);</span><br><span class="line">            <span class="type">LinearLayoutManager</span> <span class="variable">layoutManager</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">LinearLayoutManager</span>(itemView.getContext());</span><br><span class="line">            layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);</span><br><span class="line">            recyclerView.setLayoutManager(layoutManager);</span><br><span class="line">            <span class="comment">/* adapter 只负责灌输、适配数据，布局交给 LayoutManager，可复用 */</span></span><br><span class="line">            adapter = <span class="keyword">new</span> <span class="title class_">PostsAdapter</span>();</span><br><span class="line">            recyclerView.setAdapter(adapter);</span><br><span class="line">            <span class="comment">/* 在此设置横向滑动监听器，用于记录和恢复当前滑动到的位置，略 */</span></span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">setPosts</span><span class="params">(List&lt;Post&gt; posts)</span> &#123;</span><br><span class="line">            adapter.setPosts(posts);</span><br><span class="line">            adapter.notifyDataSetChanged();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现线性布局和网格布局混排列表"><a href="#实现线性布局和网格布局混排列表" class="headerlink" title="实现线性布局和网格布局混排列表"></a>实现线性布局和网格布局混排列表</h2><p>这个课题其实也不属于 <strong>MultiType</strong> 的范畴，<strong>MultiType</strong> 的职责是做数据类型分发，而不是布局，但鉴于很多复杂页面都会需要线性布局和网格布局混排，我就简单讲一讲，关键在于 <code>RecyclerView</code> 的 <code>LayoutManager</code>. 虽然是线性和网格混合，但实现起来其实只要一个网格布局 <code>GridLayoutManager</code>，如果你查看 <code>GridLayoutManager</code> 的官方源码，你会发现它其实继承自 <code>LinearLayoutManager</code>. 以下是示例和解释：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MultiGridActivity</span> <span class="keyword">extends</span> <span class="title class_">MenuBaseActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">SPAN_COUNT</span> <span class="operator">=</span> <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">private</span> MultiTypeAdapter adapter;</span><br><span class="line">    <span class="keyword">private</span> Items items;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_multi_grid);</span><br><span class="line">        items = <span class="keyword">new</span> <span class="title class_">Items</span>();</span><br><span class="line">        <span class="type">RecyclerView</span> <span class="variable">recyclerView</span> <span class="operator">=</span> (RecyclerView) findViewById(R.id.list);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">final</span> <span class="type">GridLayoutManager</span> <span class="variable">layoutManager</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GridLayoutManager</span>(<span class="built_in">this</span>, SPAN_COUNT);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">/* 关键内容：通过 setSpanSizeLookup 来告诉布局，你的 item 占几个横向单位，</span></span><br><span class="line"><span class="comment">           如果你横向有 5 个单位，而你返回当前 item 占用 5 个单位，那么它就会看起来单独占用一行 */</span></span><br><span class="line">        layoutManager.setSpanSizeLookup(<span class="keyword">new</span> <span class="title class_">GridLayoutManager</span>.SpanSizeLookup() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getSpanSize</span><span class="params">(<span class="type">int</span> position)</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> (items.get(position) <span class="keyword">instanceof</span> Category) ? SPAN_COUNT : <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        recyclerView.setLayoutManager(layoutManager);</span><br><span class="line">        </span><br><span class="line">        adapter = <span class="keyword">new</span> <span class="title class_">MultiTypeAdapter</span>(items);</span><br><span class="line">        adapter.applyGlobalMultiTypePool();</span><br><span class="line">        adapter.register(Square.class, <span class="keyword">new</span> <span class="title class_">SquareViewProvider</span>());</span><br><span class="line"></span><br><span class="line">        assertAllRegistered(adapter, items);</span><br><span class="line">        recyclerView.setAdapter(adapter);</span><br><span class="line">        loadData();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">loadData</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据扁平化处理"><a href="#数据扁平化处理" class="headerlink" title="数据扁平化处理"></a>数据扁平化处理</h2><p>在一个<strong>垂直</strong> <code>RecyclerView</code> 中，<code>Item</code> 们都是同级的，没有任何嵌套关系，但我们的数据结构往往存在嵌套关系，比如 <code>Post</code> 内部包含了 <code>Comment</code>s 数据，或换句话说 <code>Post</code> 嵌套了 <code>Comment</code>，就像微信朋友圈一样，”动态” 伴随着 “评论”。那么如何把 非扁平化 的数据排布在 扁平 的列表中呢？必然需要一个_数据扁平化处理_的过程，就像 <code>ListView</code> 的数据需要一个 <code>Adapter</code> 来适配，<code>Adapter</code> 就像一个油漏斗，把油引入瓶子中。我们在面对嵌套数据结构的时候，可以采用如下的扁平化处理，关于扁平化这个词，不必太纠结，简单说，就是把嵌套数据都拉出来，摊平，让 <code>Comment</code> 和 <code>Post</code> 同级，最后把它们都 add 进同一个 <code>Items</code> 容器，交给 <code>MultiTypeAdapter</code>. 示例：</p>
+<p>假设：你的 <code>Post</code> 是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Post</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String content;</span><br><span class="line">    <span class="keyword">public</span> List&lt;Comment&gt; comments; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设：你的 <code>Comment</code> 是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Comment</span> <span class="keyword">implements</span> <span class="title class_">Item</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String content;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设：你服务端返回的 JSON 数据是这样的：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span><span class="string">&quot;I have released the MultiType v2.2.1&quot;</span><span class="punctuation">,</span> </span><br><span class="line">        <span class="attr">&quot;comments&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span><span class="string">&quot;great&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span><span class="string">&quot;I love your post!&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>那么你的 JSON 转成 Java Bean 之后，你拿到手应该是个 <code>List&lt;Post&gt; posts</code> 对象，现在我们写一个扁平化处理的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> List&lt;Item&gt; <span class="title function_">flattenData</span><span class="params">(List&lt;Post&gt; posts)</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> List&lt;Item&gt; items = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (Post post : posts) &#123;</span><br><span class="line">        <span class="comment">/* 将 post 加进 items，Provider 内部拿到它的时候，</span></span><br><span class="line"><span class="comment">         * 我们无视它的 comments 内容即可 */</span></span><br><span class="line">        items.add(post);</span><br><span class="line">        <span class="comment">/* 紧接着将 comments 拿出来插入进 items，</span></span><br><span class="line"><span class="comment">         * 评论就能正好处于该条 post 下面 */</span></span><br><span class="line">        items.addAll(post.comments);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> items;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后我们所有的 <code>posts</code> 在加入全局 MultiType <code>Items</code> 之前，都需要经过扁平化处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">items.addAll(flattenData(posts));</span><br><span class="line">adapter.notifyDataSetChanged();</span><br></pre></td></tr></table></figure>
+
+<p>整个过程其实并不困难，相信大家都已经理解了。</p>
+<h1 id="更多示例"><a href="#更多示例" class="headerlink" title="更多示例"></a>更多示例</h1><p><strong>MultiType</strong> 的开源项目提供了许多的 sample (示例) 程序，这些示例秉承了一贯的代码清晰、干净的风格，十分易于阅读：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/drakeet/MultiType/tree/master/sample/src/main/java/me/drakeet/multitype/sample/weibo">仿造<strong>微博</strong>的数据结构和二级 ViewProvider</a></p>
+<p>这是一个类似微博数据结构的示例，数据两层结构，Item 也是两层结构：一层框架（包含头像用户名等），一层 content view(微博内容)，内容嵌套于框架中。微博的每一条微博 Item 都包含了这样两层嵌套关系，这样做的好处是，你不必每个 Item 都去重复制造一遍外层框架。</p>
+<p>或者换一个比喻，就像聊天消息，一条聊天消息也是两层的，一层头像、用户名、聊天气泡框，一层你的文字、图片等。另外，每一种消息都有左边和右边的样式，分别对应别人发来的消息和你发出的消息。如果左边算一种，右边又算一种，就是比较不好的设计了，会导致布局内容重复、冗余，修改操作都要做两遍。最好的方案是让他们视被为同一种类型，然后在 Item 框层次进行左右边判断和框架相关数据绑定。</p>
+<p>我提供的这个二级 <code>ViewProvider</code> 示例便是这样的两层结构。它能够让你每次新增加一个类型，只要实现内容即可，框不应该重复实现。</p>
+<p>如果再不明白，或许你可以看看我的这个示例中 微博 Item 框的布局：</p>
+<p><img src="http://ww2.sinaimg.cn/large/86e2ff85gw1f9brj5gw1jj21e211ane6.jpg"></p>
+<p>从我这个 <code>frame</code> 布局可以看出来，它内部有一个 <code>FrameLayout</code> 作为 <code>container</code> 将用于容纳不同的微博内容，而这一层框架则是共同的。</p>
+<p>这个例子算高级中的高级，但实际上也是很简单，展示了 <strong>MultiType</strong> 优秀的可拓展能力。完整运行结果展示如下：</p>
+<p><img src="http://ww3.sinaimg.cn/large/86e2ff85jw1f9a7tek74lj21401z414s.jpg" width=270 height=486/> <img src="http://ww1.sinaimg.cn/mw1024/86e2ff85jw1f9a7z4yqlkj21401z4n8r.jpg" width=270 height=486/></p>
+<blockquote>
+<p>注：在示例中我们并没有示范服务端 JSON 数据转为我们定义的 Weibo 对象过程（很快会补足），实际上对于完整链路，这个过程是需要做数据转换，我们需要在 <code>Weibo</code> 层加一个 <code>type</code> 或 <code>describe</code> 字段用于描述微博内容类型，然后再将微博内容的 JSON 文本转为具体微博内容对象交给 Weibo. </p>
+</blockquote>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/drakeet/about-page">drakeet&#x2F;about-page</a></p>
+<p>一个 Material Design 的关于页面，核心基于 MultiType，包含了多种 <code>Item</code>s，美观，容易使用。</p>
+<p><img src="http://ww2.sinaimg.cn/large/86e2ff85gw1f93gq2tevbj21700pcjyp.jpg"></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/drakeet/MultiType/tree/master/sample/src/main/java/me/drakeet/multitype/sample/grid">线性和网格布局混排</a></p>
+<p>使用 <code>MultiType</code> 和 <code>GridLayoutManager</code> 实现网格和线性混合布局，实现一个选集页面。</p>
+<img src="http://ww1.sinaimg.cn/large/86e2ff85gw1f96yfddvksj21401z479t.jpg" width=270 height=486/>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/drakeet/TimeMachine">drakeet&#x2F;TimeMachine</a></p>
+<p>TimeMachine 使用了 <strong>MultiType</strong> 来创建一个复杂的聊天页面，页面和需求虽然复杂，但使用 <strong>MultiType</strong> 显得轻松简单。</p>
+<p><img src="http://ww1.sinaimg.cn/large/86e2ff85gw1f96yg01b5nj20k00zkgng.jpg" width="270" height="486"/> <img src="http://ww3.sinaimg.cn/large/86e2ff85gw1f94i6ysea2j20k00zkmzn.jpg" width="270" height="486"/></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/drakeet/MultiType/tree/master/sample/src/main/java/me/drakeet/multitype/sample/bilibili">类似 Bilibili iOS 端首页</a></p>
+<p>使用 <code>MultiType</code> 实现类似 Bilibili iOS 端首页复杂的多类型列表视图，包括嵌套横向 <code>RecyclerView</code>.</p>
+<img src="http://ww3.sinaimg.cn/large/86e2ff85gw1f96ygmroy0j21401z4nl9.jpg" width="270" height="486"/></li>
+</ul>
+<p>附：一个第三方示例，<a target="_blank" rel="noopener" href="https://github.com/WanLiLi/MultiTypeDemo">采用真实的网络请求数据演示 MultiType 框架的用法 by WanLiLi</a>. 点评：看了下，代码不够清爽，但实现效果十分不错。</p>
+<h1 id="Q-A"><a href="#Q-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h1><ul>
+<li><p><strong>Q: 全局类型池的主要作用是什么，能取消全局的使用吗？</strong></p>
+<p>A: 全局类型池的主要作用是，注册一些能够各个地方复用的类型，可以存一些比如：Line、Space、Header、LoadMoreFooter. 默认情况下，全局类型池是不会生效的，只有你调用 <code>adapter.applyGlobalMultiTypePool()</code> 使用全局类型池，它才会被应用，并加入到你当下的局部类型池中。没有调用这一行代码，全局的就不会参入你的局部类型池。也就是说，终归都是局部类型池，只是你确定使用全局的时候，它会把全局的拷贝一份，然后加入到你这个局部类型池中。</p>
+</li>
+<li><p><strong>Q: 使用全局类型的话，只能是在 Application 中进行注册吗？</strong></p>
+<p>A: 不，只是推荐这么做而已。在 <code>Application</code> 初始注册，能够确保类型在使用之前就注册好。另外，位置统一固定，有利于寻找代码。不然出了问题，你需要到处寻找是在哪注册了全局类型。注册全局的代码如果分散到各个地方，就不好控制和追寻，因此最好统一一个地方注册。换一个角度来说，注册全局类型的动作存在着约定性，约定的东西、可被破坏的东西，有时会比较不可靠，<strong>因此能够使用局部类型池的情况，最好使用局部类型池。</strong></p>
+</li>
+<li><p><strong>Q: 为什么不全然使用全局类型池？</strong></p>
+<p>A: <strong>MultiType</strong> 最早的版本是只支持全局类型池的，因为它带来的好处诸多，但随着更多人使用，它的问题也逐渐暴露出来。一，全局类型池的注册容易分散到许多地方，这是无法约束的，会导致代码难以追寻。二，如果使用不当，可能引起内存泄漏问题，我自己是不会写出内存泄漏的代码的，但如果提供了可能性，就有很多人会趟上去。三，为了解决一对多的问题，我想了许多方案，很多几乎写好了，但都被推翻了，后来我发现，这些麻烦，都是因为一开始基于全局类型池引起的，那些方案固然都可以，但会使代码变得复杂，我不喜欢。</p>
+</li>
+<li><p><strong>Q: 觉得 MultiType 不够精简，应该怎么做？</strong></p>
+<p>A: 在前面 “设计思想” 中我们谈到：_MultiType 或许不是使用起来最简单的，但很可能是使用起来最灵活的。_其中的缘由是它高度可定制、可拓展，而不是把一些路封死。作为一个基础类库，简单和灵活需要一个均衡点，过度精简便要以失去灵活性为代价。如果觉得 <strong>MultiType</strong> 不够精简，想将它修改得更加容易使用，我推荐的方式是去继承 <code>MultiTypeAdapter</code> 或 <code>ItemViewProvider</code>，甚至你可以重新实现一个 <code>TypePool</code> 再设置给 <code>MultiTypeAdapter</code>. 我们不应该直接到底层去修改、破坏它们。总之，利用开放接口或继承的做法不管对于 <strong>MultiType</strong> 还是其它开源库，都应该是定制的首选。</p>
+</li>
+<li><p><strong>Q: 在 <code>ItemViewProvider</code> 中如何拿到 <code>Context</code> 对象？</strong></p>
+<p>A: 有人问我说，他在 <code>ItemViewProvider</code> 里使用 <a target="_blank" rel="noopener" href="https://github.com/bumptech/glide">Glide</a> 来加载图片需要获取到 Activity <code>Context</code> 对象，要怎么才能拿到 <code>Context</code> 对象？这是一个特别简单的问题，但我想既然有人问，应该比较典型，我就详细解答下：首先，在 Android 开发中，任何 <code>View</code> 对象都能通过 <code>view.getContext()</code> 拿到 <code>Context</code> 对象，这些对象本质上都是 <code>Activity</code> 对象的引用。而在我们的 <code>ItemViewProvider</code> 中，可以通过 <code>holder.itemView.getContext()</code> 获取到 <code>Context</code> 对象，也可以通过 viewHolder 的任意 <code>View</code> 对象 <code>getContext()</code> 方法拿到 <code>Context</code> 对象. <code>Context</code> 中文释义是 _”上下文对象”_，一般情况下，都是由 <code>Activity</code> 传递给 <code>View</code>s，<code>View</code>s 内部再进行传递。比如我们使用 <code>RecyclerView</code>，<code>Activity</code> 会将它的 <code>Context</code> 传递给 <code>RecyclerView</code>，<code>RecyclerView</code> 再传递给 <code>Adapter</code>，<code>Adapter</code> 再传递给 <code>ViewHolder</code> 的 <code>itemView</code>，<code>itemView</code> 再传递给它的各个子 <code>View</code>s，传递来传递去，其实都是同一个对象的引用。</p>
+<p>总而言之，拿到 <code>Context</code> 对象非常简单，只要你能拿到一个 <code>View</code> 对象，调用 <code>view.getContext()</code> 即可。另外，也可以参考 <em><a href="#%E4%B8%8E-viewprovider-%E9%80%9A%E8%AE%AF">与 provider 通讯</a></em> 章节，我们可以很方便地给 <code>provider</code> 传递任何对象进去，包括 <code>Context</code> 对象。</p>
+</li>
+</ul>
+<h1 id="感谢"><a href="#感谢" class="headerlink" title="感谢"></a>感谢</h1><p>在 <strong>MultiType</strong> 开发维护过程中，很多朋友给了我很多反馈，我也非常乐意于与大家交流，有问必答，因为这是一个难得不错的项目，它比较接近我心中对于一个完美项目的要求：设计精巧，代码干净漂亮。</p>
+<p>我向来是不太在意项目的 star 数目的，但热衷于把我的好东西分享给更多人使用，因此在<a target="_blank" rel="noopener" href="https://github.com/drakeet">我的 GitHub</a> 首页我不会把我一些高 star 项目摆出来，而是放一些我觉得代码相对比较好的项目。这是我的动力，我想写一份完美的代码，就像王垠的 40 行一样，达到自觉得天衣无缝、犹如天神衣袖般的优雅，嗯，要是哪天我做到了，我就停止开源，哈哈。</p>
+<p>话说回来，这个项目，特别感谢大家的帮忙、反馈，感谢一些朋友的 PR、贡献和推荐，是你们让我觉得开源是一件除了完善自我之外 还充满了意义的一件事情 – 能够与更多人协同，能够面向更宽广的世界，谢谢大家！以下是感谢名单：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/70kg">70kg</a>、<a target="_blank" rel="noopener" href="https://github.com/zubinxiong">zubinxiong</a>、<a target="_blank" rel="noopener" href="https://github.com/WanLiLi">WanLiLi</a>、<a target="_blank" rel="noopener" href="https://github.com/daimajia">代码家</a>、<a target="_blank" rel="noopener" href="https://github.com/CaMnter">CaMnter</a>、<a target="_blank" rel="noopener" href="https://github.com/android-xiaowei">android-xiaowei</a>、<a target="_blank" rel="noopener" href="https://github.com/burgessjp">burgessjp</a>、<a target="_blank" rel="noopener" href="https://github.com/lixi0912">lixi0912</a>、<a target="_blank" rel="noopener" href="https://github.com/simidaxu">simidaxu</a>、<a target="_blank" rel="noopener" href="https://github.com/maoruibin">咕咚</a>、<a target="_blank" rel="noopener" href="https://github.com/LuckyJayce">LuckyJayce</a>、<a target="_blank" rel="noopener" href="https://github.com/BelongsH">BelongsH</a>、<a target="_blank" rel="noopener" href="https://github.com/tmexcept">tmexcept</a>、<a target="_blank" rel="noopener" href="https://github.com/TellH">TellH</a>、<a target="_blank" rel="noopener" href="https://github.com/Panl">Ray Pan</a>、<a target="_blank" rel="noopener" href="https://github.com/DearZack">Zack</a>、<a target="_blank" rel="noopener" href="https://github.com/ChrisZou">Chris</a></p>
+<h1 id="引用文献"><a href="#引用文献" class="headerlink" title="引用文献"></a>引用文献</h1><ul>
+<li>《Android 内存泄漏案例和解析》<a target="_blank" rel="noopener" href="https://drakeet.me/android-leaks">https://drakeet.me/android-leaks</a></li>
+<li>《Android 复杂的多类型列表视图新写法：MultiType》<a target="_blank" rel="noopener" href="https://drakeet.me/multitype">https://drakeet.me/multitype</a></li>
+<li>《使用 Google AutoValue 自动生成代码》<a target="_blank" rel="noopener" href="http://tedyin.me/2016/04/11/auto-value/">http://tedyin.me/2016/04/11/auto-value/</a></li>
+<li>我的个人博客 <a target="_blank" rel="noopener" href="http://drakeet.me/">http://drakeet.me</a></li>
+<li><strong>MultiType</strong> 源代码 <a target="_blank" rel="noopener" href="https://github.com/drakeet/MultiType">https://github.com/drakeet/MultiType</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/RecyclerView/" rel="tag"># RecyclerView</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/04/01/performance-optimization/" rel="prev" title="Android 性能优化总结">
+                  <i class="fa fa-angle-left"></i> Android 性能优化总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/05/15/android-art-explore-1/" rel="next" title="《Android开发艺术探索》笔记-第1章">
+                  《Android开发艺术探索》笔记-第1章 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,37 +1,333 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。具体链接在这：https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Python写一个小的爬虫工具">
+<meta property="og:url" content="http://yoursite.com/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。具体链接在这：https:&#x2F;&#x2F;www.pingxx.com&#x2F;api#银行编号说明那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。">
+<meta property="og:locale">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2017-03-27T09:45:27.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.974Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/","path":"2017/03/27/用Python写一个小的爬虫工具/","title":"用Python写一个小的爬虫工具"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用Python写一个小的爬虫工具 | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E6%88%90%E7%88%AC%E8%99%AB%E7%9A%84%E5%85%B3%E9%94%AE%E6%A8%A1%E5%9D%97"><span class="nav-number">1.</span> <span class="nav-text">组成爬虫的关键模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E7%BD%91%E9%A1%B5"><span class="nav-number">2.</span> <span class="nav-text">下载网页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E7%BD%91%E9%A1%B5"><span class="nav-number">3.</span> <span class="nav-text">解析网页</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用Python写一个小的爬虫工具 | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用Python写一个小的爬虫工具
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-03-27 17:45:27" itemprop="dateCreated datePublished" datetime="2017-03-27T17:45:27+08:00">2017-03-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>事情是这样的，公司是用的第三方支付工具ping++，工作需要将他们文档中的银行编号和银行名称转成Json字符串放在本地使用。<br>具体链接在这：<a target="_blank" rel="noopener" href="https://www.pingxx.com/api#%E9%93%B6%E8%A1%8C%E7%BC%96%E5%8F%B7%E8%AF%B4%E6%98%8E">https://www.pingxx.com/api#银行编号说明</a><br>那么问题来了，对于这个银行编号表格，改怎么弄呢，总不能挨个复制吧。这样效率也太低了，不是一个程序猿的作风。于是我找ios同事要了一份他们解析好的json数据。。。哈哈哈。。就是这么简单粗暴。。<span id="more"></span>要确实要了，但还是要自己弄一下，要善于将生活中可以写代码处理的事用代码去解决。<br>确定了要做什么事就好办了，首先想到的就是用Python爬虫去解析网页，然后分析数据处理。</p>
+<h3 id="组成爬虫的关键模块"><a href="#组成爬虫的关键模块" class="headerlink" title="组成爬虫的关键模块"></a>组成爬虫的关键模块</h3><ul>
+<li>URL管理器<br>用于对需要爬取的URL和已经爬取过的URL进行管理，可以用set管理也可以用其他工具处理，这里只是对单个固定网页爬取，就用字符串代替了</li>
+<li>HTML下载器<br>将URL管理器中的对应的url的网页下载下来，存为字符串，然后可以将这个字符串传给网页解析器解析。这里用的是Python自带的urllib模块，在Python2.7 中该模块就是有名的urllib2，Python3.0中将urllib2 统一放到urllib.request下，使用方法略有不同，自行google</li>
+<li>HTML解析器<br>一方面会解析出有价值的数据，另一方面，由于每一个页面都有很多指向其它页面的网页，这些URL被解析出来之后，可以补充进URL管理器，以备之后爬取。这里用的第三方模块BeautifulSoup，需要安装，安装方法如下:<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ easy_install beautifulsoup4</span><br></pre></td></tr></table></figure>
+或者<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install beautifulsoup4</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="下载网页"><a href="#下载网页" class="headerlink" title="下载网页"></a>下载网页</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line"></span><br><span class="line">response = urllib.request.urlopen(&quot;https://www.pingxx.com/api#银行编号说明&quot;)</span><br><span class="line">print(response.read())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>没错就需要两行代码就可以下载一个网页，其实一行也可以</p>
+<h3 id="解析网页"><a href="#解析网页" class="headerlink" title="解析网页"></a>解析网页</h3><p>上面下的网页就是一个html的源码，要解析它，BeautifulSoup支持多种方式的解析，获取自己想要的数据。这里就需要去网站看一看源码，我们可以使用Command+option+J 审查元素，来看一下我们需要数据处的源码的一些可用的地方，以方便爬取，下图使我们定位到的源码</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/859087-9ec0a345e7c8369d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Paste_Image.png"></p>
+<p>查看之后，分析需要的数据在那个div下的table里，我们需要获取table，然后解析table就可以了，但是div不太好直接拿到，但是有个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;h2 id=&quot;银行编号说明&quot;&gt;银行编号说明&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
+<p>比较好拿，于是就先取他，再拿他的父节点的然后再取table<br>代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response = urllib.request.urlopen(&quot;https://www.pingxx.com/api#银行编号说明&quot;)</span><br><span class="line">soup = BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table = soup.find(&quot;h2&quot;, id=&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br></pre></td></tr></table></figure>
+<p>这样就获取到了table，剩下的就简单了，就是处理table了。先获取所有的tr，再获取每个tr中的td，然后获取需要td中的值进行拼接Json字符串。<br>完整代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import urllib.request</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line">response = urllib.request.urlopen(&quot;https://www.pingxx.com/api#银行编号说明&quot;)</span><br><span class="line">soup = BeautifulSoup(response, &quot;html.parser&quot;)</span><br><span class="line">table = soup.find(&quot;h2&quot;, id=&quot;银行编号说明&quot;).parent.find(&quot;table&quot;).find(&quot;tbody&quot;)</span><br><span class="line"></span><br><span class="line">bankJson = &quot;[&quot;</span><br><span class="line">for row in table.findAll(&#x27;tr&#x27;):</span><br><span class="line">    if len(row) &gt; 2:</span><br><span class="line">        cells = row.findAll(&#x27;td&#x27;)</span><br><span class="line">        bank_code = cells[0].find(text=True)</span><br><span class="line">        bank_name = cells[1].find(text=True)</span><br><span class="line">        bankJson = bankJson + &quot;&#123;&quot; + &quot;\&quot;code\&quot;:\&quot;&quot; + bank_code + &quot;\&quot;,&quot; + &quot;\&quot;name\&quot;:\&quot;&quot; + bank_name + &quot;\&quot;&#125;,&quot;</span><br><span class="line"></span><br><span class="line">bankJson = bankJson[0:len(bankJson) - 1] + &quot;]&quot;</span><br><span class="line">print(bankJson)</span><br></pre></td></tr></table></figure>
+
+<p>运行代码就获取到打印的结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[&#123;&quot;code&quot;:&quot;0100&quot;,&quot;name&quot;:&quot;中国邮政储蓄银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0102&quot;,&quot;name&quot;:&quot;工商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0103&quot;,&quot;name&quot;:&quot;农业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0104&quot;,&quot;name&quot;:&quot;中国银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0105&quot;,&quot;name&quot;:&quot;建设银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0301&quot;,&quot;name&quot;:&quot;交通银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0302&quot;,&quot;name&quot;:&quot;中信银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0303&quot;,&quot;name&quot;:&quot;光大银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0304&quot;,&quot;name&quot;:&quot;华夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0305&quot;,&quot;name&quot;:&quot;民生银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0306&quot;,&quot;name&quot;:&quot;广发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0308&quot;,&quot;name&quot;:&quot;招商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0309&quot;,&quot;name&quot;:&quot;兴业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0310&quot;,&quot;name&quot;:&quot;浦发银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0311&quot;,&quot;name&quot;:&quot;恒丰银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0313&quot;,&quot;name&quot;:&quot;临沂市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0316&quot;,&quot;name&quot;:&quot;浙商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0317&quot;,&quot;name&quot;:&quot;渤海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0318&quot;,&quot;name&quot;:&quot;平安银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0328&quot;,&quot;name&quot;:&quot;新韩银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0329&quot;,&quot;name&quot;:&quot;韩亚银行(中国)&quot;&#125;,&#123;&quot;code&quot;:&quot;0336&quot;,&quot;name&quot;:&quot;企业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0401&quot;,&quot;name&quot;:&quot;上海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0402&quot;,&quot;name&quot;:&quot;厦门银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0403&quot;,&quot;name&quot;:&quot;北京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0404&quot;,&quot;name&quot;:&quot;烟台市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0405&quot;,&quot;name&quot;:&quot;福建海峡银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0406&quot;,&quot;name&quot;:&quot;吉林银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0408&quot;,&quot;name&quot;:&quot;宁波银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0412&quot;,&quot;name&quot;:&quot;温州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0413&quot;,&quot;name&quot;:&quot;广州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0414&quot;,&quot;name&quot;:&quot;汉口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0418&quot;,&quot;name&quot;:&quot;洛阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0420&quot;,&quot;name&quot;:&quot;大连银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0422&quot;,&quot;name&quot;:&quot;河北银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0423&quot;,&quot;name&quot;:&quot;杭州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0424&quot;,&quot;name&quot;:&quot;南京银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0427&quot;,&quot;name&quot;:&quot;乌鲁木齐市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0428&quot;,&quot;name&quot;:&quot;绍兴银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0433&quot;,&quot;name&quot;:&quot;葫芦岛市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0434&quot;,&quot;name&quot;:&quot;天津银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0435&quot;,&quot;name&quot;:&quot;郑州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0436&quot;,&quot;name&quot;:&quot;宁夏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0438&quot;,&quot;name&quot;:&quot;齐商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0439&quot;,&quot;name&quot;:&quot;锦州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0440&quot;,&quot;name&quot;:&quot;徽商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0441&quot;,&quot;name&quot;:&quot;重庆银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0442&quot;,&quot;name&quot;:&quot;哈尔滨银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0443&quot;,&quot;name&quot;:&quot;贵阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0447&quot;,&quot;name&quot;:&quot;兰州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0448&quot;,&quot;name&quot;:&quot;南昌银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0449&quot;,&quot;name&quot;:&quot;晋商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0450&quot;,&quot;name&quot;:&quot;青岛银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0455&quot;,&quot;name&quot;:&quot;日照市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0456&quot;,&quot;name&quot;:&quot;鞍山银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0458&quot;,&quot;name&quot;:&quot;青海银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0459&quot;,&quot;name&quot;:&quot;台州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0461&quot;,&quot;name&quot;:&quot;长沙银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0463&quot;,&quot;name&quot;:&quot;赣州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0465&quot;,&quot;name&quot;:&quot;营口银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0467&quot;,&quot;name&quot;:&quot;阜新银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0474&quot;,&quot;name&quot;:&quot;内蒙古银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0475&quot;,&quot;name&quot;:&quot;湖州市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0476&quot;,&quot;name&quot;:&quot;沧州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0479&quot;,&quot;name&quot;:&quot;包商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0481&quot;,&quot;name&quot;:&quot;威海商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0483&quot;,&quot;name&quot;:&quot;攀枝花市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0485&quot;,&quot;name&quot;:&quot;绵阳市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0490&quot;,&quot;name&quot;:&quot;张家口市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0492&quot;,&quot;name&quot;:&quot;龙江银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0495&quot;,&quot;name&quot;:&quot;柳州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0497&quot;,&quot;name&quot;:&quot;莱商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0498&quot;,&quot;name&quot;:&quot;德阳银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0503&quot;,&quot;name&quot;:&quot;晋城银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0505&quot;,&quot;name&quot;:&quot;东莞商行&quot;&#125;,&#123;&quot;code&quot;:&quot;0508&quot;,&quot;name&quot;:&quot;江苏银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0513&quot;,&quot;name&quot;:&quot;承德市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0515&quot;,&quot;name&quot;:&quot;德州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0517&quot;,&quot;name&quot;:&quot;邯郸市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0525&quot;,&quot;name&quot;:&quot;浙江民泰商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0526&quot;,&quot;name&quot;:&quot;上饶市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0527&quot;,&quot;name&quot;:&quot;东营银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0528&quot;,&quot;name&quot;:&quot;泰安市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0530&quot;,&quot;name&quot;:&quot;浙江稠州商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0534&quot;,&quot;name&quot;:&quot;鄂尔多斯银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0537&quot;,&quot;name&quot;:&quot;济宁银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0547&quot;,&quot;name&quot;:&quot;昆仑银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0554&quot;,&quot;name&quot;:&quot;邢台银行&quot;&#125;,&#123;&quot;code&quot;:&quot;0556&quot;,&quot;name&quot;:&quot;漯河商行&quot;&#125;,&#123;&quot;code&quot;:&quot;1401&quot;,&quot;name&quot;:&quot;上海农商银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1402&quot;,&quot;name&quot;:&quot;昆山农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1403&quot;,&quot;name&quot;:&quot;常熟市农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1404&quot;,&quot;name&quot;:&quot;深圳农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1405&quot;,&quot;name&quot;:&quot;广州农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1408&quot;,&quot;name&quot;:&quot;佛山顺德农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1409&quot;,&quot;name&quot;:&quot;昆明农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1410&quot;,&quot;name&quot;:&quot;湖北农信社&quot;&#125;,&#123;&quot;code&quot;:&quot;1415&quot;,&quot;name&quot;:&quot;东莞农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1416&quot;,&quot;name&quot;:&quot;张家港农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1417&quot;,&quot;name&quot;:&quot;福建省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1418&quot;,&quot;name&quot;:&quot;北京农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1419&quot;,&quot;name&quot;:&quot;天津农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1420&quot;,&quot;name&quot;:&quot;宁波鄞州农村合作银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1424&quot;,&quot;name&quot;:&quot;江苏省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1428&quot;,&quot;name&quot;:&quot;江苏吴江农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1430&quot;,&quot;name&quot;:&quot;苏州银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1443&quot;,&quot;name&quot;:&quot;广西农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1446&quot;,&quot;name&quot;:&quot;黄河农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;1447&quot;,&quot;name&quot;:&quot;安徽省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1448&quot;,&quot;name&quot;:&quot;海南省农村信用社联合社&quot;&#125;,&#123;&quot;code&quot;:&quot;1513&quot;,&quot;name&quot;:&quot;重庆农村商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6462&quot;,&quot;name&quot;:&quot;潍坊市商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6466&quot;,&quot;name&quot;:&quot;富滇银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6473&quot;,&quot;name&quot;:&quot;浙江泰隆商业银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6478&quot;,&quot;name&quot;:&quot;广西北部湾银行&quot;&#125;,&#123;&quot;code&quot;:&quot;6567&quot;,&quot;name&quot;:&quot;商丘商行&quot;&#125;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>好了，问题解决了，说实话第一次写代码去解决实际中的碰到的问题，挺好玩，带着要解决的问题去学习的效果会更好一些。感想就是在想学东西或者想做一些事情的时候，不要先想太多，比如把所有资料都准备齐、哪个人的资料好，怎么才能少走弯路，学不好做不好会怎么样,等等…..然后你的激情就没了，这件事也就不了了之了，这些都不好。我们要的就是想做什么立刻去做，just do it。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"># 爬虫</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/" rel="prev" title="Android学习系列之-通知Notification">
+                  <i class="fa fa-angle-left"></i> Android学习系列之-通知Notification
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/04/01/performance-optimization/" rel="next" title="Android 性能优化总结">
+                  Android 性能优化总结 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

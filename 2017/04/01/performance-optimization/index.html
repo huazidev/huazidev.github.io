@@ -1,37 +1,371 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 性能优化总结">
+<meta property="og:url" content="http://yoursite.com/2017/04/01/performance-optimization/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导">
+<meta property="og:locale">
+<meta property="article:published_time" content="2017-04-01T15:39:21.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.974Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="性能优化">
+<meta name="twitter:card" content="summary">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2017/04/01/performance-optimization/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2017/04/01/performance-optimization/","path":"2017/04/01/performance-optimization/","title":"Android 性能优化总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android 性能优化总结 | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">1. 布局优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BB%98%E5%88%B6%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">2. 绘制优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">3. 内存泄漏优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%93%8D%E5%BA%94%E9%80%9F%E5%BA%A6%E4%BC%98%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">4. 响应速度优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-RecyclerView-%E5%92%8C-Bitmap-%E4%BC%98%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">5. RecyclerView 和 Bitmap 优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E7%BA%BF%E7%A8%8B%E4%BC%98%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">6.线程优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">7.</span> <span class="nav-text">7. 优化建议</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/performance-optimization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android 性能优化总结 | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android 性能优化总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-04-01 23:39:21" itemprop="dateCreated datePublished" datetime="2017-04-01T23:39:21+08:00">2017-04-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<span id="more"></span></p>
+<h3 id="1-布局优化"><a href="#1-布局优化" class="headerlink" title="1. 布局优化"></a>1. 布局优化</h3><p>优化布局的思想很简单，就是尽量减少布局文件的层级，布局层间减少，意味着绘制工作量减少。如果进行布局优化？</p>
+<ul>
+<li><p>首先删除布局中无用的控件和层级，其次有选择的使用 ViewGroup, 比如 LinearLayout 和 RelativeLayout 都可以实现，那么就选用 LinearLayout, 因为 RelativeLayout 功能复杂，他的布局过程花费更过的 CPU 时间。另外，减少嵌套是经常用也是最直观的方式。</p>
+</li>
+<li><p>采用 <code>&lt;include&gt;</code> 标签， <code>&lt;merge&gt;</code> 标签和<code>ViewStub</code>。<code>&lt;include&gt;</code> 标签主要用于布局重用，<code>&lt;merge&gt;</code> 标签用于减少嵌套，可以配合<code>&lt;include&gt;</code> 标签一块使用或者在自定义 View 时使用。<code>ViewStub</code> 则提供了按需加载的功能，它非常轻量级，宽高都是 0，因此本身不参与布局和绘制，很多布局在正常情况下不会显示，在特定场景下显示，因此只需要到该显示的时候再加载就好，可以提高初始化的性能。</p>
+</li>
+</ul>
+<h3 id="2-绘制优化"><a href="#2-绘制优化" class="headerlink" title="2. 绘制优化"></a>2. 绘制优化</h3><p>绘制优化是指 View 的 onDraw 方法避免执行大量的操作，主要体现在两个方面。</p>
+<ul>
+<li><p>首先，onDraw 不要创建新的局部对象，因为 onDraw 会频繁的调用，这样会瞬间产生大量的临时对象，这不仅占用过多的内存，而且会导致频繁的 GC，降低了程序执行的效率。</p>
+</li>
+<li><p>其次，onDraw 方法中不要做耗时任务，也不能执行大量的循环操作，尽管每次循环都很轻量级，但大量的循环仍然十分抢占 CPU 的时间片，这会造成 View 绘制过程不流畅。谷歌官方性能优化标准，View 的绘制帧率保持在 60fps 是最佳的，这就要求每帧的绘制时间不超过 16ms(16ms &#x3D; 1000&#x2F;60)。</p>
+</li>
+</ul>
+<h3 id="3-内存泄漏优化"><a href="#3-内存泄漏优化" class="headerlink" title="3. 内存泄漏优化"></a>3. 内存泄漏优化</h3><p>内存泄漏对开发人员的经验和开发意识要求较高，因此也是最容易犯的错误之一。内存泄漏的优化主要有两个方面，一方面就是开发中避免写出有内存泄露的代码，另一方面是通过一些分析工具找出潜在的内存泄漏而解决。列举一些容易出现内存泄漏的编码情况：</p>
+<ul>
+<li><p>静态变量导致内存泄漏</p>
+<p>  比如 <code>Context</code>, <code>View</code> 为静态变量，它内部持有了 Activity，所以当 Activity 关闭后仍然无法释放。</p>
+</li>
+<li><p>单例模式导致内存泄漏</p>
+<p>  比较明显的是同上，直接引用对象持有了 Activity，导致无法释放。另一种不太明显的是注册监听方式，只注册，而缺少取消注册的情况也会引起内存泄漏。因为单例的特点是其生命周期和 Applation 保持一致，因此会导致内存泄漏。</p>
+</li>
+<li><p>属性动画导致内存泄漏</p>
+<p>  属性动画是一类无限循环的动画，如果在 Activity 中播放此类动画且没有在 onDestory 中停止，那么动画就会一直播放下去，因为 Activity 会被动画 View 持有，最终 Activity 无法释放。解决方法就是及时停止动画。</p>
+</li>
+</ul>
+<p>至于分析内存泄漏的工具有很多，比如：</p>
+<ul>
+<li><p>Android Studio自带的 Profiler</p>
+<p>  可以直观的看到 CPU，内存，网络变化，也可以做很多模拟操作，但是不太容易看出内存泄漏，需要配合 MTA 使用。</p>
+</li>
+<li><p>MAT</p>
+<p>  MAT 全称 Eclipse Memory Analyzer，是一款强大的内存泄漏分析工具。</p>
+</li>
+<li><p>Android LeakCanary</p>
+<p> Android LeakCanary 易于集成，自动检测出内存泄漏，十分好用。目前我们项目中也是用的 LeakCanary。使用方法可以去参考文档。</p>
+</li>
+</ul>
+<p>上面这些工具只是帮助我们分析和定位内存泄漏的位置，等知道问题出在哪了，才能去解决问题。</p>
+<h3 id="4-响应速度优化"><a href="#4-响应速度优化" class="headerlink" title="4. 响应速度优化"></a>4. 响应速度优化</h3><p>核心思想就是避免在主线程中做耗时操作，当有耗时操作时应当放在子线程中去操作。响应速度过慢一般体现在 Activity 启动速度上面，主线程做太多事情，会导致黑屏甚至出现 ANR。</p>
+<ul>
+<li>耗时操作放在子线程</li>
+<li>业务优化，比如采用新算法，代码重构，偿还历史债务等</li>
+<li>通过分析 trace.txt 文件定位 ANR 的原因</li>
+<li>主线程和子线程抢占同步锁，子线程持有了主线程所需的锁</li>
+</ul>
+<h3 id="5-RecyclerView-和-Bitmap-优化"><a href="#5-RecyclerView-和-Bitmap-优化" class="headerlink" title="5. RecyclerView 和 Bitmap 优化"></a>5. RecyclerView 和 Bitmap 优化</h3><ul>
+<li>避免再 onBindView 中执行耗时操作</li>
+<li>根据列表的滑动状态来控制任务的执行频率，比如当列表快速滑动时不适合开启大量的异步任务</li>
+<li>对于 Bitmap 主要通过 BitmapFactory.Options 来根据需要对图片进行采样，加载合适大小的图片，降低 Bitmap 的大小</li>
+</ul>
+<h3 id="6-线程优化"><a href="#6-线程优化" class="headerlink" title="6.线程优化"></a>6.线程优化</h3><p>线程优化主要是采用线程池，避免程序中存在大量的 Thread，线程池可以重用内部的线程，从而避免了线程的创建和销毁代码的性能开销，同时线程池还能有效的控制线程中的最大并发数，避免大量的线程因互相抢占资源而导致阻塞现象的发生。因此开发过程中尽量使用线程池，而不是每次都要创建一个 Thread。</p>
+<h3 id="7-优化建议"><a href="#7-优化建议" class="headerlink" title="7. 优化建议"></a>7. 优化建议</h3><ul>
+<li>尽量避免创建过多对象</li>
+<li>不要过多使用枚举，枚举占用的内存空间比整型大</li>
+<li>常量使用 static final 来修饰</li>
+<li>使用一些 Android 特有的数据结构，他们有更好的性能</li>
+<li>适当使用软引用，弱引用</li>
+<li>采用内存缓存和磁盘缓存</li>
+<li>尽量采用静态内部类，这样避免潜在的由于内部类导致内存泄漏</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" rel="tag"># 性能优化</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/" rel="prev" title="用Python写一个小的爬虫工具">
+                  <i class="fa fa-angle-left"></i> 用Python写一个小的爬虫工具
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/05/06/fork-effect-multitype/" rel="next" title="【转】Android 复杂的列表视图新写法 MultiType">
+                  【转】Android 复杂的列表视图新写法 MultiType <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

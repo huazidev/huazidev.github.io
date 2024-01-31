@@ -51,6 +51,26 @@
       </tags>
   </entry>
   <entry>
+    <title>Git-分支合并后回退的几种情况分析</title>
+    <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<span id="more"></span><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
+<ul>
+<li>Git仓库有三个主要组成——工作目录，缓存区和提交历史。</li>
+<li>reset将一个分支的末端指向另一个提交。</li>
+<li>checkout 分支切换。</li>
+<li>revert撤销一个提交的同时会创建一个新的提交。</li>
+</ul>
+<p><code>git revert</code>是个安全的方法。相比<code>git reset</code>他不会改变现在的提交历史，因此<code>git revert</code>可以用在公共分支上，而<code>git reset</code>最好用在私人分支上。</p>
+<h2 id="下面说一下那篇文章介绍的撤销merge的方法：-Reset-a-Merge：reset-到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。-Reverting-a-Merge-当-merge-以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git-正好也有办法能撤销-merge。你可以使用revert命令。方法如下：这样会创建新的-commit-来抵消对应的-merge-操作-如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。-Reverting-the-Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。"><a href="#下面说一下那篇文章介绍的撤销merge的方法：-Reset-a-Merge：reset-到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。-Reverting-a-Merge-当-merge-以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git-正好也有办法能撤销-merge。你可以使用revert命令。方法如下：这样会创建新的-commit-来抵消对应的-merge-操作-如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。-Reverting-the-Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。" class="headerlink" title="下面说一下那篇文章介绍的撤销merge的方法：#### Reset a Merge：reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。#### Reverting a Merge:当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。#### Reverting the Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。"></a>下面说一下那篇文章介绍的撤销merge的方法：<br>#### Reset a Merge：<br>reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$  git checkout master</span><br><span class="line">git reset --hard [要回退的commit的sha值] </span><br></pre></td></tr></table></figure><br>简单暴力，不过很好用。<br>#### Reverting a Merge:<br>当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$  git resert -m [要撤销的那条merge线的编号] [merge前的版本号，即sha值]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 88edd6d] Revert &quot;Merge branch &#x27;jk/post-checkout&#x27;&quot;</span><br><span class="line"> 1 files changed, 0 insertions(+), 2 deletions(-)</span><br></pre></td></tr></table></figure><br>这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git merge jk/post-checkout</span><br><span class="line">Already up-to-date.</span><br></pre></td></tr></table></figure><br>#### Reverting the Revert<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git revert [方法二撤销merge时提交的commit的版本号，这里是88edd6d]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 268e243] Revert &quot;Revert &quot;Merge branch &#x27;jk/post-checkout&#x27;&quot;&quot; 1 files changed, 2 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure><br>这样就可以正常的merge了，不过这可能会产生更多的冲突。<br>现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git merge jk/post-checkout</span><br><span class="line">Auto-merging test.txt</span><br><span class="line">Merge made by recursive. test.txt | 1 + 1 files changed, 1 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure></h2><h4 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h4><p>大致的看完之后，发现后面的方法太麻烦，简直是没事找事。不过作者可能完全是基于在公共分支改动的比较复杂的情况，总之，感觉还是在本地分支用reset最方便，或者revert也可以，别整的那个麻烦就行了。<br>最后分享一篇<a href="http://gitbook.liuhui998.com/index.html">Git Community Book</a>中关于git rebase 的文章，之前不太了解，感觉写的很好：<a href="http://gitbook.liuhui998.com/4_2.html">http://gitbook.liuhui998.com/4_2.html</a></p>
+]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>《Android开发艺术探索》笔记-第1章</title>
     <url>/2017/05/15/android-art-explore-1/</url>
     <content><![CDATA[<h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
@@ -96,26 +116,6 @@
         <tag>Android</tag>
         <tag>启动模式</tag>
         <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Git-分支合并后回退的几种情况分析</title>
-    <url>/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<p>今天在合并分支的时候碰到了一个问题，情况是这样的，当前开发分支A , 合并了分支B，发现有冲突，于是就去改冲突，改好冲突后commit。但是此时老大提醒说提醒用另一中方法可能更好。于是就想退回去，重新改改试试。其实直接reset就好了。不过一查看到官网有篇文章是介绍这种情况的，正好就按他说的写一下。<span id="more"></span><br>文章地址：<a href="https://git-scm.com/blog/2010/03/02/undoing-merges.html">https://git-scm.com/blog/2010/03/02/undoing-merges.html</a><br>先说一下几个Git的基本知识：</p>
-<ul>
-<li>Git仓库有三个主要组成——工作目录，缓存区和提交历史。</li>
-<li>reset将一个分支的末端指向另一个提交。</li>
-<li>checkout 分支切换。</li>
-<li>revert撤销一个提交的同时会创建一个新的提交。</li>
-</ul>
-<p><code>git revert</code>是个安全的方法。相比<code>git reset</code>他不会改变现在的提交历史，因此<code>git revert</code>可以用在公共分支上，而<code>git reset</code>最好用在私人分支上。</p>
-<h2 id="下面说一下那篇文章介绍的撤销merge的方法：-Reset-a-Merge：reset-到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。-Reverting-a-Merge-当-merge-以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git-正好也有办法能撤销-merge。你可以使用revert命令。方法如下：这样会创建新的-commit-来抵消对应的-merge-操作-如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。-Reverting-the-Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。"><a href="#下面说一下那篇文章介绍的撤销merge的方法：-Reset-a-Merge：reset-到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。-Reverting-a-Merge-当-merge-以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git-正好也有办法能撤销-merge。你可以使用revert命令。方法如下：这样会创建新的-commit-来抵消对应的-merge-操作-如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。-Reverting-the-Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。" class="headerlink" title="下面说一下那篇文章介绍的撤销merge的方法：#### Reset a Merge：reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：简单暴力，不过很好用。#### Reverting a Merge:当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。#### Reverting the Revert这样就可以正常的merge了，不过这可能会产生更多的冲突。现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。"></a>下面说一下那篇文章介绍的撤销merge的方法：<br>#### Reset a Merge：<br>reset 到merge之前的commit，然后重新做之后的操作，不过这要求所有的协作者知道如何处理回退的head，如果这不是问题，或者只是本地分支，这是一个很好的解决方法。方法如下：<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$  git checkout master</span><br><span class="line">git reset --hard [要回退的commit的sha值] </span><br></pre></td></tr></table></figure><br>简单暴力，不过很好用。<br>#### Reverting a Merge:<br>当 merge 以后还有别的操作和改动时，或者你的协作者在你merge之后又做了一些提交的时候，git 正好也有办法能撤销 merge。你可以使用revert命令。方法如下：<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$  git resert -m [要撤销的那条merge线的编号] [merge前的版本号，即sha值]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 88edd6d] Revert &quot;Merge branch &#x27;jk/post-checkout&#x27;&quot;</span><br><span class="line"> 1 files changed, 0 insertions(+), 2 deletions(-)</span><br></pre></td></tr></table></figure><br>这样会创建新的 commit 来抵消对应的 merge 操作,如果你尝试再次合并，Git会看到该分支上的提交是在历史记录中，并假设你错误地尝试合并你已经有的东西。<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git merge jk/post-checkout</span><br><span class="line">Already up-to-date.</span><br></pre></td></tr></table></figure><br>#### Reverting the Revert<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git revert [方法二撤销merge时提交的commit的版本号，这里是88edd6d]</span><br><span class="line">Finished one revert.</span><br><span class="line">[master 268e243] Revert &quot;Revert &quot;Merge branch &#x27;jk/post-checkout&#x27;&quot;&quot; 1 files changed, 2 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure><br>这样就可以正常的merge了，不过这可能会产生更多的冲突。<br>现在基本上重新介绍了我们以前撤回的分支中的一切。现在如果我们在这个分支上有更多的工作，我们可以重新合并它。<br><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git merge jk/post-checkout</span><br><span class="line">Auto-merging test.txt</span><br><span class="line">Merge made by recursive. test.txt | 1 + 1 files changed, 1 insertions(+), 0 deletions(-)</span><br></pre></td></tr></table></figure></h2><h4 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h4><p>大致的看完之后，发现后面的方法太麻烦，简直是没事找事。不过作者可能完全是基于在公共分支改动的比较复杂的情况，总之，感觉还是在本地分支用reset最方便，或者revert也可以，别整的那个麻烦就行了。<br>最后分享一篇<a href="http://gitbook.liuhui998.com/index.html">Git Community Book</a>中关于git rebase 的文章，之前不太了解，感觉写的很好：<a href="http://gitbook.liuhui998.com/4_2.html">http://gitbook.liuhui998.com/4_2.html</a></p>
-]]></content>
-      <categories>
-        <category>git</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
       </tags>
   </entry>
   <entry>
@@ -593,6 +593,22 @@
       </tags>
   </entry>
   <entry>
+    <title>Handler相关知识总结</title>
+    <url>/2018/06/25/handler/</url>
+    <content><![CDATA[<p>直接放总结的脑图吧，简单明了：</p>
+<p><img src="https://i.loli.net/2020/06/04/a4U7LyxW1vpPlhZ.png" alt="handler.png"></p>
+<span id="more"></span>]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Handler</tag>
+        <tag>MessageQueue</tag>
+        <tag>Looper</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【转】Android 复杂的列表视图新写法 MultiType</title>
     <url>/2017/05/06/fork-effect-multitype/</url>
     <content><![CDATA[<p><strong>本文来自 <code>MultiType</code> 作者 Drakeet。</strong> 之所以保存转载主要有两个原因，首先因为这是一个很好的库，其次这篇文章也是一篇很值得学习的文章，不管是从代码设计思路，还是文章的写作风格上，都让我受益匪浅。由于作者因为一些原因删除了 <code>Github</code> 上的这篇文章，因此转载保存方便日后查找学习。如有侵犯，请联系我，我会第一时间删除。<span id="more"></span></p>
@@ -844,71 +860,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用hexo+github建个人博客</title>
-    <url>/2016/09/17/hexo-nxet-blog/</url>
-    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>准备开一个博客，记录一下自己平时碰到的一些问题，也可以供以后进行翻阅，查找定位。<br>既然是这样那就需要考虑怎么建博客了，之前大学的时候CSDN和博客园都有账号，可是只是零零星星写过一点东西，就放在那了。也自己买域名和vps用wordpress搭过一个博客，这个运行了接近两年，直到我工作一年后才停了。<span id="more"></span>前期的目的是写点技术博客，可是当时学生党为了盈利，慢慢运营成了电影资源下载网站，收益还可以。期间为了改网站模板也自己学了点php，也算有点收获。工作之后就没怎么管过了，考虑到版权问题以及对个人成长的没有多少帮助就给关了。当时关还是有点小不舍的，毕竟自己一手建的站，运营了那么久。啰里吧嗦那么多就是想说其实是对技术博客还是有点情怀的，于是才有了现在想自己开博客，写点技术文章的想法。<br>好了废话不多说，步入正题。<br>** 本片文章配置是在Mac完成的，其他系统版本应该也差不多 **</p>
-<h3 id="用Github-pages创建个人站"><a href="#用Github-pages创建个人站" class="headerlink" title="用Github pages创建个人站"></a>用Github pages创建个人站</h3><p>我想作为程序员你应该对GitHub不陌生。GitHub提供了Github Pages功能，我们可以用GitHub pages创建自己的个人站。</p>
-<blockquote>
-<p>Github Pages 是面向用户、组织和项目开放的公共静态页面搭建托管服务，站点可以被免费托管在Github 上，你可以选择使用Github Pages 默认提供的域名github.io 或者自定义域名来发布站点。</p>
-</blockquote>
-<ol>
-<li>登录GitHub账户，点击右上角+号，选择New repository,创建一个新的仓库，用于存放你的网站代码。</li>
-<li>按照要求填写仓库名，要使用默认的域名github.io的话仓库名就要以你的用户名命名，命名规则如下<strong>username.github.io</strong>,然后选择公开，点击Create Repository,创建仓库完成。<br>至此我们在GitHub上有了一个代码仓库，等我们在本地写好代码就可以部署上去了。</li>
-</ol>
-<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><p>最简单的方法，去<a href="https://git-scm.com/downloads">Git官网</a>下载安装，也可以通过以下途径安装</p>
-<h4 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h4><p>Debian或Ubuntu Linux，通过一条<code>sudo apt-get install git</code>就可以直接完成Git的安装。</p>
-<h4 id="Mac-OS安装"><a href="#Mac-OS安装" class="headerlink" title="Mac OS安装"></a>Mac OS安装</h4><blockquote>
-<p>安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：<a href="http://brew.sh/">http://brew.sh/</a></p>
-</blockquote>
-<h4 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h4><p>推荐去官网下载，安装完后在命令行下输入<code>git version</code>检查是否安装成功。</p>
-<h3 id="使用Hexo搭建博客"><a href="#使用Hexo搭建博客" class="headerlink" title="使用Hexo搭建博客"></a>使用Hexo搭建博客</h3><ol>
-<li>安装Node<br>hexo是一款基于Node.js的静态博客框架，所以我们先要安装node。<ul>
-<li>去node<a href="https://nodejs.org/en/download/">官网</a>下载安装包安装。</li>
-<li>有个国内墙的原因，可能上不去官网就算上去了也很慢，推荐使用homebrew安装node</li>
-<li>在bash命令下输入 node -v 如果显示版本号说明安装成功。</li>
-</ul>
-</li>
-<li>安装hexo<br>安装完node就可以用npm去安装hexo了，<a href="https://hexo.io/">hexo官网</a><blockquote>
-<p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题,由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。</p>
-</blockquote>
-</li>
-</ol>
-<p>执行以下命令安装hexo：<br><code>npm install hexo-cli -g    #-g表示全局安装, npm默认为当前项目安装</code><br>然后执行：<br><code>hexo version</code><br>如果出现版本号说明安装成功。如果报错，尝试用下面的命令安装<br><code>npm install hexo --no-optional</code><br>然后使用以下命令：<br><code>hexo init blog   //执行初始化命令到指定的目录,这里的目录是hexo文件夹</code><br><code>cd blog</code><br><code>npm install</code><br><code>hexo generate   //在当前目录下生成静态网页</code><br><code>hexo server     // 启动本地服务</code><br>在浏览器输入 <a href="http://localhost:4000/">http://localhost:4000</a> 就可以看到效果，到此hexo生成静态网站就已经完成。</p>
-<h3 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h3><p>进入你的博客目录，找到配置文件_config.yml修改如下信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:username/username.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
-<p>这里的username是之前注册的github的用户名<br>现在可以执行：<code>hexo d</code>部署到github了，不过有时候会出现问题，如果报如下错误</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br></pre></td></tr></table></figure>
-<p>说明连接不到远程仓库。一般是需要配置你电脑的SSH Key</p>
-<blockquote>
-<p>为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。<br>当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
-</blockquote>
-<p>关于SSH的原理可以通过阮一峰老师的一篇文章了解一下：<br><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html">http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html</a><br>配置SSH Key 的方法可以参考GitHub官网的教程：<br><a href="https://help.github.com/articles/generating-an-ssh-key/">https://help.github.com/articles/generating-an-ssh-key/</a><br>按步骤测试好之后就可以使用<code>hexo d</code>部署了.部署完之后在浏览器输入：<a href="http://username.github.io/">http://username.github.io/</a> 就可以看到效果了。</p>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>github</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Handler相关知识总结</title>
-    <url>/2018/06/25/handler/</url>
-    <content><![CDATA[<p>直接放总结的脑图吧，简单明了：</p>
-<p><img src="https://i.loli.net/2020/06/04/a4U7LyxW1vpPlhZ.png" alt="handler.png"></p>
-<span id="more"></span>]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>Handler</tag>
-        <tag>MessageQueue</tag>
-        <tag>Looper</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android 性能优化总结</title>
     <url>/2017/04/01/performance-optimization/</url>
     <content><![CDATA[<p>Android 设备作为移动设备，不管是内存还是 CPU 的性能都受到了一定的限制。鉴于此，Android不能无限制的使用内存和 CPU 资源，过多的使用内存会导致内存溢出，即 OOM。而过多的使用 CPU 资源，会导致手机变得卡顿，甚至出现程序无响应的情况，即 ANR。因此，Android 程序的性能问题变得异常突出。这也要求我们再平常的编码中注意性能优化。而优化的前提是能明确的知道那种情况会导致性能出现问题。下面就总结一下性能优化的一些方法。<span id="more"></span></p>
@@ -980,6 +931,55 @@
       <tags>
         <tag>Android</tag>
         <tag>性能优化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用hexo+github建个人博客</title>
+    <url>/2016/09/17/hexo-nxet-blog/</url>
+    <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>准备开一个博客，记录一下自己平时碰到的一些问题，也可以供以后进行翻阅，查找定位。<br>既然是这样那就需要考虑怎么建博客了，之前大学的时候CSDN和博客园都有账号，可是只是零零星星写过一点东西，就放在那了。也自己买域名和vps用wordpress搭过一个博客，这个运行了接近两年，直到我工作一年后才停了。<span id="more"></span>前期的目的是写点技术博客，可是当时学生党为了盈利，慢慢运营成了电影资源下载网站，收益还可以。期间为了改网站模板也自己学了点php，也算有点收获。工作之后就没怎么管过了，考虑到版权问题以及对个人成长的没有多少帮助就给关了。当时关还是有点小不舍的，毕竟自己一手建的站，运营了那么久。啰里吧嗦那么多就是想说其实是对技术博客还是有点情怀的，于是才有了现在想自己开博客，写点技术文章的想法。<br>好了废话不多说，步入正题。<br>** 本片文章配置是在Mac完成的，其他系统版本应该也差不多 **</p>
+<h3 id="用Github-pages创建个人站"><a href="#用Github-pages创建个人站" class="headerlink" title="用Github pages创建个人站"></a>用Github pages创建个人站</h3><p>我想作为程序员你应该对GitHub不陌生。GitHub提供了Github Pages功能，我们可以用GitHub pages创建自己的个人站。</p>
+<blockquote>
+<p>Github Pages 是面向用户、组织和项目开放的公共静态页面搭建托管服务，站点可以被免费托管在Github 上，你可以选择使用Github Pages 默认提供的域名github.io 或者自定义域名来发布站点。</p>
+</blockquote>
+<ol>
+<li>登录GitHub账户，点击右上角+号，选择New repository,创建一个新的仓库，用于存放你的网站代码。</li>
+<li>按照要求填写仓库名，要使用默认的域名github.io的话仓库名就要以你的用户名命名，命名规则如下<strong>username.github.io</strong>,然后选择公开，点击Create Repository,创建仓库完成。<br>至此我们在GitHub上有了一个代码仓库，等我们在本地写好代码就可以部署上去了。</li>
+</ol>
+<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><p>最简单的方法，去<a href="https://git-scm.com/downloads">Git官网</a>下载安装，也可以通过以下途径安装</p>
+<h4 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h4><p>Debian或Ubuntu Linux，通过一条<code>sudo apt-get install git</code>就可以直接完成Git的安装。</p>
+<h4 id="Mac-OS安装"><a href="#Mac-OS安装" class="headerlink" title="Mac OS安装"></a>Mac OS安装</h4><blockquote>
+<p>安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：<a href="http://brew.sh/">http://brew.sh/</a></p>
+</blockquote>
+<h4 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h4><p>推荐去官网下载，安装完后在命令行下输入<code>git version</code>检查是否安装成功。</p>
+<h3 id="使用Hexo搭建博客"><a href="#使用Hexo搭建博客" class="headerlink" title="使用Hexo搭建博客"></a>使用Hexo搭建博客</h3><ol>
+<li>安装Node<br>hexo是一款基于Node.js的静态博客框架，所以我们先要安装node。<ul>
+<li>去node<a href="https://nodejs.org/en/download/">官网</a>下载安装包安装。</li>
+<li>有个国内墙的原因，可能上不去官网就算上去了也很慢，推荐使用homebrew安装node</li>
+<li>在bash命令下输入 node -v 如果显示版本号说明安装成功。</li>
+</ul>
+</li>
+<li>安装hexo<br>安装完node就可以用npm去安装hexo了，<a href="https://hexo.io/">hexo官网</a><blockquote>
+<p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题,由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。</p>
+</blockquote>
+</li>
+</ol>
+<p>执行以下命令安装hexo：<br><code>npm install hexo-cli -g    #-g表示全局安装, npm默认为当前项目安装</code><br>然后执行：<br><code>hexo version</code><br>如果出现版本号说明安装成功。如果报错，尝试用下面的命令安装<br><code>npm install hexo --no-optional</code><br>然后使用以下命令：<br><code>hexo init blog   //执行初始化命令到指定的目录,这里的目录是hexo文件夹</code><br><code>cd blog</code><br><code>npm install</code><br><code>hexo generate   //在当前目录下生成静态网页</code><br><code>hexo server     // 启动本地服务</code><br>在浏览器输入 <a href="http://localhost:4000/">http://localhost:4000</a> 就可以看到效果，到此hexo生成静态网站就已经完成。</p>
+<h3 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h3><p>进入你的博客目录，找到配置文件_config.yml修改如下信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:username/username.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p>这里的username是之前注册的github的用户名<br>现在可以执行：<code>hexo d</code>部署到github了，不过有时候会出现问题，如果报如下错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br></pre></td></tr></table></figure>
+<p>说明连接不到远程仓库。一般是需要配置你电脑的SSH Key</p>
+<blockquote>
+<p>为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。<br>当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
+</blockquote>
+<p>关于SSH的原理可以通过阮一峰老师的一篇文章了解一下：<br><a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html">http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html</a><br>配置SSH Key 的方法可以参考GitHub官网的教程：<br><a href="https://help.github.com/articles/generating-an-ssh-key/">https://help.github.com/articles/generating-an-ssh-key/</a><br>按步骤测试好之后就可以使用<code>hexo d</code>部署了.部署完之后在浏览器输入：<a href="http://username.github.io/">http://username.github.io/</a> 就可以看到效果了。</p>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>github</tag>
       </tags>
   </entry>
   <entry>

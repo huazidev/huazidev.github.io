@@ -1,37 +1,349 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="1. Activity 生命周期的全面分析正常生命周期  onCreate: 表示 Activity 正在被创建 onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《Android开发艺术探索》笔记-第1章">
+<meta property="og:url" content="http://yoursite.com/2017/05/15/android-art-explore-1/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="1. Activity 生命周期的全面分析正常生命周期  onCreate: 表示 Activity 正在被创建 onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。">
+<meta property="og:locale">
+<meta property="article:published_time" content="2017-05-15T09:35:52.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.973Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="启动模式">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2017/05/15/android-art-explore-1/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2017/05/15/android-art-explore-1/","path":"2017/05/15/android-art-explore-1/","title":"《Android开发艺术探索》笔记-第1章"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>《Android开发艺术探索》笔记-第1章 | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Activity-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%9A%84%E5%85%A8%E9%9D%A2%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">1. Activity 生命周期的全面分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Activity-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">2. Activity 的启动模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-IntentFilter-%E7%9A%84%E5%8C%B9%E9%85%8D%E8%A7%84%E5%88%99"><span class="nav-number">2.1.</span> <span class="nav-text">3. IntentFilter 的匹配规则</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/15/android-art-explore-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="《Android开发艺术探索》笔记-第1章 | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《Android开发艺术探索》笔记-第1章
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-05-15 17:35:52" itemprop="dateCreated datePublished" datetime="2017-05-15T17:35:52+08:00">2017-05-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="1-Activity-生命周期的全面分析"><a href="#1-Activity-生命周期的全面分析" class="headerlink" title="1. Activity 生命周期的全面分析"></a>1. Activity 生命周期的全面分析</h2><p>正常生命周期</p>
+<ul>
+<li>onCreate: 表示 Activity 正在被创建</li>
+<li>onReStart: 表示 Activity 正在被重新启动。一般情况，当前 Activity 动不可见变成可见状态时，onReStart 就会被调用。当前 Activity 执行 onPause 和 onStop 暂停后，又回到了这个 Activity 后就会调用这个方法。<span id="more"></span></li>
+<li>onStart: 表示 Activity 正在被启动，这是 Activity 已经可见了，但是还没有出现在前台，还无法交互。可以理解为 Activity 已经显示出来，但是还看不到。</li>
+<li>onResume: 表示 Activity 已经可见了，并且出现在前台开始活动。onStart 和 onResume 都表示可见，但是 onStart 的时候 Activity 还在后台，onResume 的时候 Activity 显示在前台</li>
+<li>onPause: 表示 Activity 正在停止。此时可以做一些存储数据，停止动画的操作，但是不能太耗时，因为这会影响 Activity 的显示，oPause 必须先执行完，新的 Activity 的 onResume 才会执行。</li>
+<li>onStop: 表示 Activity 即将停止，可以做一些重量级的回收操作，同样不能太耗时</li>
+<li>onDestory: 表示 Activity 即将被销毁，这是 Activity 生命周期的最后一个回调，可以做一下回收工作和资源释放</li>
+</ul>
+<p>当前 Activity 打开新的 Activity 采用了透明主题，那么当前 Activity 不会回调 onStop。</p>
+<p>onStart 和 onStop 是从是都可见角度来回调的，onResume 和 onPause 是从是否在前台的角度来回调的，初次之外，实际使用中没有太大的区别。</p>
+<p>在新的 Activity 启动前，栈顶的 Activity 需要先 onPause 后，新的 Activity 才能启动。</p>
+<p>onPause 和 onStop 都不能做耗时操作，尤其是 onPause，因此尽量在 onStop 中做操作。</p>
+<p>正常情况，当系统配置发生变化后，Activity 会被销毁。Activity 在异常情况下终止时，系统会调用 onSaveInstanceState 来保存当前 Activity 的状态，回调时机是在 onStop 之前，当 Activity 被重建后，系统会调用 onRestoreInstanceState, 时序上来说在 onStart 之后。</p>
+<p>每个 View 都有 onSaveInstanceState 和 onRestoreInstanceState 方法，看它的实现就能知道他能为 view 恢复哪些数据。</p>
+<p>系统只会在异常终止的时候调用 onSaveInstanceState 和 onRestoreInstanceState 存储和恢复数据，其他情况不会。</p>
+<h2 id="2-Activity-的启动模式"><a href="#2-Activity-的启动模式" class="headerlink" title="2. Activity 的启动模式"></a>2. Activity 的启动模式</h2><ul>
+<li>standard: 标准模式，每启动一个 Activity 就新建一个实例，然后入栈，默认进入启动它的 Activity 所属的任务栈</li>
+<li>singleTop: 栈顶复用模式，如果新的 Activity 已经在栈顶，那么 Activity 不会被重新创建，同时调用 onNewIntent 方法</li>
+<li>singleTask: 栈内复用模式，只要 Activity 在一个栈中存在，那么多次启动此 Activity 就不会重新创建实例，调用 onNewIntent 方法。如果不存在，系统会现寻找所需的任务栈，如果任务栈不存在会创建任务栈人后入栈，如果任务栈存在，会先看栈内是否有实例，有就调到栈顶，没有就创建实例入栈。</li>
+<li>singleInstance: 单实例模式，跟 singleTask 类似，还加了一点就是，此种模式的 Activity 只能单独的位于一个任务栈中。由于栈内复用的特性，后续不会再创建新的 Activity。</li>
+</ul>
+<p>可以通过 TaskAffinity 配置任务栈名字，默认情况任务栈名字为包名。</p>
+<p>任务栈 A 为前台任务栈，任务栈 B 为后台，此时按返回键，任务栈 A 先出栈，然后任务栈 B 出栈，最后回到桌面。</p>
+<p>问题：分享到第三方应用，使用什么启动方式？</p>
+<p>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS flag 表示此 Activity 不会出现在历史的 Activity 列表中，等同于 android:excludeFrom_Recent&#x3D;”true”</p>
+<h3 id="3-IntentFilter-的匹配规则"><a href="#3-IntentFilter-的匹配规则" class="headerlink" title="3. IntentFilter 的匹配规则"></a>3. IntentFilter 的匹配规则</h3><p>启动 Activity 分为显式调用和隐式调用，显式调用需要明确指定被启动对象的信息，包括类名和包名。隐式调用则不需要。</p>
+<p>IntentFliter 过滤信息有 action, category, data</p>
+<ul>
+<li>action: Intent 中的 action 必须和过滤规则的中的 action 匹配，字符串完全一致，区分大小写。</li>
+<li>category: startActivity 时系统会默认加上一个android.intent.category.DEAFAULT，所以intent中可以不存在category，但如果存在就必须匹配其中一个</li>
+<li>data: 过滤规则中定义了 datam，那么 Intent 中必须也要定义可匹配的 data; data由两部分组成，mimeType和URI，如果没有指定URI，URI但默认值为content和file（schema）</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F/" rel="tag"># 启动模式</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/05/06/fork-effect-multitype/" rel="prev" title="【转】Android 复杂的列表视图新写法 MultiType">
+                  <i class="fa fa-angle-left"></i> 【转】Android 复杂的列表视图新写法 MultiType
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/05/21/android-art-explore-2/" rel="next" title="《Android开发艺术探索》笔记-第2章">
+                  《Android开发艺术探索》笔记-第2章 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

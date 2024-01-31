@@ -1,37 +1,436 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。 线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《Android开发艺术探索》笔记-第2章">
+<meta property="og:url" content="http://yoursite.com/2017/05/21/android-art-explore-2/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。 线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应">
+<meta property="og:locale">
+<meta property="og:image" content="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png">
+<meta property="og:image" content="https://i.loli.net/2020/05/21/WnT2w671ikfchzp.png">
+<meta property="article:published_time" content="2017-05-21T03:32:59.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.973Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="笔记">
+<meta property="article:tag" content="Binder">
+<meta property="article:tag" content="IPC">
+<meta property="article:tag" content="进程通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2017/05/21/android-art-explore-2/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2017/05/21/android-art-explore-2/","path":"2017/05/21/android-art-explore-2/","title":"《Android开发艺术探索》笔记-第2章"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>《Android开发艺术探索》笔记-第2章 | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#IPC-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">IPC 基础概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Serializable-%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.1.</span> <span class="nav-text">Serializable 接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parcelable"><span class="nav-number">1.2.</span> <span class="nav-text">Parcelable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Binder"><span class="nav-number">1.3.</span> <span class="nav-text">Binder</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-%E4%B8%AD%E7%9A%84-IPC-%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">Android 中的 IPC 方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Binder-%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">2.1.</span> <span class="nav-text">Binder 连接池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84-IPC-%E6%96%B9%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">选择合适的 IPC 方式</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/21/android-art-explore-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="《Android开发艺术探索》笔记-第2章 | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《Android开发艺术探索》笔记-第2章
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-05-21 11:32:59" itemprop="dateCreated datePublished" datetime="2017-05-21T11:32:59+08:00">2017-05-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>IPC 是 Inter-Process Communication 的缩写，含义为进程间通信或者跨进程通信，是指两个进程间进行通信的过程。</p>
+<p>线程是 CPU 调度的最小单元，同时线程是一种有限的系统资源。进程一般是指一个执行单元，一个进程可以包含多个线程。一个进程可以只有一个线程，即主线程。<br>多进程分为两种，第一种情况是一个应用因为某些原因自身需要采用多线程模式来实现，另一种情况是当前应用需要向其他应用获取数据。</p>
+<span id="more"></span>
+<p>Android 中使用多进程只有一种方法，就是给四大组件在 AndroidMenifest 中指定 android:process 属性，除此之外别无他法。<code>adb shell ps</code> 命令可以查看进程信息。</p>
+<p>进程名以 <code>:</code> 开头的进程属于当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程；<br>进程名不以 <code>:</code> 开头的进程属于全局进程，其他应用通过 ShareUID 方式可以和它跑在同一个进程中。系统会为每个应用配备唯一的 UID, 具有相同 UID 的应用才能共享数据。<br>Android 中每个进程分配了独立的虚拟机，每个虚拟机分配不同的地址空间。运行在不在进程中的四大组件，他们之间想通过内存共享数据，都会共享失败。</p>
+<p>多进程会造成如下几个问题：</p>
+<ol>
+<li>静态成员和单例模式完全失效。</li>
+<li>线程同步机制完全失效。</li>
+<li>SharePreferences 的可靠性下降。</li>
+<li>Application 会多次创建。</li>
+</ol>
+<p>对于1，2是同一个问题，不管是锁对象还是锁全局类都无法保证线程同步，因为不同进程锁的不是同一个对象。</p>
+<p>SharePreferences 不支持两个进程同时进行写操作，因为SharePreferences 底层是通过读写 xml 文件实现的，并发读写都有可能出现问题。</p>
+<p>运行在不同进程中的组件属于两个不同的虚拟机和 Application。每启动一个进程就会走一遍 Application onCreate。</p>
+<h3 id="IPC-基础概念"><a href="#IPC-基础概念" class="headerlink" title="IPC 基础概念"></a>IPC 基础概念</h3><p>IPC 基本概念主要包括三方面，Serializable 接口，Parcelable 接口，以及 Binder，Serializable 和 Parcelable 可以完成对象的序列化过程，Intent 和 Binder 传输数据时就需要使用 Serializable 和 Parcelable。</p>
+<h4 id="Serializable-接口"><a href="#Serializable-接口" class="headerlink" title="Serializable 接口"></a>Serializable 接口</h4><p>Serializable 是 Java 中提供的序列化接口，为对象提供标准的序列化和反序列化操作。<br><code>serialVersionUID</code> 是用来辅助序列化和反序列化过程的，原则上序列化后的数据中的 <code>serialVersionUID</code> 只有和当前类的 <code>serialVersionUID</code> 相同才能够正常的被反序列化。序列化的时候，系统会把当前类的 <code>serialVersionUID</code> 写入序列化的文件中，当反序列化的时候系统去检测文件中的 <code>serialVersionUID</code> 是否和当前类的 <code>serialVersionUID</code> 相同，一致则正常反序列化，否则无法正常发序列化。一般来说需要手动指定 <code>serialVersionUID</code>。如果不指定，当前类有所改变会重新计算当前类的 hash 值并把它赋值给 <code>serialVersionUID</code>。</p>
+<ol>
+<li>静态成员变量属于类，不属于对象，所以不会参与序列化过程。</li>
+<li><code>transient</code> 标记的变量不参与序列化的过程。</li>
+</ol>
+<h4 id="Parcelable"><a href="#Parcelable" class="headerlink" title="Parcelable"></a>Parcelable</h4><p>Android 提供的新的序列化方式：<code>Parcelable</code>，也是一个接口。序列化功能由 <code>writeToParcel</code> 完成。Intent，Bundle，Bitmap 都实现了此接口，可以直接序列化。</p>
+<p>Serializable 是 Java 接口，使用起来简单但开销很大，序列化和反序列化需要大量 I&#x2F;O 操作。</p>
+<p>Parcelable 使用麻烦，效率高，推荐使用。</p>
+<p>将序列化对象存储到设备中或将对象序列化后通过网络传输，推荐使用 Serialzalble。</p>
+<h4 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h4><p>Android 开发中 Binder 主要用在 Service，AIDL 和 Messenger 中，普通的 Service 中的 Binder 不涉及进程间通信。Messenger 底层是 AIDL。Binder 的唯一标识，一般用当前的 Binder 类名表示。</p>
+<p>Binder 是 ServiceManager 连接各种 Manager (ActivityManager, WindowManager,等)和相应 ManagerService 的桥梁。</p>
+<p>系统生成的 Binder 类参数解析：</p>
+<ul>
+<li>DESCRIPTOR, Binder 的唯一表示，一般用当前 Binder 的类名表示</li>
+<li>asInterface(android.os.IBinder obj), 用于将服务端的 Binder 对象转成客户端所需的 AIDL 接口类型的对象，这种转换是分进程的，如果客户端，服务端位于同一进程，那么此方法返回的就是服务端的Stub 对象本身，否则返回系统封装后的 Stub.proxy 对象。</li>
+<li>adBinder， 返回当前 Binder 对象</li>
+<li>onTransact, 运行在服务端的 Binder 线程池中，当客户端发起请求时，远程请求会通过底层封装后交由此方法来处理。</li>
+</ul>
+<p>Binder 工作机制还需注意两点：</p>
+<ol>
+<li>当客户端发起远程请求时，当前线程会被挂起直到服务端进程返回数据，是个耗时操作。</li>
+<li>服务端 Binder 方法运行在 Binder 线程池中所以 Binder 方法不管是否耗时都应该采用同步方式去实现。</li>
+</ol>
+<p>Binder 的工作机制图：<br><img src="https://i.loli.net/2020/05/21/ZkcURbHNxs7JYzv.png" alt="Binder工作流程.png"></p>
+<p>Binder 运行在服务端，如果服务端由于某中原因导致进程终止，会导致远程调用失败，Binder 提供了两个方法 <code>linkToDeath</code> 和 <code>unLinkToDeath</code> 可以设置 Binder 的死亡代理。</p>
+<p>通过 Binder 的方法 isBinderAlive 也可以判断 Binder 是否死亡。</p>
+<h3 id="Android-中的-IPC-方式"><a href="#Android-中的-IPC-方式" class="headerlink" title="Android 中的 IPC 方式"></a>Android 中的 IPC 方式</h3><ol>
+<li><p>Bundle<br>Bundle 实现了 Parcelable 接口，所以方便的在进程中传输。</p>
+</li>
+<li><p>使用文件共享<br>两个进程通过读写同一个文件交换数据。并发读写会有问题，尽量避免并发写的情况，考虑使用线程同步来限制多个线程的写操作。<br>SharePrefrences 也属于文件的一种，系统对他的读写有缓存策略，多进程模式下，读写不可靠。</p>
+</li>
+<li><p>使用 Messenger<br>Messenger 是一种轻量级的 IPC，底层实现是 AIDL。Messenger 以串行的方式处理客户端的消息。主要是为了传递消息。<br>工作原理图：<br><img src="https://i.loli.net/2020/05/21/WnT2w671ikfchzp.png" alt="messenger工作原理.png"></p>
+</li>
+<li><p>使用 AIDL<br>使用 AIDL 进行进程间通信分为服务端和客户端两方面，大致流程：服务端首先创建 Service 用来监听客户端请求，然后创建AIDL文件将暴露给客户端的接口在这个 AIDL 中声明，随后在 Service 中实现这个 AIDL 接口。客户端绑定服务端的 Service，绑定成功后，将服务端返回的 Binder 对象转成 AIDL 接口所属的类型，接着调用 AIDL 方法。</p>
+</li>
+<li><p>使用 ContentProvider<br>Android 中专门为不同应用间进行数据共享的方式，底层实现是 Binder。ContentProvider 对底层数据存储没有要求。</p>
+</li>
+</ol>
+<p>首先需要注册 Provider，其中 <code>android:authorities</code> 是 Provider 的唯一标识，通过这个就可以访问 Provider。</p>
+<p>Provider 的 onCreate 运行在主线程，其他方法运行在 Binder 线程池中。query，update，insert，delete是存在多线程并发，因此方法内部做好线程同步。</p>
+<ol start="6">
+<li>使用 Socket</li>
+</ol>
+<p>Socket 是网络通信的概念。</p>
+<ul>
+<li>TCP 面向连接协议，提供稳定的双向通信功能。</li>
+<li>UDP 无连接协议，提供不稳定的单向通信功能，也可以提供双向通信，有更好的效率，缺点是不能保证正确传输。</li>
+</ul>
+<h4 id="Binder-连接池"><a href="#Binder-连接池" class="headerlink" title="Binder 连接池"></a>Binder 连接池</h4><p>使用 AIDL 大致流程：首先创建一个 Service 和 AIDL 接口，接着创建一个继承自 AIDL 接口中的 Stub 类并实现 Stub 中的抽象方法，在 Service 的 onBinder 方法中返回这个类的对象，然后再客户端就可以绑定服务端的 Service，建立连接后就可以远程访问服务端的方法了。</p>
+<p>当项目规模很大的时候，创建很多个 Service 是不对的做法，因Service 是系统资源，太多的 Service 会使得应用看起来很重，所以最好是将所有的 AIDL 放在同一个 Service中去管理。</p>
+<p>Binder 连接池的作用是将每个业务模块的 Binder 请求统一转发的远程 Service 中去执行，避免了重复创建 Service 的过程。</p>
+<p>BinderPool 极大的提高 AIDL 的开发效率，避免大量创建 Service，建议在 AIDL 中引入 BinderPool。</p>
+<h4 id="选择合适的-IPC-方式"><a href="#选择合适的-IPC-方式" class="headerlink" title="选择合适的 IPC 方式"></a>选择合适的 IPC 方式</h4><table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+<th align="center">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Bundle</td>
+<td align="center">简单易用</td>
+<td align="center">只能传输 Bundle 支持的数据类型</td>
+<td align="center">自大组件间的进程通信</td>
+</tr>
+<tr>
+<td align="center">文件共享</td>
+<td align="center">简单易用</td>
+<td align="center">不适合高并发场景，无法做到进程间及时通信</td>
+<td align="center">无并发访问情形，交换简单的数据实时性不高的场景</td>
+</tr>
+<tr>
+<td align="center">AIDL</td>
+<td align="center">功能强大，支持一对多并发通信，支持实时通信</td>
+<td align="center">使用稍复杂，需要处理好线程同步</td>
+<td align="center">一对多通信有RPC需求</td>
+</tr>
+<tr>
+<td align="center">Messenger</td>
+<td align="center">功能一般，支持一对多串行通信，支持实时通信</td>
+<td align="center">不能很好的处理高并发情形，不支持 RPC，数据通过message传输，只能传输 Bundle 支持的数据类型</td>
+<td align="center">低并发的一对多即时通信，无RPC需求，或者无需发挥结果的RPC 需求</td>
+</tr>
+<tr>
+<td align="center">ContentProvider</td>
+<td align="center">在数据源访问方面功能强大，支持一对多并发数据共享，可以通过 Call 方法扩展</td>
+<td align="center">可以理解为受约束的 AIDL，主要提供数据源的 CRUD</td>
+<td align="center">一对多的进程间数据共享</td>
+</tr>
+<tr>
+<td align="center">Socket</td>
+<td align="center">功能强大，可以通过网络传输字节流，支持一对多并发实时通信</td>
+<td align="center">实现细节稍微繁琐，不支持直接 RPC</td>
+<td align="center">网络数据交换</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+              <a href="/tags/Binder/" rel="tag"># Binder</a>
+              <a href="/tags/IPC/" rel="tag"># IPC</a>
+              <a href="/tags/%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1/" rel="tag"># 进程通信</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/05/15/android-art-explore-1/" rel="prev" title="《Android开发艺术探索》笔记-第1章">
+                  <i class="fa fa-angle-left"></i> 《Android开发艺术探索》笔记-第1章
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/01/22/custom-viewgroup-to-flowlayout/" rel="next" title="自定义 ViewGroup 实现流式布局">
+                  自定义 ViewGroup 实现流式布局 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,37 +1,352 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。  通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android学习系列之-通知Notification">
+<meta property="og:url" content="http://yoursite.com/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。  通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。">
+<meta property="og:locale">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/859087-4ece81d9c0de1797.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/400">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/859087-cb9f6450f0afce8e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/859087-f08eca29dfbe33a5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2017-02-20T09:43:40.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.973Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Notification">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/","path":"2017/02/20/Android学习系列之-通知Notification/","title":"Android学习系列之-通知Notification"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android学习系列之-通知Notification | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">基本知识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%9F%A5%E6%93%8D%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">通知操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%80%9A%E7%9F%A5"><span class="nav-number">3.</span> <span class="nav-text">创建通知</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/20/Android%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97%E4%B9%8B-%E9%80%9A%E7%9F%A5Notification/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android学习系列之-通知Notification | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android学习系列之-通知Notification
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-02-20 17:43:40" itemprop="dateCreated datePublished" datetime="2017-02-20T17:43:40+08:00">2017-02-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>今天打算介绍下通知的基本使用方法。首先，看下官网的介绍。</p>
+<blockquote>
+<p>通知是可以在应用的常规 UI 外部向用户显示的消息。当您告知系统发出通知时，它将先以图标的形式显示在通知区域中。用户可以打开抽屉式通知栏查看通知的详细信息。 通知区域和抽屉式通知栏均是由系统控制的区域，用户可以随时查看。<span id="more"></span></p>
+</blockquote>
+<p>具体的展示如下：<br><img src="http://upload-images.jianshu.io/upload_images/859087-cfcd0e31bd9fa92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1500" alt="图1 通知区域中的通知。"><br><img src="http://upload-images.jianshu.io/upload_images/859087-4ece81d9c0de1797.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/400" alt="图2 抽屉式通知栏中的通知"><br>相信看完介绍，大家应该也都明白通知的一些使用场景了。现在大部分的应用都有推送功能，而推送都是用通知来展示的。比如简书每天就不定时的给你发推送。下面就介绍一下通知的具体使用方法。</p>
+<h3 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h3><p>要创建通知，我们就需要Notification这个类，我们可以通过 NotificationCompat.Builder 对象中为通知指定 UI 信息和操作，然后通过调用 NotificationCompat.Builder.build()，它将返回包含您的具体规范的 Notification 对象。然后通过 NotificationManager.notify()<br> 将 Notification 对象传递给系统，由系统来帮你完成后续的处理。<br>Notification对象必须包含以下三个元素：</p>
+<ul>
+<li>小图标，由 setSmallIcon() 方法设置</li>
+<li>标题，由 setContentTitle 方法设置</li>
+<li>详细文本，由  setContentText()设置</li>
+</ul>
+<p>也就是说这三个元素是必须的，不然就算创建了Notification对象也是发不出去的。另外就是需要解释一下这个小图标，小图标是指图一通知区域的小图标，也是图二中通知大图右下角的小图片，他是一个特殊的图。5.0后Android官方要求，所有应用程序的通知栏图标，应该只使用alpha图层来进行绘制，而不应该包括RGB图层。即不要为通知的图标添加任何额外的透明度，渐变色，不要用颜色将通知图标与其他应用，比如系统应用，应用的通知图标(即小图标)只能是在透明的背景上有白色的图案。<br>另外具体的设计可以参考materia design 关于Notification的设计规范，地址<a target="_blank" rel="noopener" href="https://material.io/guidelines/patterns/notifications.html">https://material.io/guidelines/patterns/notifications.html</a><br>下面贴两张图来让大家更明了各个参数对应的UI显示，<br><img src="http://upload-images.jianshu.io/upload_images/859087-cb9f6450f0afce8e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620" alt="small_icon.png"><br><img src="http://upload-images.jianshu.io/upload_images/859087-f08eca29dfbe33a5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="通知各元素对应的显示"></p>
+<p>上图的NotificationIcon 其实是smallIcon，Title即ContentTitle，Message即ContentText,另外还有时间戳等。所有的通知的其他设置都是可选的。</p>
+<h3 id="通知操作"><a href="#通知操作" class="headerlink" title="通知操作"></a>通知操作</h3><p>我们设置好了通知之后，需要再向通知添加一个操作，以用来相应用户的点击操作。当然你也可以不加这个操作，就让它挂在通知栏，用户点了就是没反应，但是这样用户体验多不好。用户点击通知后可以让用户从通知直接跳转到相应的activity，以执行下一步操作。在 Notification内部，操作本身由 PendingIntent 定义，后者包含在应用中启动 Activity的 Intent。</p>
+<h3 id="创建通知"><a href="#创建通知" class="headerlink" title="创建通知"></a>创建通知</h3><p>我们可以通过以下步骤去创建一个通知</p>
+<ol>
+<li><p>先创建NotificationCompat.Builder，并且可以通过这个builder去设置通知需要的内容，来生成Notification。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">NotificationCompat.Builder builder = new NotificationCompat.Builder(context);</span><br><span class="line">Notification notification = builder</span><br><span class="line">.setContentTitle(&quot;这是通知标题&quot;)</span><br><span class="line">.setContentText(&quot;这是通知内容&quot;)</span><br><span class="line">.setSmallIcon(R.mipmap.ic_launcher)</span><br><span class="line">.setLargeIcon(BitmapFactory.decodeResource(</span><br><span class="line">  getResources(), R.mipmap.ic_launcher))</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure></li>
+<li><p>设置优先级<br>通知还有优先级，我们可以通过setPriority() 传入通知的优先级，目前通知的优先级有五个等级，范围从 PRIORITY_MIN (-2) 到 PRIORITY_MAX (2)；如果未设置，则优先级默认为 PRIORITY_DEFAULT (0)。优先级越高，在通知栏就排的越往上。</p>
+</li>
+<li><p>设置一个点击后的动作<br>如之前所说的，我们可以通过pendingIntent来设置一个通知点击后的操作。比如跳转到一个activity。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Intent resultIntent = new Intent(this, ResultActivity.class);</span><br><span class="line">PendingIntent resultPendingIntent = PendingIntent.getActivity(</span><br><span class="line">            this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);</span><br><span class="line">mBuilder.setContentIntent(resultPendingIntent);</span><br></pre></td></tr></table></figure>
+<p>通过这种方式就可以让用户点击通知后跳转到ResultActivity页面了。</p>
+</li>
+<li><p>用NotificationManager 发送通知</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NotificationManager mNotificationManager =</span><br><span class="line">    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">// mId allows you to update the notification later on.</span><br><span class="line">mNotificationManager.notify(mId, mBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>更新通知<br>当我们需要更新通知中的内容的时候就可以依据上面设置的通知的id去更新的通知，只需要通知Id相同就可以更新，具体操作其实和创建差不多，官方的示例代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">mNotificationManager =</span><br><span class="line">        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);</span><br><span class="line">// Sets an ID for the notification, so it can be updated</span><br><span class="line">int notifyID = 1;</span><br><span class="line">mNotifyBuilder = new NotificationCompat.Builder(this)</span><br><span class="line">    .setContentTitle(&quot;New Message&quot;)</span><br><span class="line">    .setContentText(&quot;You&#x27;ve received new messages.&quot;)</span><br><span class="line">    .setSmallIcon(R.drawable.ic_notify_status)</span><br><span class="line">numMessages = 0;</span><br><span class="line">// Start of a loop that processes data and then notifies the user</span><br><span class="line">...</span><br><span class="line">    mNotifyBuilder.setContentText(currentText)</span><br><span class="line">        .setNumber(++numMessages);</span><br><span class="line">    // Because the ID remains unchanged, the existing notification is</span><br><span class="line">    // updated.</span><br><span class="line">    mNotificationManager.notify(</span><br><span class="line">            notifyID,</span><br><span class="line">            mNotifyBuilder.build());</span><br></pre></td></tr></table></figure></li>
+<li><p>删除或取消通知<br>当我们需要手动取消通知的时候，可以调用NotificationManager的 cancel()，具体的删除有以下几种方式：</p>
+</li>
+</ol>
+<ul>
+<li>用户单独或通过使用“全部清除”清除了该通知（如果通知可以清除）。</li>
+<li>用户点击通知，且您在创建通知时调用了 setAutoCancel()</li>
+<li>针对特定的通知 ID 调用了 cancel() 此方法还会删除当前通知。</li>
+<li>调用了cancelAll()方法，该方法将删除之前发出的所有通知。</li>
+</ul>
+<p>好了，到这里已经可以创建基本的Notification了，之后再写一些通知的其他使用方式。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/Notification/" rel="tag"># Notification</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/02/20/Git-%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E5%90%8E%E5%9B%9E%E9%80%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90/" rel="prev" title="Git-分支合并后回退的几种情况分析">
+                  <i class="fa fa-angle-left"></i> Git-分支合并后回退的几种情况分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/03/27/%E7%94%A8Python%E5%86%99%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%9A%84%E7%88%AC%E8%99%AB%E5%B7%A5%E5%85%B7/" rel="next" title="用Python写一个小的爬虫工具">
+                  用Python写一个小的爬虫工具 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

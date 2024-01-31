@@ -1,37 +1,391 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本篇文章为公司内部分享时所写，基于的 flutter 版本也已过时，所以可能有不对的地方，还请指出。现在放到博客上，以后有机会再完善。 前言Flutter是谷歌的移动UI框架，可以快速在iOS和Android上构建高质量的原生用户界面。 Flutter可以与现有的代码一起工作。Flutter 具有以下特点：快速开发，毫秒级的热重载，修改后，您的应用界面会立即更新。统一的应用开发体验原生性能目前已经">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈 Flutter 的 Android 混合开发">
+<meta property="og:url" content="http://yoursite.com/2019/04/18/flutter-android-mix-dev/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="本篇文章为公司内部分享时所写，基于的 flutter 版本也已过时，所以可能有不对的地方，还请指出。现在放到博客上，以后有机会再完善。 前言Flutter是谷歌的移动UI框架，可以快速在iOS和Android上构建高质量的原生用户界面。 Flutter可以与现有的代码一起工作。Flutter 具有以下特点：快速开发，毫秒级的热重载，修改后，您的应用界面会立即更新。统一的应用开发体验原生性能目前已经">
+<meta property="og:locale">
+<meta property="og:image" content="https://i.loli.net/2020/06/22/m3782GveKyfYVFr.jpg">
+<meta property="article:published_time" content="2019-04-18T15:24:21.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.974Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="flutter">
+<meta property="article:tag" content="aar">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/06/22/m3782GveKyfYVFr.jpg">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2019/04/18/flutter-android-mix-dev/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2019/04/18/flutter-android-mix-dev/","path":"2019/04/18/flutter-android-mix-dev/","title":"浅谈 Flutter 的 Android 混合开发"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>浅谈 Flutter 的 Android 混合开发 | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#flutter%E4%BB%8B%E7%BB%8D%E5%8F%8A%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">flutter介绍及安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flutter%E5%9B%9B%E7%A7%8D%E5%B7%A5%E7%A8%8B%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">Flutter四种工程类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%B2%E6%9C%89%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8flutter"><span class="nav-number">4.</span> <span class="nav-text">已有项目使用flutter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91"><span class="nav-number">5.</span> <span class="nav-text">开发遇到的坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E7%AB%A0%EF%BC%8C%E5%BE%85%E5%AE%8C%E5%96%84"><span class="nav-number">6.</span> <span class="nav-text">下一章，待完善</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/18/flutter-android-mix-dev/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="浅谈 Flutter 的 Android 混合开发 | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          浅谈 Flutter 的 Android 混合开发
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2019-04-18 23:24:21" itemprop="dateCreated datePublished" datetime="2019-04-18T23:24:21+08:00">2019-04-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/flutter/" itemprop="url" rel="index"><span itemprop="name">flutter</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>本篇文章为公司内部分享时所写，基于的 flutter 版本也已过时，所以可能有不对的地方，还请指出。现在放到博客上，以后有机会再完善。</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Flutter是谷歌的移动UI框架，可以快速在iOS和Android上构建高质量的原生用户界面。 Flutter可以与现有的代码一起工作。<br>Flutter 具有以下特点：<br>快速开发，毫秒级的热重载，修改后，您的应用界面会立即更新。<br>统一的应用开发体验<br>原生性能<br>目前已经有不少大公司开始将flutter应用在项目中，比如，闲鱼、美团等，也得到了不错的反馈。<br><a target="_blank" rel="noopener" href="https://github.com/alibaba/flutter-go">https://github.com/alibaba/flutter-go</a><br>文章暂时比较简单，之后各个模块可以细化</p>
+<span id="more"></span>
+
+<h2 id="flutter介绍及安装"><a href="#flutter介绍及安装" class="headerlink" title="flutter介绍及安装"></a>flutter介绍及安装</h2><p>对于构建Flutter类型应用，因其开发语言Dart、虚拟机、构建工具与平时我们开发Native应用不同且平台虚拟机也不支持，所以需要flutter sdk来支持。<br>flutter有点类似gradle，不同的开发人员可能安装不同版本的flutter，flutter sdk版本不一致，往往会出现Dart层Api兼容性或Flutter虚拟机不一致等问题。（这个问题可以参照Android gradle管理，将gradle版本跟项目绑定来处理）</p>
+<p>具体flutter sdk安装可以按照官方文档来操作：<a target="_blank" rel="noopener" href="https://flutter.dev/docs/get-started/install/macos">https://flutter.dev/docs/get-started/install/macos</a><br>或者flutter中文文档：<a target="_blank" rel="noopener" href="https://flutterchina.club/setup-macos/">https://flutterchina.club/setup-macos/</a></p>
+<blockquote>
+<p>安装基本没有什么坑，有墙的问题可以参考中文文档使用Flutter官方为中国开发者搭建了临时镜像。</p>
+</blockquote>
+<p>配置好就可以使用flutter的一些命令，比如 <code>flutter doctor</code>。</p>
+<h2 id="Flutter四种工程类型"><a href="#Flutter四种工程类型" class="headerlink" title="Flutter四种工程类型"></a>Flutter四种工程类型</h2><p>Flutter工程中，通常有以下几种工程类型，下面分别简单概述下：</p>
+<ol>
+<li><p>Flutter Application<br>标准的Flutter App工程，包含标准的Dart层与Native平台层</p>
+</li>
+<li><p>Flutter Module<br>Flutter组件工程，仅包含Dart层实现，Native平台层子工程为通过Flutter自动生成的隐藏工程</p>
+</li>
+<li><p>Flutter Plugin<br>Flutter平台插件工程，包含Dart层与Native平台层的实现</p>
+</li>
+<li><p>Flutter Package<br>Flutter纯Dart插件工程，仅包含Dart层的实现，往往定义一些公共Widget</p>
+</li>
+</ol>
+<h2 id="已有项目使用flutter"><a href="#已有项目使用flutter" class="headerlink" title="已有项目使用flutter"></a>已有项目使用flutter</h2><p>已有的项目想改成纯flutter项目基本不可能，目前只能是开发部分模块功能使用，比如现在磁场项目中的体现功能。因此flutter 官方出了向原生项目中添加flutter的项目：<br><a target="_blank" rel="noopener" href="https://github.com/flutter/flutter/wiki/Add-Flutter-to-existing-apps">https://github.com/flutter/flutter/wiki/Add-Flutter-to-existing-apps</a></p>
+<p>目前想要的效果是：</p>
+<ul>
+<li>非flutter开发人员无感知</li>
+<li>对现有项目无侵入</li>
+<li>不需要对现有的持续集成和编译发布进行修改</li>
+<li>方便flutter开发人员开发</li>
+</ul>
+<p>官方的项目是将flutter项目作为module来依赖，但是这对项目修改太大，只适用于开发人员。因此我们需要考虑其他的方式。在文档中我们知道，通过<code>./gradlew flutter:assemble</code> 是可以打包出aar，这个aar其实是flutter生成的产物打包成aar，来供项目使用的。我们可以利用这个，来只使用aar，这样基本满足了上面的部分条件。但是如果是每次生成一个aar再拷贝到主项目libs下，这样每次处理太麻烦了，如果能将aar进行远程依赖就更好了，上面的要求基本就都满足了，对原生项目来说只是一个远程依赖而已，需要更新时则修改版本号即可。</p>
+<p>至此，我们梳理出流程：</p>
+<ul>
+<li>flutter aar作为远端依赖</li>
+<li>本地有配置是否是flutter开发环境<ul>
+<li>开启开发环境，则使用本地依赖方式</li>
+<li>关闭开发环境，使用远端依赖</li>
+<li>默认关闭</li>
+</ul>
+</li>
+<li>flutter项目可自动打包上传aar至远端仓库</li>
+</ul>
+<p>flutter module 的项目结构如下图：</p>
+<p><img src="https://i.loli.net/2020/06/22/m3782GveKyfYVFr.jpg" alt="flutter_android_img.jpeg"></p>
+<p>.android 和 .ios 都是自动生成的，可以随时删除，通过<code>flutter packages get</code> 获取， flutter代码主要在 lib下。注意在.android和.ios目录下都有一个Flutter目录，这个是我们flutter的库项目了。也就是Android用来生成aar，iOS用来生产framework的库。如果我们用flutter create xxx 生成的纯flutter项目是没有这个Flutter目录的。</p>
+<h2 id="开发遇到的坑"><a href="#开发遇到的坑" class="headerlink" title="开发遇到的坑"></a>开发遇到的坑</h2><ol>
+<li>项目配置 productFlavor，导致无法将 flutter_assets 打包进apk</li>
+</ol>
+<blockquote>
+<p>其实这个是flutter的新版的bug，flutter的构建都是通过 <code>flutter.gradle</code> 来进行的，新的版本中做了一些改变，以为其中硬编码的原因，导致配置了productFlavor后无法执行某些task，也就没有无法将 flutter_assets 打包进apk。从而引起崩溃。</p>
+</blockquote>
+<p>做了个临时解决方案：</p>
+<ul>
+<li>创建代理 flutter 构建的 gradle 文件，即 <code>flutter_proxy.gradle</code>，从 <code>flutter.gradle</code> 复制而来</li>
+<li>修改其关于配置了 productFlavor 后的执行 task 的逻辑，确保执行相关 productFlavor 的打包 task</li>
+<li>在 <code>build.gradle</code> 中替换  <code>flutter.gradle</code> 为 <code>flutter_proxy.gradle</code></li>
+</ul>
+<p>这样就可以正常使用 gradle 打包了，缺点就是每次 <code>flutter package get</code> 需要重新改</p>
+<blockquote>
+<p>注：该 Bug 在新版 flutter sdk 中已修复</p>
+</blockquote>
+<ol start="2">
+<li><p>还有个疑问就是 <code>./gradlew flutter:assemble</code> 打出的aar 安装后，原生页面打开flutter页面时崩溃，但是打包命令去掉flutter 却可以，即 <code>./gradlew assemble</code>，猜测跟打包流程有关系，暂时没有深入去研究</p>
+</li>
+<li><p>appbar 设置属性时默认设置了状态栏<br>解决办法：单独调整状态栏属性，或修改主题</p>
+</li>
+<li><p>flutter项目中默认生成的build.gradle 中依赖的是 support 27.1.1，目前项目中使用的是 26.1.0，导致包依赖冲突</p>
+</li>
+</ol>
+<p>对于远端依赖时可以移除他的support依赖，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">implementation(&#x27;com.huazidev:test-futter-aar:0.0.2@aar&#x27;, &#123;</span><br><span class="line">     exclude group: &#x27;com.android.support&#x27;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>对于本地开发环境可以做如下配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">implementation(project(&#x27;:flutter&#x27;))&#123;</span><br><span class="line">      exclude group: &#x27;com.android.support&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，也可以在 gradle 中统一修改所有的support依赖版本，</p>
+<hr>
+<h2 id="下一章，待完善"><a href="#下一章，待完善" class="headerlink" title="下一章，待完善"></a>下一章，待完善</h2><ul>
+<li>编写脚本，自动打包发布 aar</li>
+<li>发布到jcenter 、maven等开源仓库</li>
+<li>发布到自建的私有maven仓库</li>
+<li>使用jitpack发布 （私有仓库收费）</li>
+<li>使用github提供的功能作为包管理仓库（支持私有仓库）</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/flutter/" rel="tag"># flutter</a>
+              <a href="/tags/aar/" rel="tag"># aar</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/09/19/audio-video-summary/" rel="prev" title="音视频相关知识总结">
+                  <i class="fa fa-angle-left"></i> 音视频相关知识总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

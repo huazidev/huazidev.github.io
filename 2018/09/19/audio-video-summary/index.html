@@ -1,37 +1,349 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="封装格式我们经常看到有不同后缀表示的视频：avi，rmvb，mp4，flv，mkv等等。这些格式代表的是封装格式。何为封装格式？就是把视频数据和音频数据打包成一个文件的规范。仅仅靠看文件的后缀，很难能看出具体使用了什么视音频编码标准。 我们可以通过视频的属性查看该视频文件采用的视音频技术。或者MediaInfo软件查看。 封装格式的主要作用是把视频码流和音频码流按照一定的格式存储在一个文件中。主要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频相关知识总结">
+<meta property="og:url" content="http://yoursite.com/2018/09/19/audio-video-summary/index.html">
+<meta property="og:site_name" content="华子dev">
+<meta property="og:description" content="封装格式我们经常看到有不同后缀表示的视频：avi，rmvb，mp4，flv，mkv等等。这些格式代表的是封装格式。何为封装格式？就是把视频数据和音频数据打包成一个文件的规范。仅仅靠看文件的后缀，很难能看出具体使用了什么视音频编码标准。 我们可以通过视频的属性查看该视频文件采用的视音频技术。或者MediaInfo软件查看。 封装格式的主要作用是把视频码流和音频码流按照一定的格式存储在一个文件中。主要">
+<meta property="og:locale">
+<meta property="og:image" content="https://i.loli.net/2020/06/22/DnYNHmFTvcwpQxI.png">
+<meta property="og:image" content="https://i.loli.net/2020/06/22/ZHToNguJWwjPCaQ.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/06/22/tMTb68JZaSmq7L9.png">
+<meta property="og:image" content="https://i.loli.net/2020/06/22/YA2o3KgnaTRlSmw.png">
+<meta property="article:published_time" content="2018-09-19T10:55:44.000Z">
+<meta property="article:modified_time" content="2023-03-21T05:10:52.973Z">
+<meta property="article:author" content="华子dev">
+<meta property="article:tag" content="音视频">
+<meta property="article:tag" content="视频压缩">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/06/22/DnYNHmFTvcwpQxI.png">
 
 
-{% block content %}
+<link rel="canonical" href="http://yoursite.com/2018/09/19/audio-video-summary/">
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"http://yoursite.com/2018/09/19/audio-video-summary/","path":"2018/09/19/audio-video-summary/","title":"音视频相关知识总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>音视频相关知识总结 | 华子dev</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">华子dev</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">大道至简</p>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81%E8%A3%85%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">封装格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">视频播放器原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E7%BC%96%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">视频编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9F%B3%E9%A2%91%E7%BC%96%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">音频编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E8%BD%AC%E7%A0%81-%E5%8E%8B%E7%BC%A9"><span class="nav-number">5.</span> <span class="nav-text">视频转码&#x2F;压缩</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">华子dev</p>
+  <div class="site-description" itemprop="description">record learn, record life</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/19/audio-video-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="华子dev">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="华子dev">
+      <meta itemprop="description" content="record learn, record life">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="音视频相关知识总结 | 华子dev">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          音视频相关知识总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2018-09-19 18:55:44" itemprop="dateCreated datePublished" datetime="2018-09-19T18:55:44+08:00">2018-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-03-21 13:10:52" itemprop="dateModified" datetime="2023-03-21T13:10:52+08:00">2023-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="封装格式"><a href="#封装格式" class="headerlink" title="封装格式"></a>封装格式</h3><p>我们经常看到有不同后缀表示的视频：avi，rmvb，mp4，flv，mkv等等。这些格式代表的是封装格式。何为封装格式？就是把视频数据和音频数据打包成一个文件的规范。仅仅靠看文件的后缀，很难能看出具体使用了什么视音频编码标准。</p>
+<p>我们可以通过视频的属性查看该视频文件采用的视音频技术。或者MediaInfo软件查看。</p>
+<p>封装格式的主要作用是把视频码流和音频码流按照一定的格式存储在一个文件中。<br>主要的封装格式：</p>
+<p><img src="https://i.loli.net/2020/06/22/DnYNHmFTvcwpQxI.png" alt="audio_video_table.png"></p>
+<span id="more"></span>
+
+<h3 id="视频播放器原理"><a href="#视频播放器原理" class="headerlink" title="视频播放器原理"></a>视频播放器原理</h3><p>视音频技术主要包含以下几点：封装技术，视频压缩编码技术以及音频压缩编码技术。如果考虑到网络传输的话，还包括流媒体协议技术。</p>
+<p>视频播放器播放一个互联网上的视频文件，需要经过以下几个步骤：<br>解协议，解封装，解码视音频，视音频同步。<br>如果播放本地文件则不需要解协议，为以下几个步骤：<br>解封装，解码视音频，视音频同步。</p>
+<p><img src="https://i.loli.net/2020/06/22/ZHToNguJWwjPCaQ.jpg" alt="audio_video_play_1.jpeg"></p>
+<p>解协议的作用，就是将流媒体协议的数据，解析为标准的相应的封装格式数据。视音频在网络上传播的时候，常常采用各种流媒体协议，例如HTTP，RTMP，HLS, 或是MMS等等。这些协议在传输视音频数据的同时，也会传输一些信令数据。这些信令数据包括对播放的控制（播放，暂停，停止），或者对网络状态的描述等。解协议的过程中会去除掉信令数据而只保留视音频数据。例如，采用RTMP协议传输的数据，经过解协议操作后，输出FLV格式的数据。</p>
+<p>解封装的作用，就是将输入的封装格式的数据，分离成为音频流压缩编码数据和视频流压缩编码数据。封装格式种类很多，例如MP4，MKV，RMVB，TS，FLV，AVI等等，它的作用就是将已经压缩编码的视频数据和音频数据按照一定的格式放到一起。例如，FLV格式的数据，经过解封装操作后，输出H.264编码的视频码流和AAC编码的音频码流。</p>
+<p>解码的作用，就是将视频&#x2F;音频压缩编码数据，解码成为非压缩的视频&#x2F;音频原始数据。音频的压缩编码标准包含AAC，MP3，AC-3等等，视频的压缩编码标准则包含H.264，MPEG2，VC-1等等。解码是整个系统中最重要也是最复杂的一个环节。通过解码，压缩编码的视频数据输出成为非压缩的颜色数据，例如YUV420P，RGB等等；压缩编码的音频数据输出成为非压缩的音频抽样数据，例如PCM数据。</p>
+<p>视音频同步的作用，就是根据解封装模块处理过程中获取到的参数信息，同步解码出来的视频和音频数据，并将视频音频数据送至系统的显卡和声卡播放出来。</p>
+<h3 id="视频编码"><a href="#视频编码" class="headerlink" title="视频编码"></a>视频编码</h3><p>视频编码的主要作用是将视频像素数据（RGB，YUV等）压缩成为视频码流，从而降低视频的数据量。如果视频不经过压缩编码的话，体积通常是非常大的，一部电影可能就要上百G的空间。视频编码是视音频技术中最重要的技术之一。视频码流的数据量占了视音频总数据量的绝大部分。高效率的视频编码在同等的码率下，可以获得更高的视频质量。</p>
+<p>主要的视频编码有：HEVC(H.265)，H.264，MPEG4，MPEG2，VP9，VP8等。<br>目前的主流编码标准：H.264<br>H.264仅仅是一个编码标准，而不是一个具体的编码器，H.264只是给编码器的实现提供参照用的。</p>
+<p>目前支持 H.265 的及其也越来越多。</p>
+<h3 id="音频编码"><a href="#音频编码" class="headerlink" title="音频编码"></a>音频编码</h3><p>音频编码的主要作用是将音频采样数据（PCM等）压缩成为音频码流，从而降低音频的数据量。音频编码也是互联网视音频技术中一个重要的技术。但是一般情况下音频的数据量要远小于视频的数据量，因而即使使用稍微落后的音频编码标准，而导致音频数据量有所增加，也不会对视音频的总数据量产生太大的影响。</p>
+<p>主要的音频编码：AAC，MP3，WMA等</p>
+<p>Android平台提供的媒体编解码器，容器和网络协议支持：<br><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/media/media-formats">https://developer.android.com/guide/topics/media/media-formats</a></p>
+<p>比如，Android机把AudioRecord 采集的到的PCM音频数据编码压缩为AAC格式的音频数据，然后解码为PCM通过AudioTrack来播放</p>
+<h3 id="视频转码-压缩"><a href="#视频转码-压缩" class="headerlink" title="视频转码&#x2F;压缩"></a>视频转码&#x2F;压缩</h3><p>视频转码其实可以理解为，一个视频先解码，然后再按一定格式编码。<br>压缩视频其实就是在转码，重新编码，获取相对较小的，视频质量可接受的视频。</p>
+<p>音视频压缩的基本原理：<a target="_blank" rel="noopener" href="https://blog.csdn.net/leixiaohua1020/article/details/28114081">https://blog.csdn.net/leixiaohua1020/article/details/28114081</a></p>
+<p>那视频的大小跟什么有关呢？</p>
+<p>决定因素是码率（常用单位 kbps ），即“每秒有多少数据”，码率越大视频越大，不管你是1080p还是720p还是什么其他尺寸，同样码率的720p视频和1080p视频文件大小是一样的，只是画质不一样。</p>
+<p>而影响码率的因素有很多：</p>
+<p>1、其他条件不变，画面尺寸（1080p、720p、480p…）越大码率越大；<br>2、其他条件不变，帧率（25帧&#x2F;秒、30 帧&#x2F;秒 、60帧&#x2F;秒……）越高码率也越大；<br>3、还有一个是编码算法，优秀的算法能在画质损失较小的情况下降低码率从而减小视频文件的体积。</p>
+<p>一个简单的计算视频大小的公式：</p>
+<p>码率（kbps）x视频时间（秒）÷8&#x3D;视频文件大小（kb）</p>
+<p>目前我们项目中视频压缩使用的库：<a target="_blank" rel="noopener" href="https://github.com/ypresto/android-transcoder">https://github.com/ypresto/android-transcoder</a></p>
+<p>Android MediaCodec：<a target="_blank" rel="noopener" href="https://developer.android.com/reference/android/media/MediaCodec">https://developer.android.com/reference/android/media/MediaCodec</a></p>
+<p>MediaCodec是API 16之后Google推出的用于音视频编解码的一套偏底层的API，可以直接利用硬件加速进行视频的编解码。调用的时候需要先初始化MediaCodec作为视频的编码器，然后只需要不停传入原始的YUV数据进入编码器就可以直接输出编码好的h264流，整个API设计模型来看，就是同时包含了输入端和输出端的两条队列：</p>
+<p><img src="https://i.loli.net/2020/06/22/tMTb68JZaSmq7L9.png" alt="audio_video_image2.png"></p>
+<p>作为编码器，输入端队列存放的就是原始YUV数据，输出端队列输出的就是编码好的h264流，作为解码器则对应相反。</p>
+<p><img src="https://i.loli.net/2020/06/22/YA2o3KgnaTRlSmw.png" alt="transcode_img.png"></p>
+<p>参考：<a target="_blank" rel="noopener" href="https://me.csdn.net/leixiaohua1020">https://me.csdn.net/leixiaohua1020</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91/" rel="tag"># 音视频</a>
+              <a href="/tags/%E8%A7%86%E9%A2%91%E5%8E%8B%E7%BC%A9/" rel="tag"># 视频压缩</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/06/25/handler/" rel="prev" title="Handler相关知识总结">
+                  <i class="fa fa-angle-left"></i> Handler相关知识总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/04/18/flutter-android-mix-dev/" rel="next" title="浅谈 Flutter 的 Android 混合开发">
+                  浅谈 Flutter 的 Android 混合开发 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">华子dev</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
